@@ -4,10 +4,21 @@
 \usepackage{fontspec}
 
 \begin{document}
+		\begin{center}
+		\huge \textbf{Softwareentwicklungspraktikum Spieleentwicklung mit JavaScript}\\
+		\vspace{1cm}
+		\small 
+		\textbf{Karl Ischebeck, Daniel , Philipp Koch, Janina van Rinsum}	\\
+		\textbf{Sebastian Mader}									\\
+		\textbf{SoSe 2019}											\\
+		\textbf{LMU München}
+		\vspace{1cm}
+	\end{center}
 	\section{Stand}
 	Zum aktuellen Zeitpunkt hat sich die Gruppe mit dem Lehrmaterial eingehend beschäftigt und hat bereits das zentrale Projekt weitestgehenst geplant. Die Spielidee des Projekts ist eine Neuimplementierung des Game-Klassikers \textit{Bomberman}. Dazu soll über einen Objektorientierten Entwurf, welcher im Bereich UML-Diagramm dargestellt wird, in TypeScript implementiert werden. Die Wahl fiel deswegen auf Typescript, weil wir uns nach den bisherigen Erfahrungen mit JavaScript eine einfachere und weniger fehleranfällige Entwicklung erhoffen.
 	\section{Planung}
-	Die Planung, welche aktuell die Implementation des Spiels betrifft, soll im folgenden UML-Diagramm dargestellt werden. 
+	Die Planung, welche aktuell die Implementation des Spiels betrifft, soll im folgenden UML-Diagramm dargestellt werden. Das Spiel soll in verschiedene Klassen aufgeteilt werden, wobei die Klasse \textit{Game} die zentrale Klasse darstellt. Weiterhin werden die Spieler in einer eigens vorgesehenen Klasse \textit{Player} verwaltet. Diese sind auf einem Array in der Klasse Game gespeichert. Für die korrekte Darstellung des Spielzustandes, soll auch eine Klasse \textit{Field} mit verschiedenen Kindklassen implementiert werden. Hier ist das Ziel die Objekte auf dem Spielfeld verallgemeinbar zu machen. Dazu soll eine Klasse \textit{Bomb} abgeleited werden, die Bomben im Spiel darstellt und innerhalb der Spiellogik diese hinsichtlich ihrer explodierenden Eigenschaft verwaltet. Ebenfalls sollen Wandteile mithilfe einer weiteren Kindklasse von \textit{Field} über die Klasse \textit{Wall} dargestellt werden können. Mithilfe der Objektorientierten Herangehensweise wird eine höhere Flexibilität hinischtlich des Gamedesigns erhofft, sodass verschiedene Temmplates leichter ausgetauscht werden können und in verschiedenen Spielständen das Feld ein unterschiedliches visuelles Design aufweist.\\
+	Eine weitere Planung wird den Items, die im Spiel bennötigt werden gewidtmet. So sollen über eine eigens spezifizierten Klasse \textit{Item} verschiedene Eigenschaften den Spieler ermöglicht werden, welche über die Methode performAction() innerhalb der Klasse \textit{Item} auufgerufen werden kann. Mithilfe der Items soll der Spieler besondere Attribute erhalten, die im Spielverlauf vorteilhaft sein können. Im weiteren Verlauf sollen Kindklassen der Klasse \textit{Item} gebildet werden, die zum aktuellen Zeitpunkt noch nicht näher spezifiziert wurden. Über 
 	\subsection{UML-Diagramm}
 	\subsection{Besonderheiten}
 	\section{Meilensteine}
