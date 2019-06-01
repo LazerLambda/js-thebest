@@ -10,9 +10,6 @@ export class Player{
         this.xPos = 0;
         this.yPos = 0;
 
-        this.xOld = this.xPos;
-        this.yOld = this.yOld;
-
         this.canvas = <HTMLCanvasElement>document.getElementById("game-layer");
         this.context = this.canvas.getContext("2d");
         document.addEventListener("keydown", e => {
