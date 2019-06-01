@@ -6,14 +6,14 @@ export class Item {
   x: number;
   y: number;
 
-  constructor(context: any, xPos: number, yPos: number) {
+  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
     this.context = context;
 
     this.x = xPos;
     this.y = yPos;
 
-    this.SIZE_X = 50;
-    this.SIZE_Y = 50;
+    this.SIZE_X = xSize;
+    this.SIZE_Y = ySize;
   }
 
   draw() {
@@ -25,8 +25,8 @@ export class Item {
 }
 
 export class Wall extends Item {
-  constructor(context: any, xPos: number, yPos: number) {
-    super(context, xPos, yPos);
+  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+    super(context, xPos, yPos, xSize, ySize);
   }
 
   draw() {
@@ -38,8 +38,8 @@ export class Wall extends Item {
 }
 
 export class Hole extends Item {
-  constructor(context: any, xPos: number, yPos: number) {
-    super(context, xPos, yPos);
+  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+    super(context, xPos, yPos, xSize, ySize);
   }
 
   draw() {
@@ -51,8 +51,11 @@ export class Hole extends Item {
 }
 
 export class Hallway extends Item {
-  constructor(context: any, xPos: number, yPos: number) {
-    super(context, xPos, yPos);
+
+  overlayingItem : Item;
+
+  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+    super(context, xPos, yPos, xSize, ySize);
   }
 
   draw() {

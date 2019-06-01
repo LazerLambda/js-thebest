@@ -11,11 +11,15 @@ export class Field {
 
   field: any[];
 
+  xSize : number;
+  ySize : number;
+
   items: Item[];
   fieldSize: number;
 
   constructor() {
-    const canvas = <HTMLCanvasElement>document.getElementById("canvasId");
+    const canvas = <HTMLCanvasElement>document.getElementById("background");
+
     this.context = canvas.getContext("2d");
 
     this.field = [
@@ -93,23 +97,27 @@ export class Field {
     ];
 
     this.fieldSize = this.field.length;
+
+    this.xSize = canvas.width / 8;
+    this.ySize = canvas.height / 8;
+
     this.items = new Array();
 
     for (let i = 0; i < this.fieldSize; i++) {
       switch (this.field[i].state) {
         case fieldType.HALLWAY:
           this.items.push(
-            new Hallway(this.context, this.field[i].x, this.field[i].y)
+            new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
           );
           break;
         case fieldType.HOLE:
           this.items.push(
-            new Hole(this.context, this.field[i].x, this.field[i].y)
+            new Hole(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
           );
           break;
         case fieldType.WALL:
           this.items.push(
-            new Wall(this.context, this.field[i].x, this.field[i].y)
+            new Wall(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
           );
           break;
       }
