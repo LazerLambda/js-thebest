@@ -21,3 +21,8 @@ Starten:
   - Fehlerbehandlung, Server speichert  
   - GameState auf Server, für Fehlerkorrektur, Pause (evtl. Speichern)
  - Ausgehend, dass nur valide Moves gesendet werden
+
+#Animation :
+ - Move durchführen über animate() und render()
+ - State update bei durchgeführten Move (target === newPosition)
+
