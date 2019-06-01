@@ -5,9 +5,6 @@ export class Player{
     xPos : number;
     yPos : number;
 
-    xOld : number;
-    yOld : number;
-
     constructor(context :any){
 
         this.xPos = 0;
@@ -19,9 +16,7 @@ export class Player{
         this.canvas = <HTMLCanvasElement>document.getElementById("game-layer");
         this.context = this.canvas.getContext("2d");
         document.addEventListener("keydown", e => {
-            
-            this.xOld = this.xPos;
-            this.yOld = this.yPos;
+        
 
             switch(e.key){
                 case 'ArrowUp'      : --this.yPos; this.drawPlayer; break;
