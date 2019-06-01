@@ -7,13 +7,13 @@ Starten:
  - ```./node_modules/.bin/webpack``` (```--watch``` für Live Updates)
 
 
-## Sprint I
+## Sprint I (01.06.2019)
 
-# Bisher (01.06.2019):
+# Bisher:
  - Game, Field, Player, Item (klassen) bereitgstellt
  - Darstellung möglich
 
-# Planugn :
+# Planung :
  - Kommunikation schlank halten
  - GameState lokal und auf Server
   - möglichst kleiner Traffic
