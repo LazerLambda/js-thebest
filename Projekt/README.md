@@ -25,4 +25,4 @@ Starten:
 # Animation :
  - Move durchführen über animate() und render()
  - State update bei durchgeführten Move (target === newPosition)
-
+![UML](Planung/BomberMan2.png)
