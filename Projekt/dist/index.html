@@ -1,19 +1,37 @@
-
-
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 
 <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>TypeScript</title>
+    <style>
+      #stage {
+        width: 480px;
+        height: 480px;
+        position: relative;
+        border: 2px solid black;
+      }
 
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>TypeScript</title>
-</head>
+      canvas {
+        position: absolute;
+      }
+      #game-layer {
+        z-index: 3;
+      }
+      #background {
+        z-index: 2;
+      }
+    </style>
+  </head>
 
-<body>
-	<canvas id="canvasId" width="480" height="480"></canvas>
+  <body>
+    <div id="stage">
+      <!--<canvas id="canvasId" width="480" height="480"></canvas>-->
+      
+      <canvas id="background" width="480" height="480"></canvas>
+      <canvas id="game-layer" width="480" height="480"></canvas>
+    </div>
 
     <script type="text/javascript" src="bundle.js"></script>
-</body>
-
+  </body>
 </html>
-
