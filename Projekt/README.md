@@ -5,7 +5,14 @@ Starten:
  
  - Zum Ordner im Terminal navigieren
  - ```./node_modules/.bin/webpack``` (```--watch``` für Live Updates)
+ - Build im Ordner /dist 
+ - Aufrufen mit index.html
 
+
+
+Git:
+ - ```git branch <Branch, der entstehen soll = A>```
+ - ```git checkout <neuer Branch = A>```
 
 ## Sprint I (01.06.2019)
 
@@ -37,3 +44,10 @@ Starten:
  - Animation und Bombenexplosionen
  	- Bombenexplosion designen
 	- Bombenexplosionen auf Bombenobjekt (Feld wird übergen)
+
+# Besprechung (04.06.2019):
+ - Zunächst Möglichkeit zu laufen überprüfen.
+ - Danach Running auf true, Richtung festlegen (Enum)
+ - Grid, erst running auf false, wenn Spieler Pos === Ziel
+ - In Items Methode einrichten, die wouldCollide beahndelt
+ - 
