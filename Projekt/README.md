@@ -25,4 +25,11 @@ Starten:
 # Animation :
  - Move durchführen über animate() und render()
  - State update bei durchgeführten Move (target === newPosition)
-![UML](Planung/BomberMan2.png)
+![UML](Planung/BomberMan2.png
+
+
+
+# Feststellung (04.06.2019):
+ -> 0,25 Sekunden für Animation !!
+	'-> Spielerposition ist beendet bei SpielerPos === Neues Feld
+	'-> MUSS ZUÄCHST funktionieren !
