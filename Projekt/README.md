@@ -35,4 +35,5 @@ Starten:
 	'-> MUSS ZUÄCHST funktionieren !
  -> Spiellogik und Spielzugvalidierung gehen Hand in Hand
  -> Animation und Bombenexplosionen
- -> Bombenexplosion designen
+ 	'-> Bombenexplosion designen
+	'-> Bombenexplosionen auf Bombenobjekt (Feld wird übergen)
