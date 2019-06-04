@@ -30,10 +30,10 @@ Starten:
 
 
 # Feststellung (04.06.2019):
- -> 0,25 Sekunden für Animation !!
-	'-> Spielerposition ist beendet bei SpielerPos === Neues Feld (Erst dann update)
-	'-> MUSS ZUÄCHST funktionieren !
- -> Spiellogik und Spielzugvalidierung gehen Hand in Hand
- -> Animation und Bombenexplosionen
- 	'-> Bombenexplosion designen
-	'-> Bombenexplosionen auf Bombenobjekt (Feld wird übergen)
+ - 0,25 Sekunden für Animation !!
+	- Spielerposition ist beendet bei SpielerPos === Neues Feld (Erst dann update)
+	- MUSS ZUÄCHST funktionieren !
+ - Spiellogik und Spielzugvalidierung gehen Hand in Hand
+ - Animation und Bombenexplosionen
+ 	- Bombenexplosion designen
+	- Bombenexplosionen auf Bombenobjekt (Feld wird übergen)
