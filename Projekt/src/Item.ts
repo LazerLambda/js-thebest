@@ -1,4 +1,7 @@
+import { Player } from "./Player";
+
 export class Item {
+  playerOn : Player;
   context: any;
   SIZE_X: number;
   SIZE_Y: number;
@@ -14,6 +17,7 @@ export class Item {
 
     this.SIZE_X = xSize;
     this.SIZE_Y = ySize;
+    this.playerOn = null;
   }
 
   draw() {
@@ -38,6 +42,7 @@ export class Wall extends Item {
 }
 
 export class Hole extends Item {
+
   constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
     super(context, xPos, yPos, xSize, ySize);
   }
@@ -52,6 +57,8 @@ export class Hole extends Item {
 
 export class Hallway extends Item {
 
+  playerOnItem : Player;
+
   overlayingItem : Item;
 
   constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
@@ -59,9 +66,27 @@ export class Hallway extends Item {
   }
 
   draw() {
-    this.context.fillStyle = "green";
+    if(this.playerOn === null){
+      this.context.fillStyle = "green";
+    }
+    else{
+      this.context.fillStyle = "red";
+    }
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
     this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
   }
 }
+
+export class Bomb extends Item{
+
+  timeLeft : number;
+
+  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+    super(context, xPos, yPos, xSize, ySize);
+    this.timeLeft = 100;
+  }
+
+
+
+} 

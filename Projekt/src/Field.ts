@@ -1,4 +1,5 @@
 import { Item, Hallway, Wall, Hole } from "./Item";
+import { Player } from './Player';
 
 enum fieldType {
   HALLWAY = 0,
@@ -9,18 +10,28 @@ enum fieldType {
 export class Field {
   context: any;
 
+  player : Player;
   field: any[];
 
   xSize : number;
+  width : number;
   ySize : number;
+  height : number;
 
   items: Item[];
   fieldSize: number;
 
-  constructor() {
+  constructor(player : Player) {
+    this.player = player;
     const canvas = <HTMLCanvasElement>document.getElementById("background");
 
     this.context = canvas.getContext("2d");
+
+    this.width = 8;
+    this.height = 8; 
+
+    this.xSize = canvas.width / this.width;
+    this.ySize = canvas.height / this.height;
 
     this.field = [
       { y: 0, x: 0, state: fieldType.WALL },
@@ -98,10 +109,11 @@ export class Field {
 
     this.fieldSize = this.field.length;
 
-    this.xSize = canvas.width / 8;
-    this.ySize = canvas.height / 8;
+
 
     this.items = new Array();
+  
+    var item : Hallway;
 
     for (let i = 0; i < this.fieldSize; i++) {
       switch (this.field[i].state) {
@@ -109,6 +121,7 @@ export class Field {
           this.items.push(
             new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
           );
+          item = <Hallway> this.items[i];
           break;
         case fieldType.HOLE:
           this.items.push(
@@ -122,6 +135,8 @@ export class Field {
           break;
       }
     }
+    this.player.setPlayer(item);
+    this.player.setField(this);
   }
 
   drawField() {

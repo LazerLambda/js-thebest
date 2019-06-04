@@ -16,12 +16,18 @@ export class Game {
     /**
      * Init field
      */
-    const field = new Field();
-    field.drawField();
+    
+    
 
     this.player = new Player(this.context);
+    this.field = new Field(this.player);
+    this.field.drawField();
     
     this.startAnimating(200);
+  }
+
+  game(gameState : object){
+
   }
 
   startAnimating(targetFPS: number) {
@@ -38,6 +44,7 @@ export class Game {
     if (elapsed > this.frameTime) {
       this.then = now;
 
+      this.field.drawField();
       this.player.drawPlayer();
     }
   }
