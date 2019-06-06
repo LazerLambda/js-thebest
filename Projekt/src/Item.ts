@@ -1,7 +1,7 @@
 import { Player } from "./Player";
 
 export class Item {
-  playerOn : Player;
+  playerOn: Player;
   context: any;
   SIZE_X: number;
   SIZE_Y: number;
@@ -9,7 +9,13 @@ export class Item {
   x: number;
   y: number;
 
-  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number
+  ) {
     this.context = context;
 
     this.x = xPos;
@@ -26,10 +32,18 @@ export class Item {
     this.context.fillStyle = "yellow";
     this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
   }
+
+  update() {}
 }
 
 export class Wall extends Item {
-  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number
+  ) {
     super(context, xPos, yPos, xSize, ySize);
   }
 
@@ -42,8 +56,13 @@ export class Wall extends Item {
 }
 
 export class Hole extends Item {
-
-  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number
+  ) {
     super(context, xPos, yPos, xSize, ySize);
   }
 
@@ -56,48 +75,105 @@ export class Hole extends Item {
 }
 
 export class Hallway extends Item {
+  playerOnItem: Player;
+  bombOnItem: Bomb = null;
 
-  playerOnItem : Player;
+  overlayingItem: Item[];
 
-  overlayingItem : Item;
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number
+  ) {
+    super(context, xPos, yPos, xSize, ySize);
+    this.overlayingItem = [];
+  }
 
-  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+  draw() {
+    if (this.playerOn === null) {
+      this.context.fillStyle = "green";
+    } else {
+      this.context.fillStyle = "red";
+      //this.context.fillStyle = "green";
+    }
+
+    const x = this.x * this.SIZE_X;
+    const y = this.y * this.SIZE_Y;
+    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+
+    if (this.bombOnItem !== null) {
+      this.bombOnItem.update();
+      this.bombOnItem.draw();
+    }
+  }
+}
+
+export class Bomb extends Item {
+  timeLeftToDrop : number;
+  timeLeft: number;
+  explode: boolean = false;
+  placedOn : Hallway;
+
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number,
+    placed : Hallway
+  ) {
+    super(context, xPos, yPos, xSize, ySize);
+    this.timeLeft = 100;
+    this.timeLeftToDrop = 10;
+    this.placedOn = placed
+  }
+
+  draw() {
+    if (this.explode) {
+      const x = this.x * this.SIZE_X;
+      const y = this.y * this.SIZE_Y;
+      this.context.fillStyle = "yellow";
+      this.context.fillRect(x - 10, y - 10, this.SIZE_X + 10, this.SIZE_Y + 10);
+    } else {
+      const x = this.x * this.SIZE_X;
+      const y = this.y * this.SIZE_Y;
+      this.context.fillStyle = "black";
+      this.context.fillRect(x + 10, y + 10, this.SIZE_X - 10, this.SIZE_Y - 10);
+    }
+  }
+
+  update() {
+    
+    if(this.timeLeft < 0){
+      this.explode = true;
+      if(this.timeLeftToDrop < 0){
+        this.placedOn.bombOnItem = null;
+      } else {
+        --this.timeLeftToDrop;
+      }
+    } else {
+      --this.timeLeft;
+    }
+  }
+}
+
+export class Bricks extends Item {
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number
+  ) {
     super(context, xPos, yPos, xSize, ySize);
   }
 
   draw() {
-    if(this.playerOn === null){
-      this.context.fillStyle = "green";
-    }
-    else{
-      this.context.fillStyle = "red";
-      //this.context.fillStyle = "green";
-    }
-    const x = this.x * this.SIZE_X;
-    const y = this.y * this.SIZE_Y;
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
-  }
-}
-
-export class Bomb extends Item{
-
-  timeLeft : number;
-
-  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
-    super(context, xPos, yPos, xSize, ySize);
-    this.timeLeft = 100;
-  }
-} 
-
-export class Bricks extends Item{
-  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
-    super(context, xPos, yPos, xSize, ySize);
-  }
-
-  draw(){
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
     this.context.fillStyle = "pink";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y); 
+    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
   }
 }

@@ -11,7 +11,13 @@ enum fieldType {
 export class Field {
   context: any;
 
-  player : Player;
+  player : Player[];
+  playerPos : any = {
+    player0 : null,
+    player1 : null,
+    player2 : null,
+    player3 : null
+  };
   field: any[];
 
   xSize : number;
@@ -22,17 +28,14 @@ export class Field {
   items: Item[];
   fieldSize: number;
 
-  constructor(player : Player) {
-    this.player = player;
-    const canvas = <HTMLCanvasElement>document.getElementById("background");
 
-    this.context = canvas.getContext("2d");
+/**
+ * 
+ * @param player Liste an Spielern, die dem Spiel beigetreten sind
+ * evtl. Spieler  zurückgeben nach erfolgreicher Initialisierung
+ */
 
-    this.width = 8;
-    this.height = 8; 
-
-    this.xSize = canvas.width / this.width;
-    this.ySize = canvas.height / this.height;
+  constructor() {
 
     this.field = [
       { y: 0, x: 0, state: fieldType.WALL },
@@ -108,13 +111,22 @@ export class Field {
       { y: 7, x: 7, state: fieldType.WALL }
     ];
 
+    this.player = [new Player(this.context)];
+    const canvas = <HTMLCanvasElement>document.getElementById("background");
+
+    this.context = canvas.getContext("2d");
+
+    this.width = 8;
+    this.height = 8; 
+
+    this.xSize = canvas.width / this.width;
+    this.ySize = canvas.height / this.height;
+
     this.fieldSize = this.field.length;
 
-
-
     this.items = new Array();
-  
-    var item : Hallway;
+    
+    var item : Hallway;// Nur zum testen
 
     for (let i = 0; i < this.fieldSize; i++) {
       switch (this.field[i].state) {
@@ -122,7 +134,7 @@ export class Field {
           this.items.push(
             new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
           );
-          item = <Hallway> this.items[i];
+          item = <Hallway> this.items[i]; // Test
           break;
         case fieldType.HOLE:
           this.items.push(
@@ -140,13 +152,15 @@ export class Field {
             );
       }
     }
-    this.player.initField(this, item);
+    for(let elem of this.player){
+      elem.initField(this, item);
+    }
+    this.playerPos["player0"] = item.y * 8 + item.x;
+    //this.player.initField(this, item);
     
   }
 
-  drawField() {
-    for (let i = 0; i < this.items.length; i++) {
-      this.items[i].draw();
-    }
+  returnPlayer() : Player[]{
+    return this.player;
   }
 }

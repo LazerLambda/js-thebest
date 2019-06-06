@@ -2,20 +2,16 @@ import { Field } from './Field';
 import { Player } from './Player';
 
 export class Game {
-  context: any;
   frameTime: number;
   then: number;
 
   field : Field;
-  player : Player;
+  player : Player[];
 
   constructor() {
-    const canvas = <HTMLCanvasElement>document.getElementById("background");
-    this.context = canvas.getContext("2d");
-    
-    this.player = new Player(this.context);
-    this.field = new Field(this.player);
-    this.field.drawField();
+
+    this.field = new Field();
+    this.player = this.field.returnPlayer();
     
     this.startAnimating(200);
   }
@@ -38,8 +34,13 @@ export class Game {
     if (elapsed > this.frameTime) {
       this.then = now;
 
-      this.field.drawField();
-      this.player.drawPlayer();
+      for(let elem of this.field.items){
+        elem.draw();
+      }
+      for(let elem of this.player){
+        elem.renderPlayer()
+        elem.drawPlayer();
+      }
     }
   }
 }

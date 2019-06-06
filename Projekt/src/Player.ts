@@ -1,5 +1,5 @@
 import { Field } from "./Field";
-import { Item, Hallway, Hole } from "./Item";
+import { Bomb, Hallway, Hole, Item } from "./Item";
 
 enum Direction {
   NORTH = 0,
@@ -61,6 +61,23 @@ export class Player {
               this.running = true;
             }
             break;
+          case "Enter":
+            if (e.key === "Enter") {
+              var item = <Hallway>this.onItem;
+              item.bombOnItem = new Bomb(
+                this.onItem.context,
+                this.onItem.x,
+                this.onItem.y,
+                this.onItem.SIZE_X,
+                this.onItem.SIZE_Y,
+                item
+              );
+            }
+
+            console.log("dasfasdf");
+            this.context.clearRect(0, 0, 480, 480);
+            this.context.fillStyle = "black";
+            this.context.fillRect(0, 0, 480, 480);
         }
       }
     });
@@ -77,7 +94,9 @@ export class Player {
 
   checkCollide(x: number, y: number): boolean {
     if (this.onItem === null) {
-        throw new Error("Field is not connected to Player:\n\t\"this.onItem === null\"");
+      throw new Error(
+        'Field is not connected to Player:\n\t"this.onItem === null"'
+      );
     } else {
       var pos = y * 8 + x;
       var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
@@ -86,6 +105,9 @@ export class Player {
         this.field.items[pos] instanceof Hole;
 
       if (inBounds && checkType) {
+        /**
+         * GameState hier anpassen
+         */
         this.target = pos;
         return true;
       } else {
@@ -94,8 +116,7 @@ export class Player {
     }
   }
 
-  drawPlayer() {
-    // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
+  renderPlayer() {
     if (this.running) {
       if (this.transitionCounter < this.TRANSITION_UPPER_BOUND) {
         switch (this.direction) {
@@ -126,11 +147,17 @@ export class Player {
         this.onItem = this.field.items[this.target];
         this.onItem.playerOn = this;
         tmpItem.playerOn = null;
+        this.field.playerPos = this.target;
 
         this.xPos = this.onItem.x * this.field.xSize;
         this.yPos = this.onItem.y * this.field.ySize;
       }
+    }
+  }
 
+  drawPlayer() {
+    // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
+    if (this.running) {
       this.context.clearRect(0, 0, 480, 480);
       this.context.fillStyle = "yellow";
       this.context.fillRect(this.xPos + 4, this.yPos + 4, 50, 50);
