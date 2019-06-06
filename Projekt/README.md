@@ -1,4 +1,4 @@
-## README - JS-THE-BEST
+# README - JS-THE-BEST
 
 
 Starten:
@@ -14,16 +14,16 @@ Git:
  - ```git branch <Branch, der entstehen soll = A>```
  - ```git checkout <neuer Branch = A>```
 
-## Sprint I (01.06.2019)
+# Sprint I (01.06.2019)
 
-# Bisher:
+## Bisher:
  - Game, Field, Player, Item (klassen) bereitgstellt
  - Darstellung möglich
  - Transition kann dargestellt werden
  - Bricks Klasse hinzugefügt
  - Kollisionen können getestet werden
 
-# Planung :
+## Planung :
  - Kommunikation schlank halten
  - GameState lokal und auf Server
   - möglichst kleiner Traffic
@@ -38,14 +38,14 @@ Git:
  - Bombenlogik und Animation
    - Ändert sich state erst nach Explosion ?
 
-# Animation :
+## Animation :
  - evtl eigene Illustrationen
  - Animationen mit Spritesheets 
 ![UML](Planung/BomberMan2.png
 
 
 
-# Besprechung (04.06.2019):
+## Besprechung (04.06.2019):
  - Zunächst Möglichkeit zu laufen überprüfen.
  - Danach Running auf true, Richtung festlegen (Enum)
  - Grid, erst running auf false, wenn Spieler Pos === Ziel
