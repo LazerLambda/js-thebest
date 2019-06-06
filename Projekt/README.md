@@ -41,8 +41,6 @@ Git:
 ## Animation :
  - evtl eigene Illustrationen
  - Animationen mit Spritesheets 
-![UML](Planung/BomberMan3.jpg)
-
 
 
 ## Besprechung (04.06.2019):
@@ -50,3 +48,7 @@ Git:
  - Danach Running auf true, Richtung festlegen (Enum)
  - Grid, erst running auf false, wenn Spieler Pos === Ziel
  - In Items Methode einrichten, die wouldCollide beahndelt
+
+
+ ## UML Diagram (07.06.2019):
+ ![UML](Planung/BomberMan3.jpg)
