@@ -41,7 +41,7 @@ Git:
 ## Animation :
  - evtl eigene Illustrationen
  - Animationen mit Spritesheets 
-![UML](Planung/BomberMan2.png
+![UML](Planung/BomberMan3.jpg)
 
 
 
