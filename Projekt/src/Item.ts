@@ -71,6 +71,7 @@ export class Hallway extends Item {
     }
     else{
       this.context.fillStyle = "red";
+      //this.context.fillStyle = "green";
     }
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
@@ -86,7 +87,17 @@ export class Bomb extends Item{
     super(context, xPos, yPos, xSize, ySize);
     this.timeLeft = 100;
   }
-
-
-
 } 
+
+export class Bricks extends Item{
+  constructor(context: any, xPos: number, yPos: number, xSize : number, ySize : number) {
+    super(context, xPos, yPos, xSize, ySize);
+  }
+
+  draw(){
+    const x = this.x * this.SIZE_X;
+    const y = this.y * this.SIZE_Y;
+    this.context.fillStyle = "pink";
+    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y); 
+  }
+}

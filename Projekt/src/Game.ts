@@ -12,13 +12,7 @@ export class Game {
   constructor() {
     const canvas = <HTMLCanvasElement>document.getElementById("background");
     this.context = canvas.getContext("2d");
-
-    /**
-     * Init field
-     */
     
-    
-
     this.player = new Player(this.context);
     this.field = new Field(this.player);
     this.field.drawField();

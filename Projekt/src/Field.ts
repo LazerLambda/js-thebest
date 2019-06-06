@@ -1,10 +1,11 @@
-import { Item, Hallway, Wall, Hole } from "./Item";
+import { Bricks, Hallway, Hole, Item, Wall } from "./Item";
 import { Player } from './Player';
 
 enum fieldType {
   HALLWAY = 0,
   WALL = 1,
-  HOLE = 2
+  HOLE = 2,
+  BRICKS = 3
 }
 
 export class Field {
@@ -44,7 +45,7 @@ export class Field {
       { y: 0, x: 7, state: fieldType.WALL },
 
       { y: 1, x: 0, state: fieldType.WALL },
-      { y: 1, x: 1, state: fieldType.HALLWAY },
+      { y: 1, x: 1, state: fieldType.BRICKS},
       { y: 1, x: 2, state: fieldType.HALLWAY },
       { y: 1, x: 3, state: fieldType.HALLWAY },
       { y: 1, x: 4, state: fieldType.WALL },
@@ -133,10 +134,14 @@ export class Field {
             new Wall(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
           );
           break;
+        case fieldType.BRICKS:
+            this.items.push(
+              new Bricks(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
+            );
       }
     }
-    this.player.setPlayer(item);
-    this.player.setField(this);
+    this.player.initField(this, item);
+    
   }
 
   drawField() {
