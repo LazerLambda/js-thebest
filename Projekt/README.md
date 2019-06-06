@@ -19,6 +19,9 @@ Git:
 # Bisher:
  - Game, Field, Player, Item (klassen) bereitgstellt
  - Darstellung möglich
+ - Transition kann dargestellt werden
+ - Bricks Klasse hinzugefügt
+ - Kollisionen können getestet werden
 
 # Planung :
  - Kommunikation schlank halten
@@ -28,26 +31,22 @@ Git:
   - Fehlerbehandlung, Server speichert  
   - GameState auf Server, für Fehlerkorrektur, Pause (evtl. Speichern)
  - Ausgehend, dass nur valide Moves gesendet werden
+ 
+
+ - GameState als Objekt oder Klasse ?
+ - Wie init des Feldes ?
+ - Bombenlogik und Animation
+   - Ändert sich state erst nach Explosion ?
 
 # Animation :
- - Move durchführen über animate() und render()
- - State update bei durchgeführten Move (target === newPosition)
+ - evtl eigene Illustrationen
+ - Animationen mit Spritesheets 
 ![UML](Planung/BomberMan2.png
 
 
-
-# Feststellung (04.06.2019):
- - 0,25 Sekunden für Animation !!
-	- Spielerposition ist beendet bei SpielerPos === Neues Feld (Erst dann update)
-	- MUSS ZUÄCHST funktionieren !
- - Spiellogik und Spielzugvalidierung gehen Hand in Hand
- - Animation und Bombenexplosionen
- 	- Bombenexplosion designen
-	- Bombenexplosionen auf Bombenobjekt (Feld wird übergen)
 
 # Besprechung (04.06.2019):
  - Zunächst Möglichkeit zu laufen überprüfen.
  - Danach Running auf true, Richtung festlegen (Enum)
  - Grid, erst running auf false, wenn Spieler Pos === Ziel
  - In Items Methode einrichten, die wouldCollide beahndelt
- - 
