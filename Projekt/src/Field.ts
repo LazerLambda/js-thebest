@@ -1,5 +1,5 @@
 import { Bricks, Hallway, Hole, Item, Wall } from "./Item";
-import { Player } from './Player';
+import { ActivePlayer,Player } from './Player';
 
 enum fieldType {
   HALLWAY = 0,
@@ -111,7 +111,7 @@ export class Field {
       { y: 7, x: 7, state: fieldType.WALL }
     ];
 
-    this.player = [new Player(this.context)];
+    this.player = [new ActivePlayer(this.context)];
     const canvas = <HTMLCanvasElement>document.getElementById("background");
 
     this.context = canvas.getContext("2d");
