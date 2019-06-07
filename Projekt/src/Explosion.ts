@@ -1,5 +1,5 @@
 import { Field } from "./Field";
-import { Hallway, Item, Fire } from "./Item";
+import { Hallway, Item, Fire, Wall, Bricks } from "./Item";
 
 export class Explosion {
   //bombFields: Item[] = [];
@@ -8,6 +8,11 @@ export class Explosion {
   field: Field;
   startPosX: number;
   startPosY: number;
+
+  north: boolean = true;
+  south: boolean = true;
+  west: boolean = true;
+  east: boolean = true;
 
   constructor(item: Hallway, field: Field) {
     this.explosionRad = 3;
@@ -18,14 +23,13 @@ export class Explosion {
     this.startPosY = item.y;
   }
 
-  pushTobombFieldsArray(pos: number) {
-    var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
-    if (inBounds) {
-      if (this.field.items[pos] instanceof Hallway) {
-        this.field.items[pos].setOnFire();
-        //   var tmpItem = <Hallway> this.field.items[pos];
-        //   tmpItem.onFire = new Fire(tmpItem.context,tmpItem.x, tmpItem.y, tmpItem.SIZE_X, tmpItem.SIZE_Y, tmpItem);
-      }
+  checkBounds(pos: number) {
+    return pos >= 0 && pos < this.field.items.length;
+  }
+
+  performFire(pos : number){
+    if (this.field.items[pos] instanceof Hallway) {
+      this.field.items[pos].setOnFire();
     }
   }
 
@@ -36,10 +40,38 @@ export class Explosion {
       var posWest = this.startPosY * 8 + (this.startPosX - this.counter);
       var posEast = this.startPosY * 8 + (this.startPosX + this.counter);
 
-      this.pushTobombFieldsArray(posSouth);
-      this.pushTobombFieldsArray(posNorth);
-      this.pushTobombFieldsArray(posWest);
-      this.pushTobombFieldsArray(posEast);
+      if (this.south) {
+        if(this.checkBounds(posSouth)){
+          this.performFire(posSouth);
+          if (this.field.items[posSouth] instanceof Wall){
+            this.south = false;
+          }
+        }
+      }
+      if (this.north) {
+        if(this.checkBounds(posNorth)){
+          this.performFire(posNorth);
+          if (this.field.items[posNorth] instanceof Wall){
+            this.north = false;
+          }
+        }
+      }
+      if (this.west) {
+        if(this.checkBounds(posWest)){
+          this.performFire(posWest);
+          if (this.field.items[posWest] instanceof Wall){
+            this.west = false;
+          }
+        }
+      }
+      if (this.east) {
+        if(this.checkBounds(posEast)){
+          this.performFire(posEast);
+          if (this.field.items[posEast] instanceof Wall){
+            this.east = false;
+          }
+        }
+      }
 
       ++this.counter;
     }

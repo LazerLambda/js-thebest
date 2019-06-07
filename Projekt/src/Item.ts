@@ -34,7 +34,7 @@ export class Item {
   }
 
   update() {}
-  setOnFire(){}
+  setOnFire() {}
 }
 
 export class Wall extends Item {
@@ -76,9 +76,9 @@ export class Hole extends Item {
 }
 
 export class Hallway extends Item {
-  playerOnItem: Player;
   bombOnItem: Bomb = null;
   onFire: Fire = null;
+  brickOnItem : Bricks = null;
 
   overlayingItem: Item[];
 
@@ -98,7 +98,6 @@ export class Hallway extends Item {
       this.context.fillStyle = "green";
     } else {
       this.context.fillStyle = "red";
-      //this.context.fillStyle = "green";
     }
 
     const x = this.x * this.SIZE_X;
@@ -114,10 +113,25 @@ export class Hallway extends Item {
       this.onFire.update();
       this.onFire.draw();
     }
+
+    if (this.brickOnItem !== null){
+      this.brickOnItem.draw();
+    }
   }
 
-  setOnFire(){
-    this.onFire = new Fire(this.context, this.x, this.y, this.SIZE_X, this.SIZE_Y, this);
+  setOnFire() {
+    if(this.brickOnItem !== null){
+      this.brickOnItem.setOnFire();
+    } else {
+      this.onFire = new Fire(
+        this.context,
+        this.x,
+        this.y,
+        this.SIZE_X,
+        this.SIZE_Y,
+        this
+      );
+    }
   }
 }
 
@@ -178,22 +192,38 @@ export class Bomb extends Item {
 }
 
 export class Bricks extends Item {
+  breakBricks: boolean = false;
+  placedOn : Hallway;
   constructor(
     context: any,
     xPos: number,
     yPos: number,
     xSize: number,
-    ySize: number
+    ySize: number,
+    placed : Hallway
   ) {
     super(context, xPos, yPos, xSize, ySize);
+    this.placedOn = placed;
   }
 
   draw() {
-    const x = this.x * this.SIZE_X;
-    const y = this.y * this.SIZE_Y;
-    this.context.fillStyle = "pink";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+    if (this.breakBricks) {
+      const x = this.x * this.SIZE_X;
+      const y = this.y * this.SIZE_Y;
+      this.context.fillStyle = "yellow";
+      this.context.fillRect(x - 10, y - 10, this.SIZE_X + 10, this.SIZE_Y + 10);
+      this.placedOn.setOnFire();
+      this.placedOn.brickOnItem = null;
+
+    } else {
+      const x = this.x * this.SIZE_X;
+      const y = this.y * this.SIZE_Y;
+      this.context.fillStyle = "pink";
+      this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+    }
   }
+
+  setOnFire() {this.breakBricks = true;}
 }
 
 export class Fire extends Item {

@@ -147,9 +147,9 @@ export class Field {
           );
           break;
         case fieldType.BRICKS:
-            this.items.push(
-              new Bricks(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
-            );
+          var item : Hallway = new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize);
+          item.brickOnItem = new Bricks(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize, item);
+            this.items.push(item);
       }
     }
     for(let elem of this.player){
