@@ -21,7 +21,7 @@ export class Game {
   }
 
   startAnimating(targetFPS: number) {
-    this.frameTime = 10 / 2;
+    this.frameTime = 1000 / 60;
     this.then = window.performance.now();
     this.animate(this.then);
   }
