@@ -58,6 +58,7 @@ Git:
   - Bewegungen schneller oder langsamer
   - Bombe größer
   - Rüstung
-  
+
  - Sprungfeld
+ - Bombe mit Player verbinden
  
