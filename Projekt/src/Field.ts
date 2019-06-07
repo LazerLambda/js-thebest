@@ -119,7 +119,7 @@ export class Field {
     this.width = 8;
     this.height = 8; 
 
-    this.xSize = canvas.width / this.width;
+    this.xSize = (canvas.width-300) / this.width;
     this.ySize = canvas.height / this.height;
 
     this.fieldSize = this.field.length;

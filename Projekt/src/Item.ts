@@ -34,6 +34,7 @@ export class Item {
   }
 
   update() {}
+  setOnFire(){}
 }
 
 export class Wall extends Item {
@@ -77,6 +78,7 @@ export class Hole extends Item {
 export class Hallway extends Item {
   playerOnItem: Player;
   bombOnItem: Bomb = null;
+  onFire: Fire = null;
 
   overlayingItem: Item[];
 
@@ -107,14 +109,23 @@ export class Hallway extends Item {
       this.bombOnItem.update();
       this.bombOnItem.draw();
     }
+
+    if (this.onFire !== null) {
+      this.onFire.update();
+      this.onFire.draw();
+    }
+  }
+
+  setOnFire(){
+    this.onFire = new Fire(this.context, this.x, this.y, this.SIZE_X, this.SIZE_Y, this);
   }
 }
 
 export class Bomb extends Item {
-  timeLeftToDrop : number;
+  timeLeftToDrop: number;
   timeLeft: number;
   explode: boolean = false;
-  placedOn : Hallway;
+  placedOn: Hallway;
 
   constructor(
     context: any,
@@ -122,12 +133,12 @@ export class Bomb extends Item {
     yPos: number,
     xSize: number,
     ySize: number,
-    placed : Hallway
+    placed: Hallway
   ) {
     super(context, xPos, yPos, xSize, ySize);
     this.timeLeft = 100;
     this.timeLeftToDrop = 10;
-    this.placedOn = placed
+    this.placedOn = placed;
   }
 
   draw() {
@@ -145,11 +156,18 @@ export class Bomb extends Item {
   }
 
   update() {
-    
-    if(this.timeLeft < 0){
+    if (this.timeLeft < 0) {
       this.explode = true;
-      if(this.timeLeftToDrop < 0){
+      if (this.timeLeftToDrop < 0) {
         this.placedOn.bombOnItem = null;
+        this.placedOn.onFire = new Fire(
+          this.context,
+          this.x,
+          this.y,
+          this.SIZE_X,
+          this.SIZE_Y,
+          this.placedOn
+        );
       } else {
         --this.timeLeftToDrop;
       }
@@ -175,5 +193,36 @@ export class Bricks extends Item {
     const y = this.y * this.SIZE_Y;
     this.context.fillStyle = "pink";
     this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+  }
+}
+
+export class Fire extends Item {
+  timeLeft: number = 20;
+  placedOn: Hallway = null;
+
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number,
+    placed: Hallway
+  ) {
+    super(context, xPos, yPos, xSize, ySize);
+    this.placedOn = placed;
+  }
+
+  draw() {
+    const x = this.x * this.SIZE_X;
+    const y = this.y * this.SIZE_Y;
+    this.context.fillStyle = "orange";
+    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+  }
+
+  update() {
+    if (this.timeLeft < 1) {
+      this.placedOn.onFire = null;
+    }
+    --this.timeLeft;
   }
 }
