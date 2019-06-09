@@ -1,31 +1,42 @@
+import { Explosion } from './Explosion';
 import { Field } from './Field';
 import { Player } from './Player';
+import { Hallway } from './Item';
 
 export class Game {
-  context: any;
+  explosions : Explosion[] = [];
   frameTime: number;
   then: number;
 
   field : Field;
-  player : Player;
+  player : Player[];
 
   constructor() {
-    const canvas = <HTMLCanvasElement>document.getElementById("background");
-    this.context = canvas.getContext("2d");
 
-    /**
-     * Init field
-     */
-    const field = new Field();
-    field.drawField();
-
-    this.player = new Player(this.context);
+    this.field = new Field();
+    this.player = this.field.returnPlayer();
     
     this.startAnimating(200);
   }
 
+  update(){
+    for(let i = 0; i < this.field.items.length; i++){
+      if(this.field.items[i] instanceof Hallway){
+        var tmpItem = <Hallway> this.field.items[i];
+        if(tmpItem.bombOnItem !== null){
+          if(tmpItem.bombOnItem.explode){
+            this.explosions.push(new Explosion(tmpItem, this.field));
+          }
+        }
+      }
+    }
+    for(let elem of this.explosions){
+      elem.update();
+    }
+  }
+
   startAnimating(targetFPS: number) {
-    this.frameTime = 10 / 2;
+    this.frameTime = 1000 / 60;
     this.then = window.performance.now();
     this.animate(this.then);
   }
@@ -38,7 +49,15 @@ export class Game {
     if (elapsed > this.frameTime) {
       this.then = now;
 
-      this.player.drawPlayer();
+      this.update();
+      for(let elem of this.field.items){
+        elem.update();
+        elem.draw();
+      }
+      for(let elem of this.player){
+        elem.renderPlayer()
+        elem.drawPlayer();
+      }
     }
   }
 }
