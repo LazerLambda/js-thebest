@@ -51,6 +51,7 @@ export class Game {
 
       this.update();
       for(let elem of this.field.items){
+        elem.update();
         elem.draw();
       }
       for(let elem of this.player){
