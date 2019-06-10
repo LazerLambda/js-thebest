@@ -114,9 +114,9 @@ export class Player {
        */
       if (this.loosingSequence < 0) {
         this.context.clearRect(0, 0, 480, 480);
-        this.context.font = "30px Arial";
-        this.context.fillText("You loose xD", 10, 50);
+
         this.onItem.playerOn = null;
+        this.field.updateGameInfos();
       }
       --this.loosingSequence;
     } else {
