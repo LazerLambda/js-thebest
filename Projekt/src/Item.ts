@@ -1,7 +1,7 @@
 import { Player } from "./Player";
 
 export class Item {
-  playerOn: Player;
+  playerOn: Player = null;
   context: any;
   SIZE_X: number;
   SIZE_Y: number;
@@ -23,7 +23,6 @@ export class Item {
 
     this.SIZE_X = xSize;
     this.SIZE_Y = ySize;
-    this.playerOn = null;
   }
 
   draw() {
@@ -93,6 +92,12 @@ export class Hallway extends Item {
     this.overlayingItem = [];
   }
 
+  update(){
+    if(this.onFire !== null && this.playerOn !== null){
+      this.playerOn.alive = false;
+    }
+  }
+
   draw() {
     if (this.playerOn === null) {
       this.context.fillStyle = "green";
@@ -120,6 +125,9 @@ export class Hallway extends Item {
   }
 
   setOnFire() {
+    if(this.playerOn !== null){
+      this.playerOn.alive = false;
+    }
     if(this.brickOnItem !== null){
       this.brickOnItem.setOnFire();
     } else {

@@ -8,11 +8,13 @@ enum Direction {
   EAST = 3
 }
 
-export class Player{
+export class Player {
   transitionCounter: number = 0;
   TRANSITION_UPPER_BOUND: number = 3;
   target: number = 0;
 
+  loosingSequence: number = 10;
+  alive: boolean = true;
   running: boolean;
   direction: number;
   context: any;
@@ -22,7 +24,7 @@ export class Player{
 
   xPos: number;
   yPos: number;
-  constructor(context : any){
+  constructor(context: any) {
     this.xPos = 0;
     this.yPos = 0;
 
@@ -34,7 +36,7 @@ export class Player{
     this.context = this.canvas.getContext("2d");
   }
 
-  initField(field: Field, item: Item) {
+  initField(field: Field, item: Hallway) {
     this.field = field;
 
     item.playerOn = this;
@@ -42,7 +44,7 @@ export class Player{
     this.xPos = item.x * this.field.xSize;
     this.yPos = item.y * this.field.ySize;
   }
-  
+
   renderPlayer() {
     if (this.running) {
       if (this.transitionCounter < this.TRANSITION_UPPER_BOUND) {
@@ -70,7 +72,8 @@ export class Player{
         this.transitionCounter = 0;
         this.running = false;
 
-        var tmpItem = this.onItem;
+        // Player auf neues Feld setzen
+        var tmpItem = <Hallway> this.onItem;
         this.onItem = this.field.items[this.target];
         this.onItem.playerOn = this;
         tmpItem.playerOn = null;
@@ -83,29 +86,41 @@ export class Player{
   }
 
   drawPlayer() {
-    // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
-    if (this.running) {
-      this.context.clearRect(0, 0, 480, 480);
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(this.xPos + 4, this.yPos + 4, 50, 50);
+    if (!this.alive) {
+      /**
+       * Zähler für Animation
+       */
+      if (this.loosingSequence < 0) {
+        this.context.clearRect(0, 0, 480, 480);
+        this.context.font = "30px Arial";
+        this.context.fillText("You loose xD", 10, 50);
+        this.onItem.playerOn = null;
+      }
+      --this.loosingSequence;
     } else {
-      this.context.clearRect(0, 0, 480, 480);
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(
-        this.onItem.x * this.field.xSize + 4,
-        this.onItem.y * this.field.ySize + 4,
-        50,
-        50
-      );
+      // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
+      if (this.running) {
+        this.context.clearRect(0, 0, 480, 480);
+        this.context.fillStyle = "yellow";
+        this.context.fillRect(this.xPos + 4, this.yPos + 4, 50, 50);
+      } else {
+        this.context.clearRect(0, 0, 480, 480);
+        this.context.fillStyle = "yellow";
+        this.context.fillRect(
+          this.onItem.x * this.field.xSize + 4,
+          this.onItem.y * this.field.ySize + 4,
+          50,
+          50
+        );
+      }
     }
   }
 }
 
-export class ActivePlayer extends Player{
-
+export class ActivePlayer extends Player {
   constructor(context: any) {
     super(context);
-    
+
     document.addEventListener("keydown", e => {
       if (!this.running) {
         switch (e.key) {
@@ -178,6 +193,4 @@ export class ActivePlayer extends Player{
       }
     }
   }
-
-
 }
