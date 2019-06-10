@@ -8,10 +8,29 @@ enum Direction {
   EAST = 3
 }
 
+
+//Animation
+let img : any = new Image();
+img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+img.onload = function() {
+  init();
+}
+
+function init() {
+  this.startAnimating(15);
+}
+
 export class Player {
   transitionCounter: number = 0;
   TRANSITION_UPPER_BOUND: number = 3;
   target: number = 0;
+
+  //Animation
+  spriteWidth: number = 28;
+  spriteHeight: number = 30;
+  cycleLoop = [0, 1, 0, 2];
+  currentDirection: number;
+  currentLoopIndex: number= 0;
 
   running: boolean;
   direction: number;
@@ -122,18 +141,22 @@ export class Player {
         switch (this.direction) {
           case Direction.NORTH: {
             this.yPos -= this.field.ySize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 2;
             break;
           }
           case Direction.SOUTH: {
             this.yPos += this.field.ySize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 2;
             break;
           }
           case Direction.WEST: {
             this.xPos -= this.field.xSize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 1;
             break;
           }
           case Direction.EAST: {
             this.xPos += this.field.xSize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 3;
             break;
           }
         }
@@ -158,18 +181,26 @@ export class Player {
   drawPlayer() {
     // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
     if (this.running) {
-      this.context.clearRect(0, 0, 480, 480);
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(this.xPos + 4, this.yPos + 4, 50, 50);
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.drawAnimation(this.currentDirection, this.cycleLoop[this.currentLoopIndex], this.xPos + 4, this.yPos);
+      this.currentLoopIndex++;
+      if (this.currentLoopIndex >= this.cycleLoop.length) {
+        this.currentLoopIndex = 0;
+      }
     } else {
-      this.context.clearRect(0, 0, 480, 480);
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(
-        this.onItem.x * this.field.xSize + 4,
-        this.onItem.y * this.field.ySize + 4,
-        50,
-        50
-      );
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.drawAnimation(this.currentDirection, this.cycleLoop[this.currentLoopIndex], this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
+      this.currentLoopIndex++;
+      if (this.currentLoopIndex >= this.cycleLoop.length) {
+        this.currentLoopIndex = 0;
+      }
     }
+  }
+  //Animation
+  drawAnimation(frameX: number, frameY: number, canvasX: number, canvasY:number) {
+    this.context.drawImage(img,
+      frameX * this.spriteWidth, frameY * this.spriteHeight,
+      this.spriteWidth, this.spriteHeight, canvasX, canvasY,
+      this.field.xSize, this.field.ySize);
   }
 }
