@@ -15,6 +15,7 @@ export class Game {
 
     this.field = new Field();
     this.player = this.field.returnPlayer();
+    this.field.updateGameInfos();
     
     this.startAnimating(200);
   }
