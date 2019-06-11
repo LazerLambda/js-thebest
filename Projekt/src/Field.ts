@@ -160,6 +160,24 @@ export class Field {
     
   }
 
+  updateGameInfos(){
+    this.context.clearRect(480, 0, 300, 480);
+    this.context.fillStyle = "yellow";
+    this.context.fillRect(480,0, 300, 480);
+    this.context.fillStyle = "blue";
+    this.context.font = "30px Arial";
+    this.context.fillText("Player: " + "TESTNAME", 500, 50);
+    this.context.font = "10px Arial";
+    this.context.fillText("Punkte: " + "0", 520, 75);
+    if(!this.player[0].alive){
+      this.context.fillStyle = "red";
+      this.context.fillRect(600,60, 100, 20);
+      this.context.fillStyle = "yellow";
+      this.context.font = "10px Arial";
+      this.context.fillText("You loooose xD", 600, 75);
+    }
+  }
+
   returnPlayer() : Player[]{
     return this.player;
   }
