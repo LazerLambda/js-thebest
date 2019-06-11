@@ -17,7 +17,7 @@ img.onload = function() {
 }
 
 function init() {
-  this.startAnimating(15);
+  this.startAnimating(200);
 }
 
 export class Player {
@@ -30,7 +30,8 @@ export class Player {
   spriteHeight: number = 30;
   cycleLoop = [0, 1, 0, 2];
   currentDirection: number;
-  currentLoopIndex: number= 0;
+  currentLoopIndex: number = 0;
+  frameCount: number = 0;
 
   running: boolean;
   direction: number;
@@ -146,7 +147,7 @@ export class Player {
           }
           case Direction.SOUTH: {
             this.yPos += this.field.ySize / this.TRANSITION_UPPER_BOUND;
-            this.currentDirection = 2;
+            this.currentDirection = 0;
             break;
           }
           case Direction.WEST: {
@@ -189,18 +190,32 @@ export class Player {
       }
     } else {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.drawAnimation(this.currentDirection, this.cycleLoop[this.currentLoopIndex], this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
+      //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
+      //this.drawAnimation(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4); 
       this.currentLoopIndex++;
       if (this.currentLoopIndex >= this.cycleLoop.length) {
         this.currentLoopIndex = 0;
       }
     }
   }
+
   //Animation
   drawAnimation(frameX: number, frameY: number, canvasX: number, canvasY:number) {
     this.context.drawImage(img,
       frameX * this.spriteWidth, frameY * this.spriteHeight,
       this.spriteWidth, this.spriteHeight, canvasX, canvasY,
       this.field.xSize, this.field.ySize);
+  }
+
+  //Animation Geschwindigkeit Player
+  step() {
+    this.frameCount++;
+    if (this.frameCount < 8) {
+      window.requestAnimationFrame(this.step);
+      return;
+    }
+    this.frameCount = 0;
+    this.drawPlayer();
+    window.requestAnimationFrame(this.step);
   }
 }
