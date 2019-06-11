@@ -1,5 +1,16 @@
 import { Player } from "./Player";
 
+//Animation
+let img : any = new Image();
+img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+img.onload = function() {
+  init();
+}
+
+function init() {
+  this.startAnimating(15);
+}
+
 export class Item {
   playerOn: Player = null;
   context: any;
@@ -8,6 +19,12 @@ export class Item {
 
   x: number;
   y: number;
+
+  //Animation
+  spriteWidth: number = 40;
+  spriteHeight: number = 30;
+  //cycleLoopBomb = [5, 6, 7, 6];
+  //currentLoopIndex: number= 0;
 
   constructor(
     context: any,
@@ -34,6 +51,14 @@ export class Item {
 
   update() {}
   setOnFire() {}
+
+  //Animation
+  drawAnimation(frameX: number, frameY: number, canvasX: number, canvasY:number) {
+    this.context.drawImage(img,
+      frameX * this.spriteWidth, frameY * this.spriteHeight,
+      this.spriteWidth, this.spriteHeight, canvasX, canvasY,
+      this.SIZE_X, this.SIZE_Y);
+  }
 }
 
 export class Wall extends Item {
@@ -167,13 +192,23 @@ export class Bomb extends Item {
     if (this.explode) {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(x - 10, y - 10, this.SIZE_X + 10, this.SIZE_Y + 10);
+
+      this.drawAnimation(5, 3, x - 10, y - 10);
+      //this.drawAnimation(this.cycleLoopBomb[this.currentLoopIndex], 3, x - 10, y - 10);
+      //this.currentLoopIndex++;
+      //if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+      //  this.currentLoopIndex = 0;
+      //}
     } else {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
-      this.context.fillStyle = "black";
-      this.context.fillRect(x + 10, y + 10, this.SIZE_X - 10, this.SIZE_Y - 10);
+
+      this.drawAnimation(5, 3, x + 10, y + 10);
+      //this.drawAnimation(this.cycleLoopBomb[this.currentLoopIndex], 3, x + 10, y + 10);
+      //this.currentLoopIndex++;
+      //if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+      //  this.currentLoopIndex = 0;
+      //}
     }
   }
 
