@@ -38,8 +38,8 @@ export class Game {
         elem.draw();
       }
       for(let elem of this.player){
-        elem.renderPlayer()
-        elem.drawPlayer();
+        elem.renderPlayer();
+        elem.step();
       }
     }
   }
