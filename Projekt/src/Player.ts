@@ -1,5 +1,6 @@
-import { Field } from "./Field";
+import { GameState } from "./GameState";
 import { Bomb, Hallway, Hole, Item } from "./Item";
+import { GameState } from "./GameState";
 
 enum Direction {
   NORTH = 0,
@@ -31,7 +32,7 @@ export class Player {
   context: any;
   canvas: any;
   onItem: Item;
-  field: Field;
+  field: GameState;
 
   //Animation
   spriteWidth: number = 28;

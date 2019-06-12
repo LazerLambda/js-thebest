@@ -1,5 +1,5 @@
 import { Explosion } from './Explosion';
-import { Field } from './Field';
+import { GameState } from './GameState';
 import { Player } from './Player';
 import { Hallway } from './Item';
 
@@ -13,7 +13,7 @@ export class Game {
 
   constructor() {
 
-    this.field = new Field();
+    this.field = new GameState();
     this.player = this.field.returnPlayer();
     this.field.updateGameInfos();
     
