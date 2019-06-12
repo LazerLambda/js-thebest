@@ -8,7 +8,7 @@ export class Game {
   frameTime: number;
   then: number;
 
-  field : Field;
+  field : GameState;
   player : Player[];
 
   constructor() {
