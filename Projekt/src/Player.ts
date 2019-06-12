@@ -37,9 +37,10 @@ export class Player {
   //Animation
   spriteWidth: number = 28;
   spriteHeight: number = 30;
-  cycleLoop = [0, 1, 0, 2];
+  cycleLoopPlayer = [0, 1, 0, 2];
   currentDirection: number;
   currentLoopIndex: number= 0;
+  frameCount: number = 0;
 
   xPos: number;
   yPos: number;
@@ -124,16 +125,18 @@ export class Player {
       // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
       if (this.running) {
           this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          this.drawAnimation(this.currentDirection, this.cycleLoop[this.currentLoopIndex], this.xPos + 4, this.yPos);
+          this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.xPos + 4, this.yPos);
           this.currentLoopIndex++;
-          if (this.currentLoopIndex >= this.cycleLoop.length) {
+          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
               this.currentLoopIndex = 0;
           }
       } else {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawAnimation(this.currentDirection, this.cycleLoop[this.currentLoopIndex], this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
+        //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
+        //this.drawAnimation(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4); 
+        this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
         this.currentLoopIndex++;
-        if (this.currentLoopIndex >= this.cycleLoop.length) {
+        if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
           this.currentLoopIndex = 0;
         }
       }
@@ -147,6 +150,19 @@ export class Player {
       this.spriteWidth, this.spriteHeight, canvasX, canvasY,
       this.field.xSize, this.field.ySize);
   }
+
+  //Animation Geschwindigkeit Player
+  step() {
+    this.frameCount++;
+    if (this.frameCount < 8) {
+      window.requestAnimationFrame(this.step);
+      return;
+    }
+    this.frameCount = 0;
+    this.drawPlayer();
+    window.requestAnimationFrame(this.step);
+  }
+
 }
 
 export class ActivePlayer extends Player {
