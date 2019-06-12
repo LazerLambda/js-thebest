@@ -1,5 +1,5 @@
 import { Bricks, Hallway, Hole, Item, Wall } from "./Item";
-import { Player } from './Player';
+import { ActivePlayer,Player } from './Player';
 
 enum fieldType {
   HALLWAY = 0,
@@ -111,7 +111,7 @@ export class Field {
       { y: 7, x: 7, state: fieldType.WALL }
     ];
 
-    this.player = [new Player(this.context)];
+    this.player = [new ActivePlayer(this.context)];
     const canvas = <HTMLCanvasElement>document.getElementById("background");
 
     this.context = canvas.getContext("2d");
@@ -119,7 +119,7 @@ export class Field {
     this.width = 8;
     this.height = 8; 
 
-    this.xSize = canvas.width / this.width;
+    this.xSize = (canvas.width-300) / this.width;
     this.ySize = canvas.height / this.height;
 
     this.fieldSize = this.field.length;
@@ -147,9 +147,9 @@ export class Field {
           );
           break;
         case fieldType.BRICKS:
-            this.items.push(
-              new Bricks(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
-            );
+          var item : Hallway = new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize);
+          item.brickOnItem = new Bricks(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize, item);
+            this.items.push(item);
       }
     }
     for(let elem of this.player){
@@ -158,6 +158,24 @@ export class Field {
     this.playerPos["player0"] = item.y * 8 + item.x;
     //this.player.initField(this, item);
     
+  }
+
+  updateGameInfos(){
+    this.context.clearRect(480, 0, 300, 480);
+    this.context.fillStyle = "yellow";
+    this.context.fillRect(480,0, 300, 480);
+    this.context.fillStyle = "blue";
+    this.context.font = "30px Arial";
+    this.context.fillText("Player: " + "TESTNAME", 500, 50);
+    this.context.font = "10px Arial";
+    this.context.fillText("Punkte: " + "0", 520, 75);
+    if(!this.player[0].alive){
+      this.context.fillStyle = "red";
+      this.context.fillRect(600,60, 100, 20);
+      this.context.fillStyle = "yellow";
+      this.context.font = "10px Arial";
+      this.context.fillText("You loooose xD", 600, 75);
+    }
   }
 
   returnPlayer() : Player[]{

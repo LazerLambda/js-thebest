@@ -8,11 +8,24 @@ enum Direction {
   EAST = 3
 }
 
+//Animation
+let img : any = new Image();
+img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+img.onload = function() {
+  init();
+}
+
+function init() {
+  this.startAnimating(15);
+}
+
 export class Player {
   transitionCounter: number = 0;
   TRANSITION_UPPER_BOUND: number = 3;
   target: number = 0;
 
+  loosingSequence: number = 10;
+  alive: boolean = true;
   running: boolean;
   direction: number;
   context: any;
@@ -20,9 +33,16 @@ export class Player {
   onItem: Item;
   field: Field;
 
+  //Animation
+  spriteWidth: number = 28;
+  spriteHeight: number = 30;
+  cycleLoopPlayer = [0, 1, 0, 2];
+  currentDirection: number;
+  currentLoopIndex: number= 0;
+  frameCount: number = 0;
+
   xPos: number;
   yPos: number;
-
   constructor(context: any) {
     this.xPos = 0;
     this.yPos = 0;
@@ -33,6 +53,120 @@ export class Player {
 
     this.canvas = <HTMLCanvasElement>document.getElementById("game-layer");
     this.context = this.canvas.getContext("2d");
+  }
+
+  initField(field: Field, item: Hallway) {
+    this.field = field;
+
+    item.playerOn = this;
+    this.onItem = item;
+    this.xPos = item.x * this.field.xSize;
+    this.yPos = item.y * this.field.ySize;
+  }
+
+  renderPlayer() {
+    if (this.running) {
+      if (this.transitionCounter < this.TRANSITION_UPPER_BOUND) {
+        switch (this.direction) {
+          case Direction.NORTH: {
+            this.yPos -= this.field.ySize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 2;
+            break;
+          }
+          case Direction.SOUTH: {
+            this.yPos += this.field.ySize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 0;
+            break;
+          }
+          case Direction.WEST: {
+            this.xPos -= this.field.xSize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 1;
+            break;
+          }
+          case Direction.EAST: {
+            this.xPos += this.field.xSize / this.TRANSITION_UPPER_BOUND;
+            this.currentDirection = 3;
+            break;
+          }
+        }
+
+        ++this.transitionCounter;
+      } else {
+        this.transitionCounter = 0;
+        this.running = false;
+
+        // Player auf neues Feld setzen
+        var tmpItem = <Hallway> this.onItem;
+        this.onItem = this.field.items[this.target];
+        this.onItem.playerOn = this;
+        tmpItem.playerOn = null;
+        this.field.playerPos = this.target;
+
+        this.xPos = this.onItem.x * this.field.xSize;
+        this.yPos = this.onItem.y * this.field.ySize;
+      }
+    }
+  }
+
+  drawPlayer() {
+    if (!this.alive) {
+      /**
+       * Zähler für Animation
+       */
+      if (this.loosingSequence < 0) {
+        this.context.clearRect(0, 0, 480, 480);
+
+        this.onItem.playerOn = null;
+        this.field.updateGameInfos();
+      }
+      --this.loosingSequence;
+    } else {
+      // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
+      if (this.running) {
+          this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.xPos + 4, this.yPos);
+          this.currentLoopIndex++;
+          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
+              this.currentLoopIndex = 0;
+          }
+      } else {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
+        //this.drawAnimation(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4); 
+        this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
+        this.currentLoopIndex++;
+        if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
+          this.currentLoopIndex = 0;
+        }
+      }
+    }
+  }
+
+  //Animation
+  drawAnimation(frameX: number, frameY: number, canvasX: number, canvasY:number) {
+    this.context.drawImage(img,
+      frameX * this.spriteWidth, frameY * this.spriteHeight,
+      this.spriteWidth, this.spriteHeight, canvasX, canvasY,
+      this.field.xSize, this.field.ySize);
+  }
+
+  //Animation Geschwindigkeit Player
+  step() {
+    this.frameCount++;
+    if (this.frameCount < 8) {
+      window.requestAnimationFrame(this.step);
+      return;
+    }
+    this.frameCount = 0;
+    this.drawPlayer();
+    window.requestAnimationFrame(this.step);
+  }
+
+}
+
+export class ActivePlayer extends Player {
+  constructor(context: any) {
+    super(context);
 
     document.addEventListener("keydown", e => {
       if (!this.running) {
@@ -83,15 +217,6 @@ export class Player {
     });
   }
 
-  initField(field: Field, item: Item) {
-    this.field = field;
-
-    item.playerOn = this;
-    this.onItem = item;
-    this.xPos = item.x * this.field.xSize;
-    this.yPos = item.y * this.field.ySize;
-  }
-
   checkCollide(x: number, y: number): boolean {
     if (this.onItem === null) {
       throw new Error(
@@ -113,63 +238,6 @@ export class Player {
       } else {
         return false;
       }
-    }
-  }
-
-  renderPlayer() {
-    if (this.running) {
-      if (this.transitionCounter < this.TRANSITION_UPPER_BOUND) {
-        switch (this.direction) {
-          case Direction.NORTH: {
-            this.yPos -= this.field.ySize / this.TRANSITION_UPPER_BOUND;
-            break;
-          }
-          case Direction.SOUTH: {
-            this.yPos += this.field.ySize / this.TRANSITION_UPPER_BOUND;
-            break;
-          }
-          case Direction.WEST: {
-            this.xPos -= this.field.xSize / this.TRANSITION_UPPER_BOUND;
-            break;
-          }
-          case Direction.EAST: {
-            this.xPos += this.field.xSize / this.TRANSITION_UPPER_BOUND;
-            break;
-          }
-        }
-
-        ++this.transitionCounter;
-      } else {
-        this.transitionCounter = 0;
-        this.running = false;
-
-        var tmpItem = this.onItem;
-        this.onItem = this.field.items[this.target];
-        this.onItem.playerOn = this;
-        tmpItem.playerOn = null;
-        this.field.playerPos = this.target;
-
-        this.xPos = this.onItem.x * this.field.xSize;
-        this.yPos = this.onItem.y * this.field.ySize;
-      }
-    }
-  }
-
-  drawPlayer() {
-    // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
-    if (this.running) {
-      this.context.clearRect(0, 0, 480, 480);
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(this.xPos + 4, this.yPos + 4, 50, 50);
-    } else {
-      this.context.clearRect(0, 0, 480, 480);
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(
-        this.onItem.x * this.field.xSize + 4,
-        this.onItem.y * this.field.ySize + 4,
-        50,
-        50
-      );
     }
   }
 }

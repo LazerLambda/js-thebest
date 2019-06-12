@@ -1,7 +1,10 @@
+import { Explosion } from './Explosion';
 import { Field } from './Field';
 import { Player } from './Player';
+import { Hallway } from './Item';
 
 export class Game {
+  explosions : Explosion[] = [];
   frameTime: number;
   then: number;
 
@@ -12,12 +15,25 @@ export class Game {
 
     this.field = new Field();
     this.player = this.field.returnPlayer();
+    this.field.updateGameInfos();
     
     this.startAnimating(200);
   }
 
-  game(gameState : object){
-
+  update(){
+    for(let i = 0; i < this.field.items.length; i++){
+      if(this.field.items[i] instanceof Hallway){
+        var tmpItem = <Hallway> this.field.items[i];
+        if(tmpItem.bombOnItem !== null){
+          if(tmpItem.bombOnItem.explode){
+            this.explosions.push(new Explosion(tmpItem, this.field));
+          }
+        }
+      }
+    }
+    for(let elem of this.explosions){
+      elem.update();
+    }
   }
 
   startAnimating(targetFPS: number) {
@@ -34,13 +50,16 @@ export class Game {
     if (elapsed > this.frameTime) {
       this.then = now;
 
+      this.update();
       for(let elem of this.field.items){
+        elem.update();
         elem.draw();
       }
       for(let elem of this.player){
         elem.renderPlayer()
-        elem.drawPlayer();
+        elem.step();
       }
     }
   }
+
 }
