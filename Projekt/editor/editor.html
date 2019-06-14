@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+	<body>
+
+	<div style="float:left">
+	<canvas id="cv" width="480" height="480"></canvas>
+		<div>
+			<button onclick ="setItem(WALL);">Select WALL</button>
+			<button onclick ="setItem(HALLWAY)">Select HALLWAY</button>
+			<button onclick ="setItem(BRICK)">Select BRICK</button>
+		</div>
+		<div>
+			<button onclick="chgTs(document.getElementById('ts-path-txtfld').value)">Change tileset</button>
+			<input type="text" id="ts-path-txtfld" placeholder="path/dir"/>
+		</div>
+		<div>
+			<button onclick ="saveMap(document.getElementById('map-name-txtfld').value)">Save map</button>
+			<input type="text" id="map-name-txtfld" placeholder="filename"/>
+		</div>
+		<div>
+			Load map: <input type="file" id="map-input"/>
+		</div>
+	</div>
+		<div style="float:left">
+			<div class="tl-img"><p>WALL:    </p><img id="WALL"></div>
+			<div class="tl-img"><p>HALLWAY: </p><img id="HALLWAY"></div>
+			<div class="tl-img"><p>BRICK:   </p><img id="BRICK"></div>
+			<style>
+				.tl-img {
+					padding-left:100px;
+					padding-top:30px;
+				}
+			</style>
+		</div>
+		<script src="filesaver.js"></script>
+		<script src = "editor.js"></script>
+		<div class="img"></div>
+	</body>
+	<style>
+	</style>
+</html>
