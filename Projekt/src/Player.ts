@@ -1,4 +1,3 @@
-
 import { Bomb, Hallway, Hole, Item } from "./Item";
 import { GameState } from "./GameState";
 
@@ -10,11 +9,11 @@ enum Direction {
 }
 
 //Animation
-let img : any = new Image();
-img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+let img: any = new Image();
+img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
 img.onload = function() {
   init();
-}
+};
 
 function init() {
   this.startAnimating(15);
@@ -25,7 +24,7 @@ export class Player {
   TRANSITION_UPPER_BOUND: number = 3;
   target: number = 0;
 
-  loosingSequence: number = 10;
+  loosingSequence: number = 0;
   alive: boolean = true;
   running: boolean;
   direction: number;
@@ -39,7 +38,7 @@ export class Player {
   spriteHeight: number = 30;
   cycleLoopPlayer = [0, 1, 0, 2];
   currentDirection: number;
-  currentLoopIndex: number= 0;
+  currentLoopIndex: number = 0;
   frameCount: number = 0;
 
   xPos: number;
@@ -56,7 +55,7 @@ export class Player {
     this.context = this.canvas.getContext("2d");
   }
 
-  initField(field: Field, item: Hallway) {
+  initField(field: GameState, item: Hallway) {
     this.field = field;
 
     item.playerOn = this;
@@ -97,7 +96,7 @@ export class Player {
         this.running = false;
 
         // Player auf neues Feld setzen
-        var tmpItem = <Hallway> this.onItem;
+        var tmpItem = <Hallway>this.onItem;
         this.onItem = this.field.items[this.target];
         this.onItem.playerOn = this;
         tmpItem.playerOn = null;
@@ -107,62 +106,68 @@ export class Player {
         this.yPos = this.onItem.y * this.field.ySize;
       }
     }
+    //this.step();
   }
 
   drawPlayer() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.alive) {
-      /**
-       * Zähler für Animation
-       */
+      // GameOverAnimation
       if (this.loosingSequence < 0) {
-        this.context.clearRect(0, 0, 480, 480);
+        // Game over
 
         this.onItem.playerOn = null;
         this.field.updateGameInfos();
       }
       --this.loosingSequence;
     } else {
-      // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
       if (this.running) {
-          this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.xPos + 4, this.yPos);
-          this.currentLoopIndex++;
-          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
-              this.currentLoopIndex = 0;
-          }
+        this.animate(
+          this.currentDirection,
+          this.cycleLoopPlayer[this.currentLoopIndex],
+          this.xPos,
+          this.yPos
+        );
       } else {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
-        //this.drawAnimation(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4); 
-        this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
-        this.currentLoopIndex++;
-        if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
-          this.currentLoopIndex = 0;
-        }
+        //this.animate(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
+        this.animate(
+          this.currentDirection,
+          this.cycleLoopPlayer[this.currentLoopIndex],
+          this.onItem.x * this.field.xSize,
+          this.onItem.y * this.field.ySize 
+        );
       }
     }
   }
 
   //Animation
-  drawAnimation(frameX: number, frameY: number, canvasX: number, canvasY:number) {
-    this.context.drawImage(img,
-      frameX * this.spriteWidth, frameY * this.spriteHeight,
-      this.spriteWidth, this.spriteHeight, canvasX, canvasY,
-      this.field.xSize, this.field.ySize);
-  }
-
-  //Animation Geschwindigkeit Player
-  step() {
-    this.frameCount++;
-    if (this.frameCount < 8) {
-      window.requestAnimationFrame(this.step);
-      return;
+  animate(frameX: number, frameY: number, canvasX: number, canvasY: number) {
+    let time = 10;  // Zeit für Bildwechsel in der Animation
+    if (this.frameCount <= 4 * time) {
+      if (this.frameCount % time == 0) {
+        this.currentLoopIndex++;
+        if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
+          this.currentLoopIndex = 0;
+        }
+      }
+    } else {
+      this.frameCount = 0;
     }
-    this.frameCount = 0;
-    this.drawPlayer();
-    window.requestAnimationFrame(this.step);
-  }
+    ++this.frameCount;
 
+    this.context.drawImage(
+      img,
+      frameX * this.spriteWidth,
+      frameY * this.spriteHeight,
+      this.spriteWidth,
+      this.spriteHeight,
+      canvasX,
+      canvasY,
+      this.field.xSize,
+      this.field.ySize
+    );
+  }
 }
 
 export class ActivePlayer extends Player {
@@ -170,7 +175,7 @@ export class ActivePlayer extends Player {
     super(context);
 
     document.addEventListener("keydown", e => {
-      if (!this.running) {
+      if (!this.running && this.alive) {
         switch (e.key) {
           case "ArrowUp":
             if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
@@ -208,11 +213,6 @@ export class ActivePlayer extends Player {
                 item
               );
             }
-
-            console.log("dasfasdf");
-            this.context.clearRect(0, 0, 480, 480);
-            this.context.fillStyle = "black";
-            this.context.fillRect(0, 0, 480, 480);
         }
       }
     });

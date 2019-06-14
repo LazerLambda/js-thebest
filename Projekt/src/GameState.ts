@@ -1,11 +1,11 @@
-import { Bricks, Hallway, Hole, Item, Wall } from "./Item";
+import { Brick, Hallway, Hole, Item, Wall } from "./Item";
 import { ActivePlayer,Player } from './Player';
 
 enum fieldType {
   HALLWAY = 0,
   WALL = 1,
   HOLE = 2,
-  BRICKS = 3
+  BRICK = 3
 }
 
 export class GameState {
@@ -48,7 +48,7 @@ export class GameState {
       { y: 0, x: 7, state: fieldType.WALL },
 
       { y: 1, x: 0, state: fieldType.WALL },
-      { y: 1, x: 1, state: fieldType.BRICKS},
+      { y: 1, x: 1, state: fieldType.BRICK},
       { y: 1, x: 2, state: fieldType.HALLWAY },
       { y: 1, x: 3, state: fieldType.HALLWAY },
       { y: 1, x: 4, state: fieldType.WALL },
@@ -146,9 +146,9 @@ export class GameState {
             new Wall(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
           );
           break;
-        case fieldType.BRICKS:
+        case fieldType.BRICK:
           var item : Hallway = new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize);
-          item.brickOnItem = new Bricks(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize, item);
+          item.brickOnItem = new Brick(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize, item);
             this.items.push(item);
       }
     }
