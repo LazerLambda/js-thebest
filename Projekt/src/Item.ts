@@ -93,36 +93,6 @@ export class Wall extends Item {
   }
 }
 
-export class Hole extends Item {
-  constructor(
-    context: any,
-    xPos: number,
-    yPos: number,
-    xSize: number,
-    ySize: number
-  ) {
-    super(context, xPos, yPos, xSize, ySize);
-  }
-
-  draw() {
-    const x = this.x * this.SIZE_X;
-    const y = this.y * this.SIZE_Y;
-    this.context.fillStyle = "black";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
-  }
-
-  setOnFire(){
-    this.onFire = new Fire(
-      this.context,
-      this.x,
-      this.y,
-      this.SIZE_X,
-      this.SIZE_Y,
-      this
-    );
-  }
-}
-
 export class Hallway extends Item {
   bombOnItem: Bomb = null;
   onFire: Fire = null;
@@ -189,6 +159,49 @@ export class Hallway extends Item {
         this
       );
     }
+  }
+}
+
+export class Hole extends Hallway{
+  constructor(
+    context: any,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number
+  ) {
+    super(context, xPos, yPos, xSize, ySize);
+  }
+
+  draw() {
+    const x = this.x * this.SIZE_X;
+    const y = this.y * this.SIZE_Y;
+    this.context.fillStyle = "black";
+    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+
+
+    // evtl. diese Methode in eine andere Methode schreiben mit der aus Hallway
+    if (this.onFire !== null) {
+      this.onFire.update();
+      this.onFire.draw();
+    }
+  }
+
+  update(){
+    if(this.playerOn !== null){
+      this.playerOn.alive = false;
+    }
+  }
+
+  setOnFire(){
+    this.onFire = new Fire(
+      this.context,
+      this.x,
+      this.y,
+      this.SIZE_X,
+      this.SIZE_Y,
+      this
+    );
   }
 }
 

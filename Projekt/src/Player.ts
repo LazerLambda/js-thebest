@@ -21,7 +21,7 @@ function init() {
 
 export class Player {
   transitionCounter: number = 0;
-  TRANSITION_UPPER_BOUND: number = 3;
+  TRANSITION_UPPER_BOUND: number = 5;
   target: number = 0;
 
   loosingSequence: number = 0;
@@ -121,52 +121,66 @@ export class Player {
       }
       --this.loosingSequence;
     } else {
-      if (this.running) {
+      // if (this.running) {
         this.animate(
           this.currentDirection,
           this.cycleLoopPlayer[this.currentLoopIndex],
           this.xPos,
           this.yPos
         );
-      } else {
-        //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
-        //this.animate(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
-        this.animate(
-          this.currentDirection,
-          this.cycleLoopPlayer[this.currentLoopIndex],
-          this.onItem.x * this.field.xSize,
-          this.onItem.y * this.field.ySize 
-        );
-      }
+      // } else {
+      //   //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
+      //   //this.animate(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
+      //   this.animate(
+      //     this.currentDirection,
+      //     this.cycleLoopPlayer[this.currentLoopIndex],
+      //     this.onItem.x * this.field.xSize,
+      //     this.onItem.y * this.field.ySize
+      //   );
+      // }
     }
   }
 
   //Animation
   animate(frameX: number, frameY: number, canvasX: number, canvasY: number) {
-    let time = 10;  // Zeit für Bildwechsel in der Animation
-    if (this.frameCount <= 4 * time) {
-      if (this.frameCount % time == 0) {
-        this.currentLoopIndex++;
-        if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
-          this.currentLoopIndex = 0;
+    if (this.running) {
+      let time = 1; // Zeit für Bildwechsel in der Animation
+      if (this.frameCount <= 4 * time) {
+        if (this.frameCount % time === 0) {
+          this.currentLoopIndex++;
+          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
+            this.currentLoopIndex = 0;
+          }
         }
+      } else {
+        this.frameCount = 0;
       }
-    } else {
-      this.frameCount = 0;
-    }
-    ++this.frameCount;
+      ++this.frameCount;
 
-    this.context.drawImage(
-      img,
-      frameX * this.spriteWidth,
-      frameY * this.spriteHeight,
-      this.spriteWidth,
-      this.spriteHeight,
-      canvasX,
-      canvasY,
-      this.field.xSize,
-      this.field.ySize
-    );
+      this.context.drawImage(
+        img,
+        frameX * this.spriteWidth,
+        frameY * this.spriteHeight,
+        this.spriteWidth,
+        this.spriteHeight,
+        canvasX,
+        canvasY,
+        this.field.xSize,
+        this.field.ySize
+      );
+    } else {
+      this.context.drawImage(
+        img,
+        frameX * this.spriteWidth,
+        0 * this.spriteHeight,
+        this.spriteWidth,
+        this.spriteHeight,
+        canvasX,
+        canvasY,
+        this.field.xSize,
+        this.field.ySize
+      );
+    }
   }
 }
 
@@ -223,22 +237,31 @@ export class ActivePlayer extends Player {
       throw new Error(
         'Field is not connected to Player:\n\t"this.onItem === null"'
       );
+      return false;
     } else {
       var pos = y * 8 + x;
       var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
       var checkType =
-        this.field.items[pos] instanceof Hallway ||
-        this.field.items[pos] instanceof Hole;
+        this.field.items[pos] instanceof Hallway;
 
       if (inBounds && checkType) {
         /**
          * GameState hier anpassen
          */
-        this.target = pos;
-        return true;
-      } else {
-        return false;
+        let tempField = <Hallway> this.field.items[pos];
+        if (tempField.brickOnItem === null) {
+          this.target = pos;
+          return true;
+        }
       }
+
+      // checkType = this.field.items[pos] instanceof Hole;
+      // if(checkType){
+      //   return true;
+      // }
+      // else {
+      //   return false;
+      // }
     }
   }
 }
