@@ -6,7 +6,7 @@
     <title>TypeScript</title>
     <style>
       #stage {
-        width: 480px;
+        width:780px;
         height: 480px;
         position: relative;
         border: 2px solid black;
@@ -26,10 +26,12 @@
 
   <body>
     <div id="stage">
-      <!--<canvas id="canvasId" width="480" height="480"></canvas>-->
+        <canvas id="background" width="780" height="480"></canvas>
+        <canvas id="game-layer" width="780" height="480"></canvas>
       
-      <canvas id="background" width="480" height="480"></canvas>
-      <canvas id="game-layer" width="480" height="480"></canvas>
+      <!--
+      <canvas id="canvasId" width="480" height="480"></canvas>
+      -->
     </div>
 
     <script type="text/javascript" src="bundle.js"></script>
