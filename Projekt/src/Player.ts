@@ -106,13 +106,16 @@ export class Player {
         this.yPos = this.onItem.y * this.field.ySize;
       }
     }
-    //this.step();
   }
 
   drawPlayer() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.alive) {
       // GameOverAnimation
+
+      /**
+       * Hier Animation implementieren
+       */
       if (this.loosingSequence < 0) {
         // Game over
 
@@ -121,23 +124,12 @@ export class Player {
       }
       --this.loosingSequence;
     } else {
-      // if (this.running) {
         this.animate(
           this.currentDirection,
           this.cycleLoopPlayer[this.currentLoopIndex],
           this.xPos,
           this.yPos
         );
-      // } else {
-      //   //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
-      //   //this.animate(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
-      //   this.animate(
-      //     this.currentDirection,
-      //     this.cycleLoopPlayer[this.currentLoopIndex],
-      //     this.onItem.x * this.field.xSize,
-      //     this.onItem.y * this.field.ySize
-      //   );
-      // }
     }
   }
 
@@ -254,14 +246,6 @@ export class ActivePlayer extends Player {
           return true;
         }
       }
-
-      // checkType = this.field.items[pos] instanceof Hole;
-      // if(checkType){
-      //   return true;
-      // }
-      // else {
-      //   return false;
-      // }
     }
   }
 }
