@@ -1,4 +1,3 @@
-
 import { Bomb, Hallway, Hole, Item } from "./Item";
 import { GameState } from "./GameState";
 
@@ -10,11 +9,11 @@ enum Direction {
 }
 
 //Animation
-let img : any = new Image();
-img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+let img: any = new Image();
+img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
 img.onload = function() {
   init();
-}
+};
 
 function init() {
   this.startAnimating(15);
@@ -22,10 +21,10 @@ function init() {
 
 export class Player {
   transitionCounter: number = 0;
-  TRANSITION_UPPER_BOUND: number = 3;
+  TRANSITION_UPPER_BOUND: number = 5;
   target: number = 0;
 
-  loosingSequence: number = 10;
+  loosingSequence: number = 0;
   alive: boolean = true;
   running: boolean;
   direction: number;
@@ -39,7 +38,7 @@ export class Player {
   spriteHeight: number = 30;
   cycleLoopPlayer = [0, 1, 0, 2];
   currentDirection: number;
-  currentLoopIndex: number= 0;
+  currentLoopIndex: number = 0;
   frameCount: number = 0;
 
   xPos: number;
@@ -56,7 +55,7 @@ export class Player {
     this.context = this.canvas.getContext("2d");
   }
 
-  initField(field: Field, item: Hallway) {
+  initField(field: GameState, item: Hallway) {
     this.field = field;
 
     item.playerOn = this;
@@ -97,7 +96,7 @@ export class Player {
         this.running = false;
 
         // Player auf neues Feld setzen
-        var tmpItem = <Hallway> this.onItem;
+        var tmpItem = <Hallway>this.onItem;
         this.onItem = this.field.items[this.target];
         this.onItem.playerOn = this;
         tmpItem.playerOn = null;
@@ -110,59 +109,71 @@ export class Player {
   }
 
   drawPlayer() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.alive) {
+      // GameOverAnimation
+
       /**
-       * Zähler für Animation
+       * Hier Animation implementieren
        */
       if (this.loosingSequence < 0) {
-        this.context.clearRect(0, 0, 480, 480);
+        // Game over
 
         this.onItem.playerOn = null;
         this.field.updateGameInfos();
       }
       --this.loosingSequence;
     } else {
-      // + 4 nur zur hervorhebung, roter Hintergrund ist der Spieler auf item
-      if (this.running) {
-          this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.xPos + 4, this.yPos);
-          this.currentLoopIndex++;
-          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
-              this.currentLoopIndex = 0;
-          }
-      } else {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        //falls Spieler dazwischen stehen soll, sieht vermutlich nur auf großem Spielfeld gut aus
-        //this.drawAnimation(0, 0, this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4); 
-        this.drawAnimation(this.currentDirection, this.cycleLoopPlayer[this.currentLoopIndex], this.onItem.x * this.field.xSize + 4, this.onItem.y * this.field.ySize + 4);
-        this.currentLoopIndex++;
-        if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
-          this.currentLoopIndex = 0;
-        }
-      }
+        this.animate(
+          this.currentDirection,
+          this.cycleLoopPlayer[this.currentLoopIndex],
+          this.xPos,
+          this.yPos
+        );
     }
   }
 
   //Animation
-  drawAnimation(frameX: number, frameY: number, canvasX: number, canvasY:number) {
-    this.context.drawImage(img,
-      frameX * this.spriteWidth, frameY * this.spriteHeight,
-      this.spriteWidth, this.spriteHeight, canvasX, canvasY,
-      this.field.xSize, this.field.ySize);
-  }
+  animate(frameX: number, frameY: number, canvasX: number, canvasY: number) {
+    if (this.running) {
+      let time = 1; // Zeit für Bildwechsel in der Animation
+      if (this.frameCount <= 4 * time) {
+        if (this.frameCount % time === 0) {
+          this.currentLoopIndex++;
+          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
+            this.currentLoopIndex = 0;
+          }
+        }
+      } else {
+        this.frameCount = 0;
+      }
+      ++this.frameCount;
 
-  //Animation Geschwindigkeit Player
-  step() {
-    this.frameCount++;
-    if (this.frameCount < 8) {
-      window.requestAnimationFrame(this.step);
-      return;
+      this.context.drawImage(
+        img,
+        frameX * this.spriteWidth,
+        frameY * this.spriteHeight,
+        this.spriteWidth,
+        this.spriteHeight,
+        canvasX,
+        canvasY,
+        this.field.xSize,
+        this.field.ySize
+      );
+    } else {
+      this.context.drawImage(
+        img,
+        frameX * this.spriteWidth,
+        0 * this.spriteHeight,
+        this.spriteWidth,
+        this.spriteHeight,
+        canvasX,
+        canvasY,
+        this.field.xSize,
+        this.field.ySize
+      );
     }
-    this.frameCount = 0;
-    this.drawPlayer();
-    window.requestAnimationFrame(this.step);
   }
-
 }
 
 export class ActivePlayer extends Player {
@@ -170,7 +181,7 @@ export class ActivePlayer extends Player {
     super(context);
 
     document.addEventListener("keydown", e => {
-      if (!this.running) {
+      if (!this.running && this.alive) {
         switch (e.key) {
           case "ArrowUp":
             if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
@@ -208,11 +219,6 @@ export class ActivePlayer extends Player {
                 item
               );
             }
-
-            console.log("dasfasdf");
-            this.context.clearRect(0, 0, 480, 480);
-            this.context.fillStyle = "black";
-            this.context.fillRect(0, 0, 480, 480);
         }
       }
     });
@@ -223,21 +229,22 @@ export class ActivePlayer extends Player {
       throw new Error(
         'Field is not connected to Player:\n\t"this.onItem === null"'
       );
+      return false;
     } else {
       var pos = y * 8 + x;
       var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
       var checkType =
-        this.field.items[pos] instanceof Hallway ||
-        this.field.items[pos] instanceof Hole;
+        this.field.items[pos] instanceof Hallway;
 
       if (inBounds && checkType) {
         /**
          * GameState hier anpassen
          */
-        this.target = pos;
-        return true;
-      } else {
-        return false;
+        let tempField = <Hallway> this.field.items[pos];
+        if (tempField.brickOnItem === null) {
+          this.target = pos;
+          return true;
+        }
       }
     }
   }

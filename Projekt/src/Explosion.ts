@@ -1,11 +1,11 @@
-import { Field } from "./Field";
-import { Hallway, Item, Fire, Wall, Bricks } from "./Item";
+import { GameState } from "./GameState";
+import { Hallway,Wall} from "./Item";
 
 export class Explosion {
   //bombFields: Item[] = [];
   explosionRad: number;
   counter: number = 1;
-  field: Field;
+  field: GameState;
   startPosX: number;
   startPosY: number;
 
@@ -14,7 +14,7 @@ export class Explosion {
   west: boolean = true;
   east: boolean = true;
 
-  constructor(item: Hallway, field: Field) {
+  constructor(item: Hallway, field: GameState) {
     this.explosionRad = 3;
 
     this.field = field;

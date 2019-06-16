@@ -57,7 +57,7 @@ export class Game {
       }
       for(let elem of this.player){
         elem.renderPlayer()
-        elem.step();
+        elem.drawPlayer();
       }
     }
   }
