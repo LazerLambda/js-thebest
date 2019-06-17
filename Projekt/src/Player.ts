@@ -1,5 +1,6 @@
 import { Bomb, Hallway, Hole, Item } from "./Item";
 import { GameState } from "./GameState";
+import { useableItem } from "./UsableItems";
 
 enum Direction {
   NORTH = 0,
@@ -32,6 +33,9 @@ export class Player {
   canvas: any;
   onItem: Item;
   field: GameState;
+  hitPoints: number = 1;
+  movementSpeed:number = 10; 
+  inventory:useableItem =null;
 
   //Animation
   spriteWidth: number = 28;
