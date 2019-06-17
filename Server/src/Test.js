@@ -1,10 +1,16 @@
 
 const express = require( "express" );
-const fs = require('fs'); 
-const port = 3000; // default port to listen
-
-
 const app = express();
+const fs = require('fs'); 
+const port = 3001; // default port to listen
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+
+
+//express.static(root, [options])
+app.use(express.static('public'))
+
+
 // define a route handler for the default home page
 app.get( "/", ( req, res ) => {
     fs.readFile('index.html', function(err, data) {
@@ -13,6 +19,22 @@ app.get( "/", ( req, res ) => {
         res.end();
       });
 } );
+
+app.post( "/game", ( req, res ) => {
+    fs.readFile('bundle.js', function(err, data) {
+        res.writeHead(200, {'Content-Type': 'text/javascript'});
+        res.write(data);
+        res.end();
+      });
+} );
+
+
+io.on('connection', function(socket) {
+    socket.on('event', payload =>{
+        console.log(`Received: ${payload.greeting}`);
+        socket.emit('event', {greeting:'hello client'});})
+});
+
 
 // start the Express server
 app.listen( port, () => {
