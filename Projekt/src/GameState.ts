@@ -1,5 +1,6 @@
-import { Brick, Hallway, Hole, Item, Wall } from "./Item";
 import { ActivePlayer,Player } from './Player';
+import { Brick, Hallway, Hole, Item, Wall } from "./Item";
+import { Explosion } from './Explosion';
 
 enum fieldType {
   HALLWAY = 0,
@@ -10,6 +11,7 @@ enum fieldType {
 
 export class GameState {
   context: any;
+  explosions : Explosion[] = [];
 
   player : Player[];
   playerPos : any = {
@@ -158,6 +160,39 @@ export class GameState {
     this.playerPos["player0"] = item.y * 8 + item.x;
     //this.player.initField(this, item);
     
+  }
+
+  update(){
+    for(let i = 0; i < this.items.length; i++){
+      if(this.items[i] instanceof Hallway){
+        var tmpItem = <Hallway> this.items[i];
+        if(tmpItem.bombOnItem !== null){
+          if(tmpItem.bombOnItem.explode){
+            this.explosions.push(new Explosion(tmpItem, this));
+          }
+        }
+      }
+    }
+    for(let elem of this.explosions){
+      elem.update();
+    }
+
+    for(let elem of this.items){
+      elem.update();
+    }
+    for(let elem of this.player){
+      elem.renderPlayer()
+    }
+  }
+
+  drawGame(){
+    for(let elem of this.items){
+      elem.draw();
+    }
+    for(let elem of this.player){
+      elem.drawPlayer();
+    }
+
   }
 
   updateGameInfos(){
