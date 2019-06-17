@@ -113,23 +113,27 @@ export class Player {
     if (!this.alive) {
       // GameOverAnimation
 
-      /**
-       * Hier Animation implementieren
-       */
       if (this.loosingSequence < 0) {
         // Game over
 
         this.onItem.playerOn = null;
         this.field.updateGameInfos();
+      } else {
+        /**
+         * Hier Animation implementieren
+         */
+
+        this.context.fillStyle = "red";
+        this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
       }
       --this.loosingSequence;
     } else {
-        this.animate(
-          this.currentDirection,
-          this.cycleLoopPlayer[this.currentLoopIndex],
-          this.xPos,
-          this.yPos
-        );
+      this.animate(
+        this.currentDirection,
+        this.cycleLoopPlayer[this.currentLoopIndex],
+        this.xPos,
+        this.yPos
+      );
     }
   }
 
@@ -233,14 +237,13 @@ export class ActivePlayer extends Player {
     } else {
       var pos = y * 8 + x;
       var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
-      var checkType =
-        this.field.items[pos] instanceof Hallway;
+      var checkType = this.field.items[pos] instanceof Hallway;
 
       if (inBounds && checkType) {
         /**
          * GameState hier anpassen
          */
-        let tempField = <Hallway> this.field.items[pos];
+        let tempField = <Hallway>this.field.items[pos];
         if (tempField.brickOnItem === null) {
           this.target = pos;
           return true;
