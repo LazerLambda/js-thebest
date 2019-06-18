@@ -20,6 +20,7 @@ app.get( "/", ( req, res ) => {
       });
 } );
 
+
 app.post( "/game", ( req, res ) => {
     fs.readFile('bundle.js', function(err, data) {
         res.writeHead(200, {'Content-Type': 'text/javascript'});
@@ -28,12 +29,15 @@ app.post( "/game", ( req, res ) => {
       });
 } );
 
-
 io.on('connection', function(socket) {
-    socket.on('event', payload =>{
-        console.log(`Received: ${payload.greeting}`);
-        socket.emit('event', {greeting:'hello client'});})
-});
+    console.log("a user connected");
+  });
+
+// io.on('connection', function(socket) {
+//     socket.on('event', payload =>{
+//         console.log(`Received: ${payload.greeting}`);
+//         socket.emit('event', {greeting:'hello client'});})
+// });
 
 
 // start the Express server
