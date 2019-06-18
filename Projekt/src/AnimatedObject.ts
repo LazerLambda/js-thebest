@@ -40,7 +40,7 @@ export class AnimatedObject {
       }
       ++this.frameCount;
       
-      this.context.drawImage(
+      this.player.context.drawImage(
         img,
         frameX * this.spriteWidth,
         this.cycleLoopPlayer[this.currentLoopIndex] * this.spriteHeight,
@@ -52,7 +52,7 @@ export class AnimatedObject {
         this.player.field.ySize
       );
     } else {
-      this.context.drawImage(
+      this.player.context.drawImage(
         img,
         frameX * this.spriteWidth,
         0 * this.spriteHeight,
