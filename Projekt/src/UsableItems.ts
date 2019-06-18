@@ -1,4 +1,5 @@
 import { Player } from "./Player";
+import { Explosion } from "./Explosion";
 
 export class useableItem {
 
@@ -60,34 +61,96 @@ export class shoes extends useableItem {
         this.usingPlayer.movementSpeed =+ 10;
     }
 }
-export class remoteBombKit extends useableItem {
-    
-    
 
+//bombe mit Fernzünder
+export class remoteBombKit extends useableItem {
+    trigger: remote;
+    
     use() {
-         this.usingPlayer.inventory = new remote("2d",this.inventorySpaceX,this.inventorySpaceY,40,30);
-         new remoteBomb("2d",this.usingPlayer.xPos,this.usingPlayer.yPos,40,30);
+         this.trigger = new remote("2d",this.inventorySpaceX,this.inventorySpaceY,40,30);
+         this.usingPlayer.inventory = this.trigger;
+         new remoteBomb("2d",this.usingPlayer.xPos,this.usingPlayer.yPos,40,30,this.trigger);
          
         }
 }
+//Fernzünder
 export class remote extends useableItem {
     connectedBomb: remoteBomb
 
     use() {
+        this.connectedBomb.explode();
+    }
+}
+//Bombe die auf das Fernzündersignal wartet
+export class remoteBomb  extends useableItem {
+    trigger:remote;
+    static = true;
+
+    constructor(
+        context: any,
+        xPos: number,
+        yPos: number,
+        xSize: number,
+        ySize: number,
+        RemoteControl:remote
+        ) {
+        super(context, xPos, yPos, xSize, ySize);
+        this.trigger = RemoteControl;
 
     }
 }
-export class remoteBomb  extends useableItem {
-    trigger:remote;
-}
 
+//spieler wird für alle anderen Spiler unsichbar für 5 sec
+export class magicHat extends useableItem { 
+
+    use(){
+          
+        this.usingPlayer.visible = false ;
+    
+    }
 }
-export class magicHat extends useableItem {}
-export class sensorBomb extends useableItem {}
-export class springToGo extends useableItem {}
-export class spring extends useableItem {}
-export class nuke extends useableItem {}
-export class laserGun extends useableItem {}
-export class portableHole extends useableItem {}
+ // Bombe explodiert erst wenn sich ein Spieler in den Wirkungsbreeich bewegt
+export class sensorBomb extends useableItem {
+
+       
+     use() {
+
+     }
+}
+// plazierbare Sprungfederfalle die Spieler auf ein zufälliges Feld verschiebt
+export class springToGo extends useableItem {
+
+    use() {
+         
+    }
+}
+// Sprungfederfalle
+export class spring extends useableItem {
+
+    use() {
+         
+    }
+}
+// Bombe mit größerem Radius
+export class nuke extends useableItem {
+
+    use() {
+         
+    }
+}
+//Spieler fügt allen gegener in einer geraden Linie Schaden zu
+export class laserGun extends useableItem {
+
+    use() {
+         
+    }
+}
+//plazierbares Hole-Feld
+export class portableHole extends useableItem {
+
+    use() {
+         
+    }
+}
 
 

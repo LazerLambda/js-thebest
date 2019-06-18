@@ -168,7 +168,7 @@ export class GameState {
         var tmpItem = <Hallway> this.items[i];
         if(tmpItem.bombOnItem !== null){
           if(tmpItem.bombOnItem.explode){
-            this.explosions.push(new Explosion(tmpItem, this));
+            this.explosions.push(new Explosion(tmpItem, this,3));
           }
         }
       }

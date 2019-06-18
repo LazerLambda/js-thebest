@@ -34,8 +34,9 @@ export class Player {
   onItem: Item;
   field: GameState;
   hitPoints: number = 1;
-  movementSpeed:number = 10; 
-  inventory:useableItem =null;
+  movementSpeed: number = 10; 
+  inventory: useableItem =null;
+  visible: boolean = true;
 
   //Animation
   spriteWidth: number = 28;
