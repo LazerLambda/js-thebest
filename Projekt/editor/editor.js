@@ -54,9 +54,9 @@ updateCvs = function() {
 
 chgTs = function(path) {
 	tiles[0] = new Image(fieldWidth,fieldHeight);
-	tiles[0].src = path+"/wall.jpg";
+	tiles[0].src = path+"/hallway.jpg";
 	tiles[1] = new Image(fieldWidth,fieldHeight);
-	tiles[1].src = path+"/hallway.jpg";
+	tiles[1].src = path+"/wall.jpg";
 	tiles[2] = new Image(fieldWidth,fieldHeight);
 	tiles[2].src = path+"/hole.jpg";
 	tiles[3] = new Image(fieldWidth, fieldHeight);
