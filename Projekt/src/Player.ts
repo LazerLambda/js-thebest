@@ -130,7 +130,7 @@ export class Player {
     } else {
       this.animate(
         this.currentDirection,
-        this.cycleLoopPlayer[this.currentLoopIndex],
+        //this.cycleLoopPlayer[this.currentLoopIndex],
         this.xPos,
         this.yPos
       );
@@ -138,7 +138,7 @@ export class Player {
   }
 
   //Animation
-  animate(frameX: number, frameY: number, canvasX: number, canvasY: number) {
+  animate(frameX: number, /*frameY: number,*/ canvasX: number, canvasY: number) {
     if (this.running) {
       let time = 1; // Zeit für Bildwechsel in der Animation
       if (this.frameCount <= 4 * time) {
@@ -156,7 +156,7 @@ export class Player {
       this.context.drawImage(
         img,
         frameX * this.spriteWidth,
-        frameY * this.spriteHeight,
+        this.cycleLoopPlayer[this.currentLoopIndex] * this.spriteHeight,
         this.spriteWidth,
         this.spriteHeight,
         canvasX,
