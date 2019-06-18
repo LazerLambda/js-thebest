@@ -1,22 +1,12 @@
 import { Bomb, Hallway, Hole, Item } from "./Item";
 import { GameState } from "./GameState";
+import { AnimatedObject } from "./AnimatedObject";
 
 enum Direction {
   NORTH = 0,
   SOUTH = 1,
   WEST = 2,
   EAST = 3
-}
-
-//Animation
-let img: any = new Image();
-img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
-img.onload = function() {
-  init();
-};
-
-function init() {
-  this.startAnimating(15);
 }
 
 export class Player {
@@ -32,14 +22,8 @@ export class Player {
   canvas: any;
   onItem: Item;
   field: GameState;
-
-  //Animation
-  spriteWidth: number = 28;
-  spriteHeight: number = 30;
-  cycleLoopPlayer = [0, 1, 0, 2];
   currentDirection: number;
-  currentLoopIndex: number = 0;
-  frameCount: number = 0;
+  animatedObject: AnimatedObject;
 
   xPos: number;
   yPos: number;
@@ -50,6 +34,7 @@ export class Player {
     this.field = null;
     this.onItem = null;
     this.running = false;
+    this.animatedObject = new AnimatedObject(this);
 
     this.canvas = <HTMLCanvasElement>document.getElementById("game-layer");
     this.context = this.canvas.getContext("2d");
@@ -128,56 +113,14 @@ export class Player {
       }
       --this.loosingSequence;
     } else {
-      this.animate(
+      this.animatedObject.animate(
         this.currentDirection,
-        this.cycleLoopPlayer[this.currentLoopIndex],
         this.xPos,
         this.yPos
       );
     }
   }
 
-  //Animation
-  animate(frameX: number, frameY: number, canvasX: number, canvasY: number) {
-    if (this.running) {
-      let time = 1; // Zeit für Bildwechsel in der Animation
-      if (this.frameCount <= 4 * time) {
-        if (this.frameCount % time === 0) {
-          this.currentLoopIndex++;
-          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
-            this.currentLoopIndex = 0;
-          }
-        }
-      } else {
-        this.frameCount = 0;
-      }
-      ++this.frameCount;
-
-      this.context.drawImage(
-        img,
-        frameX * this.spriteWidth,
-        frameY * this.spriteHeight,
-        this.spriteWidth,
-        this.spriteHeight,
-        canvasX,
-        canvasY,
-        this.field.xSize,
-        this.field.ySize
-      );
-    } else {
-      this.context.drawImage(
-        img,
-        frameX * this.spriteWidth,
-        0 * this.spriteHeight,
-        this.spriteWidth,
-        this.spriteHeight,
-        canvasX,
-        canvasY,
-        this.field.xSize,
-        this.field.ySize
-      );
-    }
-  }
 }
 
 export class ActivePlayer extends Player {
