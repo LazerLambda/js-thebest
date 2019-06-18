@@ -1,8 +1,9 @@
 // Canvas and fieldsArray--------------------------------
 
-const WALL = 0;
-const HALLWAY = 1;
-const BRICK = 2;
+const HALLWAY = 0;
+const WALL = 1;
+const HOLE = 2;
+const BRICK = 3;
 const tiles = [];
 var item = WALL;
 
@@ -49,17 +50,26 @@ updateCvs = function() {
 	}
 }
 
+
+
 chgTs = function(path) {
 	tiles[0] = new Image(fieldWidth,fieldHeight);
 	tiles[0].src = path+"/wall.jpg";
 	tiles[1] = new Image(fieldWidth,fieldHeight);
 	tiles[1].src = path+"/hallway.jpg";
 	tiles[2] = new Image(fieldWidth,fieldHeight);
-	tiles[2].src = path+"/brick.jpg";
+	tiles[2].src = path+"/hole.jpg";
+	tiles[3] = new Image(fieldWidth, fieldHeight);
+	tiles[3].src = path+"/brick.jpg";
 	updateCvs();
-	document.getElementById("WALL").src = path+"/wall.jpg";
-	document.getElementById("HALLWAY").src = path+"/hallway.jpg";
-	document.getElementById("BRICK").src = path+"/brick.jpg";
+	var hallway = document.getElementById("btn-hallway");
+	hallway.replaceChild(tiles[0],hallway.childNodes[0]);
+	var wall = document.getElementById("btn-wall");
+	wall.   replaceChild(tiles[1],wall.childNodes[0]);
+	var hole = document.getElementById("btn-hole");
+	hole.   replaceChild(tiles[2],hole.childNodes[0]);
+	var brick = document.getElementById("btn-brick");
+	brick.  replaceChild(tiles[3],brick.childNodes[0]);
 }
 
 cvs.onclick = function (evt) {
@@ -72,18 +82,20 @@ cvs.onclick = function (evt) {
 }
 
 setItem(WALL);
-chgTs("t1");
+chgTs("tileset1");
 
 function saveMap(name) {
-	var map = "";
-	for (let i = 0; i < fields.length; i++) {
-		for (let j = 0; j < fields.length; j++) {
+	var map = "[\n";
+	for (let i = 0; i < gameHeight; i++) {
+		map += "[";
+		for (let j = 0; j < gameWidth; j++) {
 			map += fields[i][j];
 			if (j != fields.length-1) map += ',';
 		}
-		map += '\n';
+		map += "]\n";
 	}
-		var blob = new Blob([map],{type: "text/plain;charset=ascii"});
+	map += "]\n";
+	var blob = new Blob([map],{type: "text/plain;charset=ascii"});
 	saveAs(blob,name);
 }
 
@@ -102,26 +114,27 @@ function readSingleFile(e) {
 
 document.getElementById("map-input").addEventListener('change', readSingleFile, false);
 
-function loadMap(csvStr) {
-	var map2dim = [];
+function loadMap(mapStr) {
+	var mapArr = [];
 	var linePos = 0;
 	var colPos = 0;
-	for(let totalPos = 0; csvStr[totalPos] != undefined; totalPos++) {
+	for(let totalPos = 3; mapStr[totalPos] != undefined; totalPos++) {
 		var line = [];
-		while(csvStr[totalPos] != '\n') {
-				if (csvStr[totalPos] != ',') {
-					line.push(csvStr[totalPos]);
-					linePos++;
-				}
-				totalPos++;
+		while(mapStr[totalPos] != '\n') {
+			const nxtChar = mapStr[totalPos];
+			if (nxtChar != ',' && nxtChar != '[' && nxtChar != ']') {
+				line.push(mapStr[totalPos]);
+				linePos++;
 			}
+			totalPos++;
+		}
 		linePos = 0;
-		map2dim[colPos] = line;
+		mapArr[colPos] = line;
 		colPos++;
 	}
-	for (let i = 0; i < map2dim.length; i++) {
-		for (let j = 0; j < map2dim.length; j++) {
-			fields[i][j] = map2dim[i][j];
+	for (let i = 0; i < gameWidth; i++) {
+		for (let j = 0; j < gameHeight; j++) {
+			fields[i][j] = mapArr[i][j];
 		}
 	}
 	updateCvs();
