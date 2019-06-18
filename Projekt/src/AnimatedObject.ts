@@ -25,7 +25,7 @@ export class AnimatedObject {
     this.player = player;
   }
 
-  animate(frameX: number, canvasX: number, canvasY: number) {
+  animate(spriteSheetNumber: number, canvasX: number, canvasY: number) {
     if(this.player.running) {
       let time = 1; // Zeit für Bildwechsel in der Animation
       if (this.frameCount <= 4 * time) {
@@ -42,7 +42,7 @@ export class AnimatedObject {
       
       this.player.context.drawImage(
         img,
-        frameX * this.spriteWidth,
+        spriteSheetNumber * this.spriteWidth,
         this.cycleLoopPlayer[this.currentLoopIndex] * this.spriteHeight,
         this.spriteWidth,
         this.spriteHeight,
@@ -54,7 +54,7 @@ export class AnimatedObject {
     } else {
       this.player.context.drawImage(
         img,
-        frameX * this.spriteWidth,
+        spriteSheetNumber * this.spriteWidth,
         0 * this.spriteHeight,
         this.spriteWidth,
         this.spriteHeight,
