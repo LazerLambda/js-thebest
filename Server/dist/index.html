@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>TypeScript</title>
+    <style>
+      #stage {
+        width: 780px;
+        height: 480px;
+        position: relative;
+        border: 2px solid black;
+      }
+
+      canvas {
+        position: absolute;
+      }
+      #game-layer {
+        z-index: 3;
+      }
+      #background {
+        z-index: 2;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Hallo Welt SKRRRRRRRRRRRR</h1>
+    <!-- <div id="stage">
+        <canvas id="background" width="780" height="480"></canvas>
+        <canvas id="game-layer" width="780" height="480"></canvas>
+      
+      
+      <canvas id="canvasId" width="480" height="480"></canvas>
+      
+    </div> -->
+    <button onClick="sendMsg()">Hit Me</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script>
+      const socket = io("http://localhost:3000");
+
+      function sendMsg() {
+        socket.emit("message", "HELLO WORLD");
+      }
+      socket.on("message", function(data) {
+        document.write(data);
+
+      });
+    </script>
+  </body>
+</html>
