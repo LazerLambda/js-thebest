@@ -12,7 +12,7 @@ export class Game {
 
   constructor() {
     const socket: any = io("http://localhost:3000");
-    io.emit("S ready");
+    io.emit("S_ready");
 
     this.field = new GameState();
     this.player = this.field.returnPlayer();
