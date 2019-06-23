@@ -44,6 +44,8 @@ constructor(
     this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
   }
 
+  use() {} //wird in jeder Unterklasse überschrieben
+
 
 
 }
@@ -53,12 +55,14 @@ export class armor extends useableItem {
 
     use() {
         this.usingPlayer.hitPoints =+1;
+        this.usingPlayer.inventory = null;
     }
 }
 export class shoes extends useableItem {
 
     use() {
         this.usingPlayer.movementSpeed =+ 10;
+        this.usingPlayer.inventory = null;
     }
 }
 
@@ -79,6 +83,7 @@ export class remote extends useableItem {
 
     use() {
         this.connectedBomb.explode();
+        this.usingPlayer.inventory = null;
     }
 }
 //Bombe die auf das Fernzündersignal wartet
@@ -106,6 +111,7 @@ export class magicHat extends useableItem {
     use(){
           
         this.usingPlayer.visible = false ;
+        this.usingPlayer.inventory = null;
     
     }
 }
@@ -147,6 +153,13 @@ export class laserGun extends useableItem {
 }
 //plazierbares Hole-Feld
 export class portableHole extends useableItem {
+
+    use() {
+         
+    }
+}
+//spieler plaziert zwei teilbomben -> alle felder auf dem kürzesten Weg explodieren
+export class chainBomb extends useableItem {
 
     use() {
          

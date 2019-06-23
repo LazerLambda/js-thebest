@@ -211,6 +211,9 @@ export class GameState {
       this.context.font = "10px Arial";
       this.context.fillText("You loooose xD", 600, 75);
     }
+    if(this.player[0].inventory != null){
+      this.player[0].inventory.draw();
+    }
   }
 
   returnPlayer() : Player[]{

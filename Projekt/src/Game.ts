@@ -35,6 +35,7 @@ export class Game {
 
       this.field.update();
       this.field.drawGame();
+      this.field.updateGameInfos();
     }
   }
 

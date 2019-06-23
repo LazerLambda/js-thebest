@@ -35,7 +35,7 @@ export class Player {
   field: GameState;
   hitPoints: number = 1;
   movementSpeed: number = 10; 
-  inventory: useableItem =null;
+  inventory: useableItem = null;
   visible: boolean = true;
 
   //Animation
@@ -216,8 +216,8 @@ export class ActivePlayer extends Player {
               this.running = true;
             }
             break;
-          case "Enter":
-            if (e.key === "Enter") {
+          case "Y":
+            if (e.key === "Y") {
               var item = <Hallway>this.onItem;
               item.bombOnItem = new Bomb(
                 this.onItem.context,
@@ -226,8 +226,15 @@ export class ActivePlayer extends Player {
                 this.onItem.SIZE_X,
                 this.onItem.SIZE_Y,
                 item
-              );
+              )
+              break;
             }
+          case "X":
+              if (e.key === "X"){
+                if (this.inventory != null){
+                  this.inventory.use();
+                }
+              }
         }
       }
     });
