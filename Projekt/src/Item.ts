@@ -88,8 +88,9 @@ export class Wall extends Item {
   draw() {
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
-    this.context.fillStyle = "grey";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+	var im = new Image(this.SIZE_X, this.SIZE_Y);
+	im.src = "tilesets/tileset1/wall.jpg";
+	this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
   }
 }
 
@@ -118,15 +119,17 @@ export class Hallway extends Item {
   }
 
   draw() {
+	var im = new Image(this.SIZE_X, this.SIZE_Y);
     if (this.playerOn === null) {
-      this.context.fillStyle = "green";
+	  im.src = "tilesets/tileset1/hallway.jpg";
     } else {
-      this.context.fillStyle = "red";
+	  im.src = "tilesets/tileset1/hallway.jpg";
     }
 
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+
+	this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
 
     if (this.bombOnItem !== null) {
       this.bombOnItem.update();
@@ -176,8 +179,9 @@ export class Hole extends Hallway{
   draw() {
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
-    this.context.fillStyle = "black";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+	var im = new Image(this.SIZE_X, this.SIZE_Y);
+	im.src = "tilesets/tileset1/hole.jpg";
+	this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
 
 
     // evtl. diese Methode in eine andere Methode schreiben mit der aus Hallway
@@ -310,8 +314,10 @@ export class Brick{
     } else {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
-      this.context.fillStyle = "pink";
-      this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+	  var im = new Image(this.SIZE_X, this.SIZE_Y);
+	  im.src = "tilesets/tileset1/brick.jpg";
+	  this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
+
     }
   }
 
@@ -348,8 +354,9 @@ export class Fire {
   draw() {
     const x = this.xPos * this.xSize;
     const y = this.yPos * this.ySize;
-    this.context.fillStyle = "orange";
-    this.context.fillRect(x, y, this.xSize, this.ySize);
+	var im = new Image(this.xSize, this.ySize);
+	im.src = "tilesets/tileset1/fire.jpg";
+	this.context.drawImage(im, x, y, this.xSize, this.ySize);
   }
 
   update() {

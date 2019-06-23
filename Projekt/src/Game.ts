@@ -1,7 +1,6 @@
 import { GameState } from './GameState';
 import { Player } from './Player';
 import { Hallway } from './Item';
-import * as io from 'socket.io-client';
 
 export class Game {
   frameTime: number;
@@ -11,8 +10,6 @@ export class Game {
   player : Player[];
 
   constructor() {
-    const socket: any = io("http://localhost:3000");
-    io.emit("S_ready");
 
     this.field = new GameState();
     this.player = this.field.returnPlayer();

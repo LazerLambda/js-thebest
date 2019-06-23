@@ -39,80 +39,17 @@ export class GameState {
 
   constructor() {
 
-    this.field = [
-      { y: 0, x: 0, state: fieldType.WALL },
-      { y: 0, x: 1, state: fieldType.WALL },
-      { y: 0, x: 2, state: fieldType.WALL },
-      { y: 0, x: 3, state: fieldType.WALL },
-      { y: 0, x: 4, state: fieldType.WALL },
-      { y: 0, x: 5, state: fieldType.WALL },
-      { y: 0, x: 6, state: fieldType.WALL },
-      { y: 0, x: 7, state: fieldType.WALL },
-
-      { y: 1, x: 0, state: fieldType.WALL },
-      { y: 1, x: 1, state: fieldType.BRICK},
-      { y: 1, x: 2, state: fieldType.HALLWAY },
-      { y: 1, x: 3, state: fieldType.HALLWAY },
-      { y: 1, x: 4, state: fieldType.WALL },
-      { y: 1, x: 5, state: fieldType.HALLWAY },
-      { y: 1, x: 6, state: fieldType.HALLWAY },
-      { y: 1, x: 7, state: fieldType.WALL },
-
-      { y: 2, x: 0, state: fieldType.WALL },
-      { y: 2, x: 1, state: fieldType.WALL },
-      { y: 2, x: 2, state: fieldType.WALL },
-      { y: 2, x: 3, state: fieldType.HALLWAY },
-      { y: 2, x: 4, state: fieldType.WALL },
-      { y: 2, x: 5, state: fieldType.HALLWAY },
-      { y: 2, x: 6, state: fieldType.WALL },
-      { y: 2, x: 7, state: fieldType.WALL },
-
-      { y: 3, x: 0, state: fieldType.WALL },
-      { y: 3, x: 1, state: fieldType.HALLWAY },
-      { y: 3, x: 2, state: fieldType.HALLWAY },
-      { y: 3, x: 3, state: fieldType.HALLWAY },
-      { y: 3, x: 4, state: fieldType.WALL },
-      { y: 3, x: 5, state: fieldType.HALLWAY },
-      { y: 3, x: 6, state: fieldType.HALLWAY },
-      { y: 3, x: 7, state: fieldType.WALL },
-
-      { y: 4, x: 0, state: fieldType.WALL },
-      { y: 4, x: 1, state: fieldType.WALL },
-      { y: 4, x: 2, state: fieldType.WALL },
-      { y: 4, x: 3, state: fieldType.HALLWAY },
-      { y: 4, x: 4, state: fieldType.WALL },
-      { y: 4, x: 5, state: fieldType.HALLWAY },
-      { y: 4, x: 6, state: fieldType.WALL },
-      { y: 4, x: 7, state: fieldType.WALL },
-
-      { y: 5, x: 0, state: fieldType.WALL },
-      { y: 5, x: 1, state: fieldType.HALLWAY },
-      { y: 5, x: 2, state: fieldType.HALLWAY },
-      { y: 5, x: 3, state: fieldType.HALLWAY },
-      { y: 5, x: 4, state: fieldType.HALLWAY },
-      { y: 5, x: 5, state: fieldType.HALLWAY },
-      { y: 5, x: 6, state: fieldType.HALLWAY },
-      { y: 5, x: 7, state: fieldType.WALL },
-
-      { y: 6, x: 0, state: fieldType.WALL },
-      { y: 6, x: 1, state: fieldType.HALLWAY },
-      { y: 6, x: 2, state: fieldType.WALL },
-      { y: 6, x: 3, state: fieldType.HALLWAY },
-      { y: 6, x: 4, state: fieldType.WALL },
-      { y: 6, x: 5, state: fieldType.HALLWAY },
-      { y: 6, x: 6, state: fieldType.HOLE },
-      { y: 6, x: 7, state: fieldType.WALL },
-
-      { y: 7, x: 0, state: fieldType.WALL },
-      { y: 7, x: 1, state: fieldType.WALL },
-      { y: 7, x: 2, state: fieldType.WALL },
-      { y: 7, x: 3, state: fieldType.WALL },
-      { y: 7, x: 4, state: fieldType.WALL },
-      { y: 7, x: 5, state: fieldType.WALL },
-      { y: 7, x: 6, state: fieldType.WALL },
-      { y: 7, x: 7, state: fieldType.WALL }
-    ];
-
+    this.field =
+		[
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL],
+			[fieldType.WALL,fieldType.BRICK,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL],
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.WALL],
+			[fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL],
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.WALL],
+			[fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL],
+			[fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.HOLE,fieldType.WALL],
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL]
+		];
     this.player = [new ActivePlayer(this.context)];
     const canvas = <HTMLCanvasElement>document.getElementById("background");
 
@@ -130,34 +67,37 @@ export class GameState {
     
     var item : Hallway;// Nur zum testen
 
-    for (let i = 0; i < this.fieldSize; i++) {
-      switch (this.field[i].state) {
+
+    for (let i = 0; i < this.width; i++) {
+    for (let j = 0; j < this.height; j++) {
+      switch (this.field[i][j]) {
         case fieldType.HALLWAY:
           this.items.push(
-            new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
+            new Hallway(this.context, j, i, this.xSize, this.ySize)
           );
-          item = <Hallway> this.items[i]; // Test
+          item = <Hallway> this.items[j]; // Test
           break;
         case fieldType.HOLE:
           this.items.push(
-            new Hole(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
+            new Hole(this.context, j, i, this.xSize, this.ySize)
           );
           break;
         case fieldType.WALL:
           this.items.push(
-            new Wall(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
+            new Wall(this.context, j, i, this.xSize, this.ySize)
           );
           break;
         case fieldType.BRICK:
-          var item : Hallway = new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize);
-          item.brickOnItem = new Brick(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize, item);
+          var item : Hallway = new Hallway(this.context, j, i, this.xSize, this.ySize);
+          item.brickOnItem = new Brick(this.context, j, i, this.xSize, this.ySize, item);
             this.items.push(item);
       }
     }
+	}
     for(let elem of this.player){
       elem.initField(this, item);
     }
-    this.playerPos["player0"] = item.y * 8 + item.x;
+    this.playerPos["player0"] = item.x + item.y * 8;
     //this.player.initField(this, item);
     
   }
