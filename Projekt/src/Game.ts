@@ -1,21 +1,29 @@
-
-import { GameState } from './GameState';
-import { Player } from './Player';
-import { Hallway } from './Item';
+import { GameState } from "./GameState";
+import { Player } from "./Player";
+import * as io from "socket.io-client";
 
 export class Game {
   frameTime: number;
   then: number;
 
-  field : GameState;
-  player : Player[];
+  field: GameState;
+  player: Player[];
 
   constructor() {
+    /**
+     * Hier Startseite
+     */
+
+    const test = io("localhost:3000");
+    
+    io.on();
+
+    io.emit("message", "");
 
     this.field = new GameState();
     this.player = this.field.returnPlayer();
     this.field.updateGameInfos();
-    
+
     this.startAnimating(200);
   }
 
@@ -37,5 +45,4 @@ export class Game {
       this.field.drawGame();
     }
   }
-
 }

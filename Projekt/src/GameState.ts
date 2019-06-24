@@ -185,6 +185,8 @@ export class GameState {
     }
   }
 
+  sendMove() {}
+
   drawGame(){
     for(let elem of this.items){
       elem.draw();
