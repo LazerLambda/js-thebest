@@ -1,4 +1,3 @@
-
 import { GameState } from './GameState';
 import { Player } from './Player';
 import { Hallway } from './Item';
@@ -39,3 +38,4 @@ export class Game {
   }
 
 }
+
