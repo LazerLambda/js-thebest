@@ -17,3 +17,8 @@ var moveObject: object = { playerId: playerName, move: move };
 
  - Wird  ein Client getrennt, wird das Spiel ungültig und es wird eine Nachricht mit dem selbst gewähltem Namen des Spielers hinsichtlich des Austritts versendet.
    - Typ des Events ist ```'user_left'``` 
+
+
+## Sequenzdiagram
+
+![Sequenz](Sequenz.jpg)
