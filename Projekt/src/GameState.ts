@@ -1,6 +1,7 @@
 import { ActivePlayer,Player } from './Player';
 import { Brick, Hallway, Hole, Item, Wall } from "./Item";
 import { Explosion } from './Explosion';
+import * as io from "socket.io-client";
 
 enum fieldType {
   HALLWAY = 0,
@@ -12,6 +13,7 @@ enum fieldType {
 export class GameState {
   context: any;
   explosions : Explosion[] = [];
+  socket : any;
 
   player : Player[];
   playerPos : any = {
@@ -38,7 +40,15 @@ export class GameState {
  */
 
   constructor() {
-
+    const socket = io("http://localhost:3000");
+    
+    socket.on('S_ready',function(data : any) {
+      
+      this.playerNr = data;
+      document.write(this.playerNr);
+      
+      socket.emit('G_ready', "");
+    });
     this.field =
 		[
 			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL],
@@ -93,12 +103,16 @@ export class GameState {
             this.items.push(item);
       }
     }
-	}
+	} 
     for(let elem of this.player){
       elem.initField(this, item);
     }
     this.playerPos["player0"] = item.x + item.y * 8;
     //this.player.initField(this, item);
+    
+  }
+
+  updateIncommingPlayerMove(playerName : string, move : number){
     
   }
 
