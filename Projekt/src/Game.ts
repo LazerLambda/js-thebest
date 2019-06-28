@@ -8,23 +8,34 @@ export class Game {
 
   field: GameState;
   player: Player[];
+  playerNr : any;
 
   constructor() {
+    
     /**
      * Hier Startseite
      */
 
-    const test = io("localhost:3000");
+    // const socket = io("http://localhost:3000");
     
-    io.on();
+    // socket.on('S_ready',function(data : any) {
+      
+    //   this.playerNr = data;
+    //   document.write(this.playerNr);
+      
+    //   socket.emit('G_ready', "");
+    // });
 
-    io.emit("message", "");
+
+
+    //io.emit("message", "");
 
     this.field = new GameState();
     this.player = this.field.returnPlayer();
     this.field.updateGameInfos();
 
     this.startAnimating(200);
+
   }
 
   startAnimating(targetFPS: number) {
