@@ -1,7 +1,7 @@
 import { Player } from "./Player";
 
 let img : any = new Image();
-img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+img.src = 'animations/gopher.png';
 img.onload = function() {
   init();
 }
@@ -14,8 +14,8 @@ export class AnimatedObject {
 
   context: any;
 
-  spriteWidth: number = 28;
-  spriteHeight: number = 30;
+  spriteWidth: number = 100;
+  spriteHeight: number = 100;
   cycleLoopPlayer = [0, 1, 0, 2];
   currentLoopIndex: number = 0;
   frameCount: number = 0;

@@ -9,6 +9,18 @@ enum Direction {
   EAST = 3
 }
 
+
+//Animation
+let img : any = new Image();
+img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+img.onload = function() {
+  init();
+}
+
+function init() {
+  this.startAnimating(200);
+}
+
 export class Player {
   transitionCounter: number = 0;
   TRANSITION_UPPER_BOUND: number = 5;
