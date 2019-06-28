@@ -1,23 +1,21 @@
-import { Field } from './Field';
+import { GameState } from './GameState';
 import { Player } from './Player';
+import { Hallway } from './Item';
 
 export class Game {
   frameTime: number;
   then: number;
 
-  field : Field;
+  field : GameState;
   player : Player[];
 
   constructor() {
 
-    this.field = new Field();
+    this.field = new GameState();
     this.player = this.field.returnPlayer();
-    
-    this.startAnimating(200);
-  }
+    this.field.updateGameInfos();
 
-  game(gameState : object){
-
+    this.startAnimating(200);    
   }
 
   startAnimating(targetFPS: number) {
@@ -34,13 +32,10 @@ export class Game {
     if (elapsed > this.frameTime) {
       this.then = now;
 
-      for(let elem of this.field.items){
-        elem.draw();
-      }
-      for(let elem of this.player){
-        elem.renderPlayer();
-        elem.step();
-      }
+      this.field.update();
+      this.field.drawGame();
     }
   }
+
 }
+

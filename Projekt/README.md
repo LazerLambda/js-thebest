@@ -52,3 +52,13 @@ Git:
 
  ## UML Diagram (07.06.2019):
  ![UML](Planung/BomberMan3.jpg)
+
+ ## Vorschläge:
+ - Power Ups 
+  - Bewegungen schneller oder langsamer
+  - Bombe größer
+  - Rüstung
+
+ - Sprungfeld
+ - Bombe mit Player verbinden
+ 
