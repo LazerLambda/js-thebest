@@ -1,5 +1,6 @@
 import { Player } from "./Player";
 import { Explosion } from "./Explosion";
+import { Item } from "./Item";
 
 export class useableItem {
 
@@ -82,12 +83,12 @@ export class remote extends useableItem {
     connectedBomb: remoteBomb
 
     use() {
-        this.connectedBomb.explode();
+      //  this.connectedBomb.explode();
         this.usingPlayer.inventory = null;
     }
 }
 //Bombe die auf das Fernzündersignal wartet
-export class remoteBomb  extends useableItem {
+export class remoteBomb extends useableItem {
     trigger:remote;
     static = true;
 
@@ -131,10 +132,13 @@ export class springToGo extends useableItem {
     }
 }
 // Sprungfederfalle
-export class spring extends useableItem {
+export class spring extends Item {
 
-    use() {
-         
+    update() {
+        if (this.playerOn !=null){
+            this.playerOn.xPos += Math.floor(Math.random() * 40 - 20); 
+            this.playerOn.yPos += Math.floor(Math.random() * 40 - 20); 
+        }   
     }
 }
 // Bombe mit größerem Radius

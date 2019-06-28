@@ -33,7 +33,7 @@ export class Explosion {
     }
   }
 
-  update() {
+    update() {
     if (this.counter < this.explosionRad) {
       var posNorth = (this.startPosY - this.counter) * 8 + this.startPosX;
       var posSouth = (this.startPosY + this.counter) * 8 + this.startPosX;
