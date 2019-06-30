@@ -37,6 +37,12 @@ io.on("connection", function(socket: any) {
     io.sockets.in("room-" + roomno).emit("S_ready");
   }
 
+  socket.on('mode', function(data : any){
+    if(data === 'editor'){
+
+    }
+  });
+
   socket.on("G_ready", function(name: any) {
     console.log(name);
     var tmpGame = gameList.find(
