@@ -23,8 +23,8 @@ for (let i = 1; i < gameHeight; i++) {
 
 var fields = Array.from(Array(gameHeight), () => new Array(gameWidth));
 
-for (let i = 0; i < gameWidth; i++) {
-	for (let j = 0; j < gameHeight; j++) {
+for (let i = 0; i < gameHeight; i++) {
+	for (let j = 0; j < gameWidth; j++) {
 		fields[i][j] = WALL;
 	}
 }
@@ -43,9 +43,9 @@ function setItem (newItem) {
 }
 
 updateCvs = function() {
-	for (let i = 0; i < gameWidth; i++) {
+	for (let i = 0; i < gameHeight; i++) {
 		for (let j = 0; j < gameWidth; j++) {
-			ctx.drawImage(tiles[fields[i][j]], i*fieldWidth, j*fieldHeight ,fieldWidth, fieldHeight);
+			ctx.drawImage(tiles[fields[j][i]], i*fieldWidth, j*fieldHeight , fieldWidth, fieldHeight);
 		}
 	}
 }
@@ -54,13 +54,13 @@ updateCvs = function() {
 
 chgTs = function(path) {
 	tiles[0] = new Image(fieldWidth,fieldHeight);
-	tiles[0].src = path+"/hallway.jpg";
+	tiles[0].src = "../tilesets/"+path+"/hallway.jpg";
 	tiles[1] = new Image(fieldWidth,fieldHeight);
-	tiles[1].src = path+"/wall.jpg";
+	tiles[1].src = "../tilesets/"+path+"/wall.jpg";
 	tiles[2] = new Image(fieldWidth,fieldHeight);
-	tiles[2].src = path+"/hole.jpg";
+	tiles[2].src = "../tilesets/"+path+"/hole.jpg";
 	tiles[3] = new Image(fieldWidth, fieldHeight);
-	tiles[3].src = path+"/brick.jpg";
+	tiles[3].src = "../tilesets/"+path+"/brick.jpg";
 	updateCvs();
 	var hallway = document.getElementById("btn-hallway");
 	hallway.replaceChild(tiles[0],hallway.childNodes[0]);
@@ -77,7 +77,7 @@ cvs.onclick = function (evt) {
 	var y = evt.layerY - cvs.offsetTop;
 	x = Math.floor(x/fieldWidth);
 	y = Math.floor(y/fieldWidth);
-	fields[x][y] = item;
+	fields[y][x] = item;
 	ctx.drawImage(tiles[item], x*fieldWidth, y*fieldHeight, fieldWidth, fieldHeight);
 }
 
@@ -94,7 +94,7 @@ function saveMap(name) {
 		}
 		map += "]\n";
 	}
-	map += "]\n";
+	map += "];\n";
 	var blob = new Blob([map],{type: "text/plain;charset=ascii"});
 	saveAs(blob,name);
 }
@@ -122,7 +122,7 @@ function loadMap(mapStr) {
 		var line = [];
 		while(mapStr[totalPos] != '\n') {
 			const nxtChar = mapStr[totalPos];
-			if (nxtChar != ',' && nxtChar != '[' && nxtChar != ']') {
+			if (nxtChar != ',' && nxtChar != '[' && nxtChar != ']' && nxtChar != ';') {
 				line.push(mapStr[totalPos]);
 				linePos++;
 			}
@@ -132,11 +132,11 @@ function loadMap(mapStr) {
 		mapArr[colPos] = line;
 		colPos++;
 	}
-	for (let i = 0; i < gameWidth; i++) {
-		for (let j = 0; j < gameHeight; j++) {
+	for (let i = 0; i < gameHeight; i++) {
+		for (let j = 0; j < gameWidth; j++) {
 			fields[i][j] = mapArr[i][j];
 		}
-	}
+	}	console.log(mapArr);
 	updateCvs();
 }
 
