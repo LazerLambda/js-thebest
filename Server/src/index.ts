@@ -38,6 +38,7 @@ io.on("connection", function(socket: any) {
   }
 
   socket.on('mode', function(data : any){
+    console.log(data);
     if(data === 'editor'){
 
     }
