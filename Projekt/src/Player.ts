@@ -216,8 +216,8 @@ export class ActivePlayer extends Player {
               this.running = true;
             }
             break;
-          case "Y":
-            if (e.key === "Y") {
+          case "y":
+            if (e.key === "y") {
               var item = <Hallway>this.onItem;
               item.bombOnItem = new Bomb(
                 this.onItem.context,
@@ -229,8 +229,8 @@ export class ActivePlayer extends Player {
               )
               break;
             }
-          case "X":
-              if (e.key === "X"){
+          case "x":
+              if (e.key === "x"){
                 if (this.inventory != null){
                   this.inventory.use();
                 }

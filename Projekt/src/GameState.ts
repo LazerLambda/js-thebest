@@ -6,7 +6,8 @@ enum fieldType {
   HALLWAY = 0,
   WALL = 1,
   HOLE = 2,
-  BRICK = 3
+  BRICK = 3,
+  USABLEITEM = 4
 }
 
 export class GameState {
@@ -89,7 +90,7 @@ export class GameState {
       { y: 5, x: 1, state: fieldType.HALLWAY },
       { y: 5, x: 2, state: fieldType.HALLWAY },
       { y: 5, x: 3, state: fieldType.HALLWAY },
-      { y: 5, x: 4, state: fieldType.HALLWAY },
+      { y: 5, x: 4, state: fieldType.USABLEITEM },
       { y: 5, x: 5, state: fieldType.HALLWAY },
       { y: 5, x: 6, state: fieldType.HALLWAY },
       { y: 5, x: 7, state: fieldType.WALL },
