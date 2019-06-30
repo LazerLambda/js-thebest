@@ -11,7 +11,7 @@ export class Game {
   playerNr : any;
 
   constructor() {
-    
+
     /**
      * Hier Startseite
      */
@@ -31,6 +31,7 @@ export class Game {
     //io.emit("message", "");
 
     this.field = new GameState();
+    this.field.initField();
     this.player = this.field.returnPlayer();
     this.field.updateGameInfos();
 

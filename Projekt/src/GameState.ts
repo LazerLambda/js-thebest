@@ -10,6 +10,14 @@ enum fieldType {
   BRICK = 3
 }
 
+enum serverState{
+  SELECTION = 0,
+  DESIGN = 1,
+  GAME = 2,
+  GAMEOVER = 3,
+  CONNECTION_LOST = 4 
+}
+
 export class GameState {
   context: any;
   explosions : Explosion[] = [];
@@ -32,6 +40,7 @@ export class GameState {
   items: Item[];
   fieldSize: number;
 
+  gameState : number;
 
 /**
  * 
@@ -40,6 +49,7 @@ export class GameState {
  */
 
   constructor() {
+    this.gameState = 0;
     const socket = io("http://localhost:3000");
     
     socket.on('S_ready',function(data : any) {
@@ -67,9 +77,13 @@ export class GameState {
 
     this.width = 8;
     this.height = 8; 
-
+    
     this.xSize = (canvas.width-300) / this.width;
     this.ySize = canvas.height / this.height;
+
+  }
+  initField(){
+
 
     this.fieldSize = this.field.length;
 
