@@ -234,6 +234,7 @@ export class ActivePlayer extends Player {
                 if (this.inventory != null){
                   this.inventory.use();
                 }
+                break;
               }
         }
       }
