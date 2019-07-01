@@ -11,27 +11,8 @@ export class Game {
   playerNr : any;
 
   constructor() {
-
-    /**
-     * Hier Startseite
-     */
-
-    // const socket = io("http://localhost:3000");
-    
-    // socket.on('S_ready',function(data : any) {
-      
-    //   this.playerNr = data;
-    //   document.write(this.playerNr);
-      
-    //   socket.emit('G_ready', "");
-    // });
-
-
-
-    //io.emit("message", "");
-
     this.field = new GameState();
-    this.field.initField();
+    this.field.initStartPage();
     this.player = this.field.returnPlayer();
     this.field.updateGameInfos();
 
