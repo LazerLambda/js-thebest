@@ -13,8 +13,8 @@ export class Game {
   constructor() {
     this.field = new GameState();
     this.field.initStartPage();
-    this.player = this.field.returnPlayer();
-    this.field.updateGameInfos();
+    //this.player = this.field.returnPlayer();
+    // this.field.updateGameInfos();
 
     this.startAnimating(200);
 

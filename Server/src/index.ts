@@ -4,6 +4,97 @@ import * as path from "path";
 import * as Game from "./Game";
 //import * as Player from "./Player";
 
+enum fieldType {
+  HALLWAY = 0,
+  WALL = 1,
+  HOLE = 2,
+  BRICK = 3
+}
+
+
+var field : any[] = [
+  [
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL
+  ],
+  [
+    fieldType.WALL,
+    fieldType.BRICK,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.WALL
+  ],
+  [
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.WALL
+  ],
+  [
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.WALL
+  ],
+  [
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.WALL
+  ],
+  [
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.HALLWAY,
+    fieldType.WALL
+  ],
+  [
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.WALL,
+    fieldType.HALLWAY,
+    fieldType.HOLE,
+    fieldType.WALL
+  ],
+  [
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL,
+    fieldType.WALL
+  ]
+];
+
 const app = express();
 app.set("port", process.env.PORT || 3000);
 app.use(express.static("dist"));
@@ -32,6 +123,7 @@ io.on("connection", function(socket: any) {
   socket.on('G_ready', function(data : any){
     console.log("G_ready received");
     console.log(data);
+    socket.emit('init_field', field);
   });
 });
 const server = http.listen(3000, function() {
