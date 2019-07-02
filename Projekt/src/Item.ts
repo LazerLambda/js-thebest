@@ -2,7 +2,7 @@ import { Player } from "./Player";
 
 //Animation
 let img: any = new Image();
-img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
+img.src = "animations/bomb.png";
 img.onload = function() {
   init();
 };
@@ -22,10 +22,10 @@ export class Item {
   y: number;
 
   //Animation
-  spriteWidth: number = 40;
-  spriteHeight: number = 30;
-  //cycleLoopBomb = [5, 6, 7, 6];
-  //currentLoopIndex: number= 0;
+  spriteWidth: number = 500;
+  spriteHeight: number = 500;
+  cycleLoopBomb = [0, 1, 0, 1];
+  currentLoopIndex: number = 0;
 
   constructor(
     context: any,
@@ -88,8 +88,9 @@ export class Wall extends Item {
   draw() {
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
-    this.context.fillStyle = "grey";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+	var im = new Image(this.SIZE_X, this.SIZE_Y);
+	im.src = "tilesets/tileset1/wall.jpg";
+	this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
   }
 }
 
@@ -118,15 +119,17 @@ export class Hallway extends Item {
   }
 
   draw() {
+	var im = new Image(this.SIZE_X, this.SIZE_Y);
     if (this.playerOn === null) {
-      this.context.fillStyle = "green";
+	  im.src = "tilesets/tileset1/hallway.jpg";
     } else {
-      this.context.fillStyle = "red";
+	  im.src = "tilesets/tileset1/hallway.jpg";
     }
 
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+
+	this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
 
     if (this.bombOnItem !== null) {
       this.bombOnItem.update();
@@ -176,8 +179,9 @@ export class Hole extends Hallway{
   draw() {
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
-    this.context.fillStyle = "black";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+	var im = new Image(this.SIZE_X, this.SIZE_Y);
+	im.src = "tilesets/tileset1/hole.jpg";
+	this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
 
 
     // evtl. diese Methode in eine andere Methode schreiben mit der aus Hallway
@@ -230,22 +234,20 @@ export class Bomb extends Item {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
 
-      this.drawAnimation(5, 3, x - 10, y - 10);
-      //this.drawAnimation(this.cycleLoopBomb[this.currentLoopIndex], 3, x - 10, y - 10);
-      //this.currentLoopIndex++;
-      //if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-      //  this.currentLoopIndex = 0;
-      //}
+      this.drawAnimation(0, this.cycleLoopBomb[this.currentLoopIndex], x - 10, y - 10);
+      this.currentLoopIndex++;
+      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+        this.currentLoopIndex = 0;
+      }
     } else {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
 
-      this.drawAnimation(5, 3, x + 10, y + 10);
-      //this.drawAnimation(this.cycleLoopBomb[this.currentLoopIndex], 3, x + 10, y + 10);
-      //this.currentLoopIndex++;
-      //if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-      //  this.currentLoopIndex = 0;
-      //}
+      this.drawAnimation(0, this.cycleLoopBomb[this.currentLoopIndex], x , y);
+      this.currentLoopIndex++;
+      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+        this.currentLoopIndex = 0;
+      }
     }
   }
 
@@ -310,8 +312,10 @@ export class Brick{
     } else {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
-      this.context.fillStyle = "pink";
-      this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
+	  var im = new Image(this.SIZE_X, this.SIZE_Y);
+	  im.src = "tilesets/tileset1/brick.jpg";
+	  this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
+
     }
   }
 
@@ -348,8 +352,9 @@ export class Fire {
   draw() {
     const x = this.xPos * this.xSize;
     const y = this.yPos * this.ySize;
-    this.context.fillStyle = "orange";
-    this.context.fillRect(x, y, this.xSize, this.ySize);
+	var im = new Image(this.xSize, this.ySize);
+	im.src = "tilesets/tileset1/fire.jpg";
+	this.context.drawImage(im, x, y, this.xSize, this.ySize);
   }
 
   update() {

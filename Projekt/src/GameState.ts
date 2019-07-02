@@ -1,6 +1,7 @@
 import { ActivePlayer,Player } from './Player';
 import { Brick, Hallway, Hole, Item, Wall } from "./Item";
 import { Explosion } from './Explosion';
+//import * as io from "socket.io-client";
 
 enum fieldType {
   HALLWAY = 0,
@@ -13,6 +14,7 @@ enum fieldType {
 export class GameState {
   context: any;
   explosions : Explosion[] = [];
+  socket : any;
 
   player : Player[];
   playerPos : any = {
@@ -114,6 +116,26 @@ export class GameState {
       { y: 7, x: 7, state: fieldType.WALL }
     ];
 
+   // const socket = io("http://localhost:3000");
+    
+   //socket.on('S_ready',function(data : any) {
+      
+      this.playerNr = data;
+      document.write(this.playerNr);
+      
+     socket.emit('G_ready', "");
+    });
+    this.field =
+		[
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL],
+			[fieldType.WALL,fieldType.BRICK,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL],
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.WALL],
+			[fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL],
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.WALL],
+			[fieldType.WALL,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.HALLWAY,fieldType.WALL],
+			[fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.WALL,fieldType.HALLWAY,fieldType.HOLE,fieldType.WALL],
+			[fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL,fieldType.WALL]
+		];
     this.player = [new ActivePlayer(this.context)];
     const canvas = <HTMLCanvasElement>document.getElementById("background");
 
@@ -131,35 +153,42 @@ export class GameState {
     
     var item : Hallway;// Nur zum testen
 
-    for (let i = 0; i < this.fieldSize; i++) {
-      switch (this.field[i].state) {
+
+    for (let i = 0; i < this.width; i++) {
+    for (let j = 0; j < this.height; j++) {
+      switch (this.field[i][j]) {
         case fieldType.HALLWAY:
           this.items.push(
-            new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
+            new Hallway(this.context, j, i, this.xSize, this.ySize)
           );
-          item = <Hallway> this.items[i]; // Test
+          item = <Hallway> this.items[j]; // Test
           break;
         case fieldType.HOLE:
           this.items.push(
-            new Hole(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
+            new Hole(this.context, j, i, this.xSize, this.ySize)
           );
           break;
         case fieldType.WALL:
           this.items.push(
-            new Wall(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize)
+            new Wall(this.context, j, i, this.xSize, this.ySize)
           );
           break;
         case fieldType.BRICK:
-          var item : Hallway = new Hallway(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize);
-          item.brickOnItem = new Brick(this.context, this.field[i].x, this.field[i].y, this.xSize, this.ySize, item);
+          var item : Hallway = new Hallway(this.context, j, i, this.xSize, this.ySize);
+          item.brickOnItem = new Brick(this.context, j, i, this.xSize, this.ySize, item);
             this.items.push(item);
       }
     }
+	} 
     for(let elem of this.player){
       elem.initField(this, item);
     }
-    this.playerPos["player0"] = item.y * 8 + item.x;
+    this.playerPos["player0"] = item.x + item.y * 8;
     //this.player.initField(this, item);
+    
+  }
+
+  updateIncommingPlayerMove(playerName : string, move : number){
     
   }
 
@@ -185,6 +214,8 @@ export class GameState {
       elem.renderPlayer()
     }
   }
+
+  sendMove() {}
 
   drawGame(){
     for(let elem of this.items){

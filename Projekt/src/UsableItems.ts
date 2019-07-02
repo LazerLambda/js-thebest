@@ -127,20 +127,55 @@ export class sensorBomb extends useableItem {
 // plazierbare Sprungfederfalle die Spieler auf ein zufälliges Feld verschiebt
 export class springToGo extends useableItem {
 
-    use() {
+    use(){
+        fields[this.playerOn.xPos][this.playerOn.yPos].itemOn =  new spring(
+            this.context,
+            this.playerOn.xPos,
+            this.playerOn.yPos,
+            40,
+            40);
+            this.usingPlayer.inventory = null;
+    }
          
+    
+}
+class possibleLandingSpot {
+    x:Number;
+    y:Number;
+
+    constructor (x:Number,y:Number) {
+        this.x = x;
+        this.y = y;
     }
 }
 // Sprungfederfalle
 export class spring extends Item {
+ PLS: possibleLandingSpot[] = [];
+   
+ getPossibleLandingSpots(){
+        for (let i  = 0;i < fields.MaxX;i++){ // höchste x Koordinate
+            for (let j  = 0;i < fields.MaxY;i++){ //höchste y Koordinate
+                if (fields[this.x][this.y].fieldtype == HALLWAY || 
+                    fields[this.x][this.y].fieldtype == HOLE){
+                    this.PLS.push(new possibleLandingSpot(i,j));
+                }
+        }
 
-    update() {
-        if (this.playerOn !=null){
-            this.playerOn.xPos += Math.floor(Math.random() * 40 - 20); 
-            this.playerOn.yPos += Math.floor(Math.random() * 40 - 20); 
-        }   
     }
 }
+    
+    update() {
+        if (this.playerOn != null){
+                 this.getPossibleLandingSpots();
+                 var x = Math.floor(Math.random()*(this.PLS.length - 1));
+                 this.playerOn.field = fields[this.PLS[x].x][this.PLS[x].y];
+            
+        }
+
+    }   
+}   
+    
+
 // Bombe mit größerem Radius
 export class nuke extends useableItem {
 
@@ -148,7 +183,7 @@ export class nuke extends useableItem {
          
     }
 }
-//Spieler fügt allen gegener in einer geraden Linie Schaden zu
+//Spieler fügt allen gegnern in einer geraden Linie Schaden zu
 export class laserGun extends useableItem {
 
     use() {
@@ -159,7 +194,30 @@ export class laserGun extends useableItem {
 export class portableHole extends useableItem {
 
     use() {
-         
+        switch (this.playerOn.direction) {
+            case this.playerOn.direction = 0: {
+                if (fields[this.playerOn.xPos][this.playerOn.yPos-1].fieldtype = HALLWAY){
+                fields[this.playerOn.xPos][this.playerOn.yPos-1].fieldtype = HOLE;}
+              break;
+            }
+            case this.playerOn.direction = 1: {
+                if (fields[this.playerOn.xPos+1][this.playerOn.yPos].fieldtype = HALLWAY){
+                fields[this.playerOn.xPos+1][this.playerOn.yPos].fieldtype = HOLE;}
+              break;
+            }
+            case this.playerOn.direction = 2: {
+                if (fields[this.playerOn.xPos][this.playerOn.yPos+1].fieldtype = HALLWAY){
+                fields[this.playerOn.xPos][this.playerOn.yPos+1].fieldtype = HOLE;}
+              break;
+            }
+            case this.playerOn.direction = 3: {
+                if (fields[this.playerOn.xPos-1][this.playerOn.yPos].fieldtype = HALLWAY){
+                fields[this.playerOn.xPos-1][this.playerOn.yPos].fieldtype = HOLE;}
+              break;
+            }
+          }
+        this.usingPlayer.inventory = null;
+        
     }
 }
 //spieler plaziert zwei teilbomben -> alle felder auf dem kürzesten Weg explodieren
