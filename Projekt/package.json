@@ -13,5 +13,10 @@
     "typescript": "^3.4.5",
     "webpack": "^4.32.0",
     "webpack-cli": "^3.3.2"
+  },
+  "script": {},
+  "dependencies": {
+    "@types/socket.io": "^2.1.2",
+    "socket.io-client": "^2.2.0"
   }
 }
