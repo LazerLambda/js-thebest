@@ -1,5 +1,5 @@
 import { GameState } from "./GameState";
-import { Hallway,Wall} from "./Item";
+import { Hallway, Wall } from "./Item";
 
 export class Explosion {
   //bombFields: Item[] = [];
@@ -27,7 +27,7 @@ export class Explosion {
     return pos >= 0 && pos < this.field.items.length;
   }
 
-  performFire(pos : number){
+  performFire(pos: number) {
     if (this.field.items[pos] instanceof Hallway) {
       this.field.items[pos].setOnFire();
     }
@@ -41,33 +41,33 @@ export class Explosion {
       var posEast = this.startPosY * 8 + (this.startPosX + this.counter);
 
       if (this.south) {
-        if(this.checkBounds(posSouth)){
+        if (this.checkBounds(posSouth)) {
           this.performFire(posSouth);
-          if (this.field.items[posSouth] instanceof Wall){
+          if (this.field.items[posSouth] instanceof Wall) {
             this.south = false;
           }
         }
       }
       if (this.north) {
-        if(this.checkBounds(posNorth)){
+        if (this.checkBounds(posNorth)) {
           this.performFire(posNorth);
-          if (this.field.items[posNorth] instanceof Wall){
+          if (this.field.items[posNorth] instanceof Wall) {
             this.north = false;
           }
         }
       }
       if (this.west) {
-        if(this.checkBounds(posWest)){
+        if (this.checkBounds(posWest)) {
           this.performFire(posWest);
-          if (this.field.items[posWest] instanceof Wall){
+          if (this.field.items[posWest] instanceof Wall) {
             this.west = false;
           }
         }
       }
       if (this.east) {
-        if(this.checkBounds(posEast)){
+        if (this.checkBounds(posEast)) {
           this.performFire(posEast);
-          if (this.field.items[posEast] instanceof Wall){
+          if (this.field.items[posEast] instanceof Wall) {
             this.east = false;
           }
         }

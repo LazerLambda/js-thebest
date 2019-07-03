@@ -1,16 +1,9 @@
-import { ActivePlayer, Player } from "./Player";
+import { ActivePlayer, Player, PassivePlayer } from "./Player";
 import { Brick, Hallway, Hole, Item, Wall } from "./Item";
 import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
 import { Editor } from "./Editor";
 import * as io from "socket.io-client";
-
-enum fieldType {
-  HALLWAY = 0,
-  WALL = 1,
-  HOLE = 2,
-  BRICK = 3
-}
 
 enum serverState {
   SELECTION = 0,
@@ -21,201 +14,224 @@ enum serverState {
   CONNECTION_LOST = 5
 }
 
-export class GameState {
-  context: any;
-  editor: Editor;
-  explosions: Explosion[] = [];
-  socket: any = null;
+enum fieldType {
+  HALLWAY = 0,
+  WALL = 1,
+  HOLE = 2,
+  BRICK = 3
+}
 
-  player: Player[];
-  playerPos: any = {
-    player0: null,
-    player1: null,
-    player2: null,
-    player3: null
-  };
-  field: any[];
+export class GameState {
+  playerNr: number;
+  startpage: Startpage;
+  editor: Editor;
+  state: serverState;
+
+  field: any[][];
+  items: Item[];
+  context: any;
+  socket: any;
 
   xSize: number;
-  width: number;
   ySize: number;
-  height: number;
 
-  items: Item[];
-  fieldSize: number;
+  canvasHeight: number;
+  canvasWidth: number;
 
-  gameState: number;
-  startPage: Startpage;
+  MAX_PLAYERS: number = 4;
+  activePlayer: ActivePlayer;
+  passivePlayers: PassivePlayer[] = [];
 
-  /**
-   *
-   * @param player Liste an Spielern, die dem Spiel beigetreten sind
-   * evtl. Spieler  zurückgeben nach erfolgreicher Initialisierung
-   */
+  explosions: Explosion[] = [];
+
+  playerObj: Object = {
+    1: null,
+    2: null,
+    3: null,
+    4: null
+  };
 
   constructor() {
-    // Set gameState to Launchpage
-
+    this.socket = io("http://localhost:3000");
     const canvas = <HTMLCanvasElement>document.getElementById("background");
-
     this.context = canvas.getContext("2d");
 
-    this.xSize = (canvas.width - 300) / this.width;
-    this.ySize = canvas.height / this.height;
+    // dynamisch machen
+    this.canvasHeight = canvas.height;
+    this.canvasWidth = canvas.width;
+    this.xSize = (canvas.width - 300) / 8;
+    this.ySize = canvas.height / 8;
+
+    this.initStartPage();
+
+    // this.socket.emit("mode", "game");
+    // this.initGame();
   }
 
   initStartPage() {
-    this.gameState = serverState.SELECTION;
-    this.startPage = new Startpage(this.context, this);
+    this.state = serverState.SELECTION;
+    this.startpage = new Startpage(this.context, this);
   }
 
   initDesign() {
-    this.gameState = serverState.DESIGN;
+    this.state = serverState.DESIGN;
     this.editor = new Editor(this.context);
   }
 
-  initConnection() {
-    this.socket = io("http://localhost:3000");
+  initGame() {
+    this.socket.on(
+      "S_ready",
+      function(data: any) {
+        this.playerNr = <number>data;
+        this.socket.emit("G_ready", "Name");
+      }.bind(this)
+    );
+    this.socket.on(
+      "init_field",
+      function(data: any) {
+        this.field = data["game_field"];
+        this.items = new Array();
 
-    this.socket.on("S_ready", function(data: any) {
-      //this.playerNr = data;
-    });
-  }
-
-  initField() {
-    this.gameState = serverState.FIELD_WAIT;
-
-    if (this.socket === null) {
-      throw "ERROR: Socket is not initialized\n\t'-> Something went wrong with the serverState Variable\n";
-    }
-
-    this.socket.emit("G_ready", "Player ready");
-    this.socket.on("init_field", function(data: any) {
-      this.player = [new ActivePlayer(this.context)];
-      this.field = data;
-
-      this.fieldSize = this.field.length;
-
-      this.items = new Array();
-
-      var item: Hallway; // Nur zum testen
-
-      this.width = 8;
-      this.height = 8;
-
-      for (let i = 0; i < this.width; i++) {
-        for (let j = 0; j < this.height; j++) {
-          switch (this.field[i][j]) {
-            case fieldType.HALLWAY:
-              this.items.push(
-                new Hallway(this.context, j, i, this.xSize, this.ySize)
-              );
-              item = <Hallway>this.items[j]; // Test
-              break;
-            case fieldType.HOLE:
-              this.items.push(
-                new Hole(this.context, j, i, this.xSize, this.ySize)
-              );
-              break;
-            case fieldType.WALL:
-              this.items.push(
-                new Wall(this.context, j, i, this.xSize, this.ySize)
-              );
-              break;
-            case fieldType.BRICK:
-              var item: Hallway = new Hallway(
-                this.context,
-                j,
-                i,
-                this.xSize,
-                this.ySize
-              );
-              item.brickOnItem = new Brick(
-                this.context,
-                j,
-                i,
-                this.xSize,
-                this.ySize,
-                item
-              );
-              this.items.push(item);
-          }
-        }
-      }
-
-      for (let elem of this.player) {
-        elem.initField(this, item);
-      }
-
-      //this.playerPos["player0"] = item.x + item.y * 8;
-
-      this.gameState = serverState.GAME;
-
-      //TEST
-      for (let elem of this.items) {
-        if(elem.context === undefined){
-        document.write("sdaf");
-        } else {
-          document.write("nicht");
-        }
-      }
-      //this.updateGameInfos();
-      // document.write("ADSF");
-
-      //this.playerPos["player0"] = item.x + item.y * 8;
-      //this.player.initField(this, item);
-    });
-  }
-
-  updateIncommingPlayerMove(playerName: string, move: number) {}
-
-  update() {
-    if (this.gameState === serverState.SELECTION) {
-      this.startPage.update();
-    }
-    if (this.gameState === serverState.DESIGN) {
-      this.editor.update();
-    }
-    if (this.gameState === serverState.GAME) {
-      document.write("ASsdfasd");
-      for (let i = 0; i < this.items.length; i++) {
-        if (this.items[i] instanceof Hallway) {
-          var tmpItem = <Hallway>this.items[i];
-          if (tmpItem.bombOnItem !== null) {
-            if (tmpItem.bombOnItem.explode) {
-              this.explosions.push(new Explosion(tmpItem, this));
+        for (let i = 0; i < this.field.length; i++) {
+          for (let j = 0; j < this.field[0].length; j++) {
+            switch (this.field[i][j]) {
+              case fieldType.HALLWAY:
+                this.items.push(
+                  new Hallway(this.context, j, i, this.xSize, this.ySize)
+                );
+                break;
+              case fieldType.HOLE:
+                this.items.push(
+                  new Hole(this.context, j, i, this.xSize, this.ySize)
+                );
+                break;
+              case fieldType.WALL:
+                this.items.push(
+                  new Wall(this.context, j, i, this.xSize, this.ySize)
+                );
+                break;
+              case fieldType.BRICK:
+                var item: Hallway = new Hallway(
+                  this.context,
+                  j,
+                  i,
+                  this.xSize,
+                  this.ySize
+                );
+                item.brickOnItem = new Brick(
+                  this.context,
+                  j,
+                  i,
+                  this.xSize,
+                  this.ySize,
+                  item
+                );
+                this.items.push(item);
+                break;
             }
           }
         }
-      }
-      for (let elem of this.explosions) {
-        elem.update();
-      }
 
-      for (let elem of this.items) {
-        elem.update();
+        for (let i = 1; i <= this.MAX_PLAYERS; i++) {
+          var player = data["player_" + i];
+          var x: number = <number>player["startpos"]["x"];
+          var y: number = <number>player["startpos"]["y"];
+
+          this.state = serverState.GAME;
+          // 8 dynamisch
+
+          var pos: number = x + y * 8;
+          var field = this.items[pos];
+          if (this.playerNr === i) {
+            this.activePlayer = new ActivePlayer(this.context);
+            this.activePlayer.initField(this, field);
+            this.update();
+            this.draw();
+          } else {
+            var passivePlayer = new PassivePlayer(this.context);
+            passivePlayer.initField(this, field);
+            this.passivePlayers.push(passivePlayer);
+            this.update();
+            this.draw();
+          }
+        }
+        this.updateGameInfos();
+      }.bind(this)
+    );
+  }
+
+  update() {
+    switch (this.state) {
+      case serverState.SELECTION:
+        break;
+      case serverState.DESIGN:
+        break;
+      case serverState.FIELD_WAIT:
+        break;
+      case serverState.GAME: {
+        for (let i = 0; i < this.items.length; i++) {
+          if (this.items[i] instanceof Hallway) {
+            var tmpItem = <Hallway>this.items[i];
+            if (tmpItem.bombOnItem !== null) {
+              if (tmpItem.bombOnItem.explode) {
+                this.explosions.push(new Explosion(tmpItem, this));
+              }
+            }
+          }
+        }
+
+        for (let elem of this.explosions) {
+          elem.update();
+        }
+
+        for (let elem of this.items) {
+          elem.update();
+        }
+
+        for (let elem of this.passivePlayers) {
+          elem.renderPlayer();
+        }
+        this.activePlayer.renderPlayer();
+
+        break;
       }
-      for (let elem of this.player) {
-        elem.renderPlayer();
-      }
+      case serverState.GAMEOVER:
+        break;
+      case serverState.CONNECTION_LOST:
+        break;
     }
   }
 
-  sendMove() {}
+  draw() {
+    switch (this.state) {
+      case serverState.SELECTION:
+        break;
+      case serverState.DESIGN:
+        break;
+      case serverState.FIELD_WAIT:
+        break;
+      case serverState.GAME: {
+        this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        for (let elem of this.items) {
+          elem.draw();
+        }
 
-  drawGame() {
-    if (this.gameState === serverState.GAME) {
-      for (let elem of this.items) {
-        elem.draw();
+        for (let elem of this.passivePlayers) {
+          elem.drawPlayer();
+        }
+
+        this.activePlayer.drawPlayer();
+        break;
       }
-      for (let elem of this.player) {
-        elem.drawPlayer();
-      }
+      case serverState.GAMEOVER:
+        break;
+      case serverState.CONNECTION_LOST:
+        break;
     }
   }
 
   updateGameInfos() {
-    if (this.gameState === serverState.GAME) {
+    if (this.state === serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);
       this.context.fillStyle = "yellow";
       this.context.fillRect(480, 0, 300, 480);
@@ -225,17 +241,14 @@ export class GameState {
       this.context.font = "10px Arial";
       this.context.fillText("Punkte: " + "0", 520, 75);
 
-      if (!this.player[0].alive) {
-        this.context.fillStyle = "red";
-        this.context.fillRect(600, 60, 100, 20);
-        this.context.fillStyle = "yellow";
-        this.context.font = "10px Arial";
-        this.context.fillText("You loooose xD", 600, 75);
-      }
+      // if (!this.player[0].alive) {
+      //   this.context.fillStyle = "red";
+      //   this.context.fillRect(600, 60, 100, 20);
+      //   this.context.fillStyle = "yellow";
+      //   this.context.font = "10px Arial";
+      //   this.context.fillText("You loooose xD", 600, 75);
+      // }
     }
   }
-
-  returnPlayer(): Player[] {
-    return this.player;
-  }
+  updateIncommingPlayerMove(playerName: string, move: number) {}
 }

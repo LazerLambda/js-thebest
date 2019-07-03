@@ -88,9 +88,9 @@ export class Wall extends Item {
   draw() {
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
-	var im = new Image(this.SIZE_X, this.SIZE_Y);
-	im.src = "tilesets/tileset1/wall.jpg";
-	this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
+    var im = new Image(this.SIZE_X, this.SIZE_Y);
+    im.src = "tilesets/tileset1/wall.jpg";
+    this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
   }
 }
 
@@ -352,9 +352,11 @@ export class Fire {
   draw() {
     const x = this.xPos * this.xSize;
     const y = this.yPos * this.ySize;
-	var im = new Image(this.xSize, this.ySize);
-	im.src = "tilesets/tileset1/fire.jpg";
-	this.context.drawImage(im, x, y, this.xSize, this.ySize);
+	// var im = new Image(this.xSize, this.ySize);
+	// im.src = "tilesets/tileset1/fire.jpg";
+  // this.context.drawImage(im, x, y, this.xSize, this.ySize);
+    this.context.fillStyle = "orange";
+    this.context.fillRect(x, y, this.xSize, this.ySize);
   }
 
   update() {

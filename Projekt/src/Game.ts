@@ -8,16 +8,13 @@ export class Game {
 
   field: GameState;
   player: Player[];
-  playerNr : any;
+  playerNr: any;
+
+  game: any;
 
   constructor() {
-    this.field = new GameState();
-    this.field.initStartPage();
-    //this.player = this.field.returnPlayer();
-    // this.field.updateGameInfos();
-
+    this.game = new GameState();
     this.startAnimating(200);
-
   }
 
   startAnimating(targetFPS: number) {
@@ -34,9 +31,8 @@ export class Game {
     if (elapsed > this.frameTime) {
       this.then = now;
 
-      this.field.update();
-      this.field.drawGame();
+      this.game.update();
+      this.game.draw();
     }
   }
 }
-
