@@ -3,13 +3,82 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>TypeScript</title>
+
+    <title>Advanced AI Algorithms - Triple A</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="//fonts.googleapis.com/css?family=Raleway"
+    />
     <style>
+
+      @font-face{
+        font-family: "Avenir";
+        src: url("AvenirLTStd-Heavy.otf");
+      }
+      @font-face {
+        font-family: "Mistral";
+        src: url("MISTRAL.TTF");
+        /* src: url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.eot");
+        src: url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.eot?#iefix")
+            format("embedded-opentype"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.woff2")
+            format("woff2"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.woff")
+            format("woff"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.ttf")
+            format("truetype"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.svg#Mistral")
+            format("svg"); */
+      }
       #stage {
-        width:780px;
+        width: 780px;
         height: 480px;
         position: relative;
         border: 2px solid black;
+      }
+      #stage {
+        position: absolute;
+        top: 30%;
+        left: 30%;
+        bottom: 30%;
+        right: 30%;
+      }
+
+      #logo {
+        
+        width: 400px;
+        height: 60px;
+        position: absolute;
+        top: 10%;
+        left: 40%;
+        right: 50%;
+      }
+
+      #logoIn{
+        position: absolute;
+        text-align: center;
+        background-color: #f1651c;
+        color: #ffffff; 
+        top: 00%;
+        left: 20%;
+        right: 20%;
+        font-family: Avenir;
+      }
+
+      body{
+        background-color: #cccccc;
+      }
+
+      h2 {
+        position: absolute;
+        font-family: Mistral;
+        /* transform: rotate(-23deg); */
+        transform: skew(-20deg, -5deg);
+        top: 45px;
+        left: 180px;
+        bottom: 60px;
+        right: 0px;
       }
 
       canvas {
@@ -25,10 +94,16 @@
   </head>
 
   <body>
+    <div id="logo">
+      <div id="logoIn">
+        <h1 id="logoH1">GRUPPE HH</h1>
+      </div>
+      <h2>BomberMan 2019</h2>
+    </div>
     <div id="stage">
-        <canvas id="background" width="780" height="480"></canvas>
-        <canvas id="game-layer" width="780" height="480"></canvas>
-      
+      <canvas id="background" width="780" height="480"></canvas>
+      <canvas id="game-layer" width="780" height="480"></canvas>
+
       <!--
       <canvas id="canvasId" width="480" height="480"></canvas>
       -->
