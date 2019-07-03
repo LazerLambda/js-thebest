@@ -9,13 +9,12 @@ enum Direction {
   EAST = 3
 }
 
-
 //Animation
-let img : any = new Image();
-img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+let img: any = new Image();
+img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
 img.onload = function() {
   init();
-}
+};
 
 function init() {
   this.startAnimating(200);
@@ -47,15 +46,15 @@ export class Player {
     this.onItem = null;
     this.running = false;
     this.animatedObject = new AnimatedObject(this);
+    this.context = context;
 
-    this.canvas = <HTMLCanvasElement>document.getElementById("game-layer");
-    this.context = this.canvas.getContext("2d");
+    this.currentDirection = 3;
   }
 
   initField(field: GameState, item: Hallway) {
     this.field = field;
-
     item.playerOn = this;
+    this.target = item.x + item.y * 8;
     this.onItem = item;
     this.xPos = item.x * this.field.xSize;
     this.yPos = item.y * this.field.ySize;
@@ -97,7 +96,6 @@ export class Player {
         this.onItem = this.field.items[this.target];
         this.onItem.playerOn = this;
         tmpItem.playerOn = null;
-        this.field.playerPos = this.target;
 
         this.xPos = this.onItem.x * this.field.xSize;
         this.yPos = this.onItem.y * this.field.ySize;
@@ -106,7 +104,6 @@ export class Player {
   }
 
   drawPlayer() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.alive) {
       // GameOverAnimation
 
@@ -125,14 +122,9 @@ export class Player {
       }
       --this.loosingSequence;
     } else {
-      this.animatedObject.animate(
-        this.currentDirection,
-        this.xPos,
-        this.yPos
-      );
+      this.animatedObject.animate(this.currentDirection, this.xPos, this.yPos);
     }
   }
-
 }
 
 export class ActivePlayer extends Player {
@@ -205,5 +197,11 @@ export class ActivePlayer extends Player {
         }
       }
     }
+  }
+}
+
+export class PassivePlayer extends Player {
+  constructor(context: any) {
+    super(context);
   }
 }
