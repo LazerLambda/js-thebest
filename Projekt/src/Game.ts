@@ -8,34 +8,13 @@ export class Game {
 
   field: GameState;
   player: Player[];
-  playerNr : any;
+  playerNr: any;
+
+  game: any;
 
   constructor() {
-    
-    /**
-     * Hier Startseite
-     */
-
-    // const socket = io("http://localhost:3000");
-    
-    // socket.on('S_ready',function(data : any) {
-      
-    //   this.playerNr = data;
-    //   document.write(this.playerNr);
-      
-    //   socket.emit('G_ready', "");
-    // });
-
-
-
-    //io.emit("message", "");
-
-    this.field = new GameState();
-    this.player = this.field.returnPlayer();
-    this.field.updateGameInfos();
-
+    this.game = new GameState();
     this.startAnimating(200);
-
   }
 
   startAnimating(targetFPS: number) {
@@ -52,9 +31,8 @@ export class Game {
     if (elapsed > this.frameTime) {
       this.then = now;
 
-      this.field.update();
-      this.field.drawGame();
+      this.game.update();
+      this.game.draw();
     }
   }
 }
-
