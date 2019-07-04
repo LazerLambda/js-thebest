@@ -143,12 +143,12 @@ export class GameState {
           var pos: number = x + y * 8;
           var field = this.items[pos];
           if (this.playerNr === i) {
-            this.activePlayer = new ActivePlayer(this.context);
+            this.activePlayer = new ActivePlayer(this.context, i);
             this.activePlayer.initField(this, field);
             this.update();
             this.draw();
           } else {
-            var passivePlayer = new PassivePlayer(this.context);
+            var passivePlayer = new PassivePlayer(this.context, i);
             passivePlayer.initField(this, field);
             this.passivePlayers.push(passivePlayer);
             this.update();
