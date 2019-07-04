@@ -38,9 +38,13 @@ export class Player {
 
   xPos: number;
   yPos: number;
-  constructor(context: any) {
+
+  playerNr: number;
+
+  constructor(context: any, playerNr: any) {
     this.xPos = 0;
     this.yPos = 0;
+    this.playerNr = playerNr;
 
     this.field = null;
     this.onItem = null;
@@ -53,7 +57,7 @@ export class Player {
 
   initField(field: GameState, item: Hallway) {
     this.field = field;
-    item.playerOn = this;
+    item.playerOn.push(this);
     this.target = item.x + item.y * 8;
     this.onItem = item;
     this.xPos = item.x * this.field.xSize;
@@ -94,8 +98,10 @@ export class Player {
         // Player auf neues Feld setzen
         var tmpItem = <Hallway>this.onItem;
         this.onItem = this.field.items[this.target];
-        this.onItem.playerOn = this;
-        tmpItem.playerOn = null;
+        this.onItem.playerOn.push(this);
+        tmpItem.playerOn = tmpItem.playerOn.filter(e => {
+          e.playerNr !== this.playerNr;
+        });
 
         this.xPos = this.onItem.x * this.field.xSize;
         this.yPos = this.onItem.y * this.field.ySize;
@@ -110,7 +116,9 @@ export class Player {
       if (this.loosingSequence < 0) {
         // Game over
 
-        this.onItem.playerOn = null;
+        this.onItem.playerOn = this.onItem.playerOn.filter(e => {
+          e.playerNr !== this.playerNr;
+        });
         this.field.updateGameInfos();
       } else {
         /**
@@ -128,8 +136,8 @@ export class Player {
 }
 
 export class ActivePlayer extends Player {
-  constructor(context: any) {
-    super(context);
+  constructor(context: any, playerNr: number) {
+    super(context, playerNr);
 
     document.addEventListener("keydown", e => {
       if (!this.running && this.alive) {
@@ -201,7 +209,7 @@ export class ActivePlayer extends Player {
 }
 
 export class PassivePlayer extends Player {
-  constructor(context: any) {
-    super(context);
+  constructor(context: any, playerNr: number) {
+    super(context, playerNr);
   }
 }
