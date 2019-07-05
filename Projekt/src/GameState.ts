@@ -1,7 +1,7 @@
 import { ActivePlayer,Player } from './Player';
 import { Brick, Hallway, Hole, Item, Wall } from "./Item";
 import { Explosion } from './Explosion';
-//import * as io from "socket.io-client";
+import * as io from "socket.io-client";
 
 enum fieldType {
   HALLWAY = 0,
@@ -116,9 +116,9 @@ export class GameState {
       { y: 7, x: 7, state: fieldType.WALL }
     ];
 
-   // const socket = io("http://localhost:3000");
+   const socket = io("http://localhost:3000");
     
-   //socket.on('S_ready',function(data : any) {
+   socket.on('S_ready',function(data : any) {
       
       this.playerNr = data;
       document.write(this.playerNr);
