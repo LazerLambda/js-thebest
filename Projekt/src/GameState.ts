@@ -1,5 +1,6 @@
 import { ActivePlayer, Player, PassivePlayer } from "./Player";
-import { Brick, Hallway, Hole, Item, Wall } from "./Item";
+import { Hallway, Hole, Item, Wall } from "./Item";
+import { Brick } from './Brick';
 import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
 import { Editor } from "./Editor";
@@ -39,7 +40,7 @@ export class GameState {
   canvasWidth: number;
 
   MAX_PLAYERS: number = 4;
-  activePlayer: ActivePlayer;
+  activePlayer: ActivePlayer = null;
   passivePlayers: PassivePlayer[] = [];
 
   explosions: Explosion[] = [];
@@ -143,7 +144,7 @@ export class GameState {
           var pos: number = x + y * 8;
           var field = this.items[pos];
           if (this.playerNr === i) {
-            this.activePlayer = new ActivePlayer(this.context, i);
+            this.activePlayer = new ActivePlayer(this.context, this.socket, i);
             this.activePlayer.initField(this, field);
             this.update();
             this.draw();
@@ -172,6 +173,12 @@ export class GameState {
         for (let i = 0; i < this.items.length; i++) {
           if (this.items[i] instanceof Hallway) {
             var tmpItem = <Hallway>this.items[i];
+
+            // if(tmpItem.x)
+            // for(let e of tmpItem.playerOn){
+            //   // console.log("x :" + tmpItem.y + ", y:" + tmpItem.y);
+            //   // console.log("Nr: " + e.playerNr);
+            // }
             if (tmpItem.bombOnItem !== null) {
               if (tmpItem.bombOnItem.explode) {
                 this.explosions.push(new Explosion(tmpItem, this));
@@ -191,7 +198,9 @@ export class GameState {
         for (let elem of this.passivePlayers) {
           elem.renderPlayer();
         }
-        this.activePlayer.renderPlayer();
+        if (this.activePlayer !== null) {
+          this.activePlayer.renderPlayer();
+        }
 
         break;
       }
@@ -220,7 +229,9 @@ export class GameState {
           elem.drawPlayer();
         }
 
-        this.activePlayer.drawPlayer();
+        if (this.activePlayer !== null) {
+          this.activePlayer.drawPlayer();
+        }
         break;
       }
       case serverState.GAMEOVER:
