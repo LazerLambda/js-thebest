@@ -1,4 +1,4 @@
-#import { ActivePlayer,Player } from './Player';
+import { ActivePlayer,Player } from './Player';
 import { Brick, Hallway, Hole, Item, Wall } from "./Item";
 import { Explosion } from './Explosion';
 import * as io from "socket.io-client";
