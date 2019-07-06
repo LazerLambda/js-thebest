@@ -1,4 +1,6 @@
 import { Player } from "./Player";
+import { Brick } from "./Brick";
+import { Fire } from "./Fire";
 
 //Animation
 let img: any = new Image();
@@ -112,7 +114,18 @@ export class Hallway extends Item {
     this.overlayingItem = [];
   }
 
-  update() {}
+  update() {
+    if (this.bombOnItem !== null) {
+      this.bombOnItem.update();
+    }
+
+    if (this.onFire !== null) {
+      this.onFire.update();
+      for (let e of this.playerOn) {
+        e.alive = false;
+      }
+    }
+  }
 
   draw() {
     var im = new Image(this.SIZE_X, this.SIZE_Y);
@@ -128,26 +141,19 @@ export class Hallway extends Item {
     this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
 
     if (this.bombOnItem !== null) {
-      this.bombOnItem.update();
       this.bombOnItem.draw();
     }
 
     if (this.onFire !== null) {
-      this.onFire.update();
-      this.onFire.draw();
+      this.onFire.drawFire();
     }
 
     if (this.brickOnItem !== null) {
-      this.brickOnItem.draw();
+      this.brickOnItem.drawBrick();
     }
   }
 
   setOnFire() {
-    if (this.onFire !== null && this.playerOn.length !== 0) {
-      for (let e of this.playerOn) {
-        e.alive = false;
-      }
-    }
     if (this.brickOnItem !== null) {
       this.brickOnItem.setOnFire();
     } else {
@@ -184,15 +190,14 @@ export class Hole extends Hallway {
     // evtl. diese Methode in eine andere Methode schreiben mit der aus Hallway
     if (this.onFire !== null) {
       this.onFire.update();
-      this.onFire.draw();
+      this.onFire.drawFire();
     }
   }
 
   update() {
-    if (this.playerOn.length !== 0) {
-      for (let e of this.playerOn) {
-        e.alive = false;
-      }
+    for (let e of this.playerOn) {
+      e.alive = false;
+
     }
   }
 
@@ -274,97 +279,5 @@ export class Bomb extends Item {
     } else {
       --this.timeLeft;
     }
-  }
-}
-
-export class Brick {
-  breakBricks: boolean = false;
-  placedOn: Hallway;
-
-  context: any;
-  SIZE_X: number;
-  SIZE_Y: number;
-
-  x: number;
-  y: number;
-  constructor(
-    context: any,
-    xPos: number,
-    yPos: number,
-    xSize: number,
-    ySize: number,
-    placed: Hallway
-  ) {
-    this.context = context;
-
-    this.x = xPos;
-    this.y = yPos;
-
-    this.SIZE_X = xSize;
-    this.SIZE_Y = ySize;
-    this.placedOn = placed;
-  }
-
-  draw() {
-    if (this.breakBricks) {
-      const x = this.x * this.SIZE_X;
-      const y = this.y * this.SIZE_Y;
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(x - 10, y - 10, this.SIZE_X + 10, this.SIZE_Y + 10);
-      this.placedOn.setOnFire();
-      this.placedOn.brickOnItem = null;
-    } else {
-      const x = this.x * this.SIZE_X;
-      const y = this.y * this.SIZE_Y;
-      var im = new Image(this.SIZE_X, this.SIZE_Y);
-      im.src = "tilesets/tileset1/brick.jpg";
-      this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
-    }
-  }
-
-  setOnFire() {
-    this.breakBricks = true;
-  }
-}
-
-export class Fire {
-  timeLeft = 20;
-  context: any;
-  xPos: number;
-  yPos: number;
-  xSize: number;
-  ySize: number;
-  placedOn: Item;
-  constructor(
-    context: any,
-    xPos: number,
-    yPos: number,
-    xSize: number,
-    ySize: number,
-    placedOn: Item
-  ) {
-    this.context = context;
-    this.xPos = xPos;
-    this.yPos = yPos;
-    this.xSize = xSize;
-    this.ySize = ySize;
-    this.placedOn = placedOn;
-  }
-
-  draw() {
-    const x = this.xPos * this.xSize;
-    const y = this.yPos * this.ySize;
-    // var im = new Image(this.xSize, this.ySize);
-    // im.src = "tilesets/tileset1/fire.jpg";
-    // this.context.drawImage(im, x, y, this.xSize, this.ySize);
-    this.context.fillStyle = "orange";
-    this.context.fillRect(x, y, this.xSize, this.ySize);
-  }
-
-  update() {
-    if (this.timeLeft < 1) {
-      this.placedOn.onFire = null;
-    }
-    --this.timeLeft;
   }
 }

@@ -57,9 +57,9 @@ export class Player {
 
   initField(field: GameState, item: Hallway) {
     this.field = field;
-    item.playerOn.push(this);
-    this.target = item.x + item.y * 8;
+    this.target = item.x + item.y * 8; //
     this.onItem = item;
+    this.onItem.playerOn.push(this);
     this.xPos = item.x * this.field.xSize;
     this.yPos = item.y * this.field.ySize;
   }
@@ -99,9 +99,23 @@ export class Player {
         var tmpItem = <Hallway>this.onItem;
         this.onItem = this.field.items[this.target];
         this.onItem.playerOn.push(this);
-        tmpItem.playerOn = tmpItem.playerOn.filter(e => {
-          e.playerNr !== this.playerNr;
-        });
+        var oldPos = tmpItem.x + tmpItem.y * 8;
+        this.field.items[oldPos].playerOn.forEach(e => {console.log("hier" + e.playerNr);});
+
+
+        // this.field.items[oldPos].playerOn = this.field.items[oldPos].playerOn.filter(function(e){
+        //   return <number> e.playerNr !== <number> this.playerNr;
+        // });
+
+        var newArr = new Array();
+        for (let i = 0; i < this.field.items[oldPos].playerOn.length; i++){
+          console.log("" + this.field.items[oldPos].playerOn[(i)].playerNr);
+          if(this.field.items[oldPos].playerOn[(i)].playerNr !== this.playerNr){
+            newArr.push(this.field.items[oldPos].playerOn[(i)]);
+          }
+        }
+        this.field.items[oldPos].playerOn = newArr;
+       
 
         this.xPos = this.onItem.x * this.field.xSize;
         this.yPos = this.onItem.y * this.field.ySize;
@@ -117,8 +131,12 @@ export class Player {
         // Game over
 
         this.onItem.playerOn = this.onItem.playerOn.filter(e => {
+          // console.log("drawPlayer: !this.alive");
+          // console.log(e.playerNr + "");
           e.playerNr !== this.playerNr;
         });
+        this.context.fillStyle = "red";
+        this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
         this.field.updateGameInfos();
       } else {
         /**
@@ -136,32 +154,38 @@ export class Player {
 }
 
 export class ActivePlayer extends Player {
-  constructor(context: any, playerNr: number) {
+  socket: any = null;
+  constructor(context: any, socket: any, playerNr: number) {
     super(context, playerNr);
+    this.socket = socket;
 
     document.addEventListener("keydown", e => {
       if (!this.running && this.alive) {
         switch (e.key) {
           case "ArrowUp":
             if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
+              socket.emit("event", "Test");
               this.direction = Direction.NORTH;
               this.running = true;
             }
             break;
           case "ArrowDown":
             if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
+              socket.emit("event", "Test");
               this.direction = Direction.SOUTH;
               this.running = true;
             }
             break;
           case "ArrowRight":
             if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
+              socket.emit("event", "Test");
               this.direction = Direction.EAST;
               this.running = true;
             }
             break;
           case "ArrowLeft":
             if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
+              socket.emit("event", "Test");
               this.direction = Direction.WEST;
               this.running = true;
             }
@@ -180,6 +204,8 @@ export class ActivePlayer extends Player {
             }
         }
       }
+
+      socket.emit("event", "Test");
     });
   }
 
