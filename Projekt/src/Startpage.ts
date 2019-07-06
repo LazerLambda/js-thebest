@@ -1,5 +1,4 @@
 import { GameState } from "./GameState";
-import { Z_FINISH } from "zlib";
 
 export class Startpage {
   gameState: GameState;
