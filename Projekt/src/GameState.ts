@@ -8,6 +8,7 @@ import { Editor } from "./Editor";
 import { RoomWait } from "./RoomWait";
 import { UserHasLeft } from "./UserHasLeft";
 import * as io from "socket.io-client";
+import { Winner } from "./Winner";
 
 enum serverState {
   SELECTION = 0,
@@ -16,7 +17,7 @@ enum serverState {
   FIELD_WAIT = 3,
   GAME = 4,
   GAMEOVER = 5,
-  CONNECTION_LOST = 6
+  WINNER = 6
 }
 
 enum fieldType {
@@ -30,6 +31,7 @@ export class GameState {
   playerNr: number;
   startpage: Startpage;
   gameover: GameOver;
+  winner : Winner;
   roomwaitpage: RoomWait;
   editor: Editor;
   state: serverState;
@@ -272,10 +274,19 @@ export class GameState {
       elem.update();
     }
 
+    var winner = true;
     for (let elem of this.passivePlayers) {
       this.handleNetworkInput();
+      winner = !elem.alive && winner;         // überprüfe, ob die anderen Spieler noch teilnehmen
       elem.renderPlayer();
     }
+    console.log(winner);
+
+    if(winner || this.passivePlayers.length === 0){
+      this.winner = new Winner(this.context);
+      this.state = serverState.WINNER;
+    }
+    
     if (this.activePlayer !== null) {
       this.activePlayer.renderPlayer();
       if (!this.activePlayer.alive) {
@@ -307,7 +318,9 @@ export class GameState {
         this.gameover.updateGameOver();
         this.updateGameInfos();
         break;
-      case serverState.CONNECTION_LOST:
+      case serverState.WINNER:
+        this.updateGame();
+        this.winner.drawWinner();
         break;
     }
   }
@@ -349,7 +362,9 @@ export class GameState {
         this.showGame();
         this.gameover.drawGameOver();
         break;
-      case serverState.CONNECTION_LOST:
+      case serverState.WINNER:
+          this.showGame();
+          this.winner.drawWinner();
         break;
     }
   }
