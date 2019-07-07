@@ -9,15 +9,15 @@ enum Direction {
   EAST = 3
 }
 
-//Animation
-let img: any = new Image();
-img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
-img.onload = function() {
-  init();
-};
 
-function init() {
-  this.startAnimating(200);
+enum Event{
+  MOVE = 'move',
+  DROP = 'drop',
+}
+
+enum ActionBomb{
+  DEFAULT_BOMB = 1,
+  
 }
 
 export class Player {
@@ -144,8 +144,8 @@ export class Player {
         }
         this.field.items[pos].playerOn = newArr;
 
-        this.context.fillStyle = "red";
-        this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
+        // this.context.fillStyle = "red";
+        // this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
         this.field.updateGameInfos();
       } else {
         /**
@@ -196,28 +196,28 @@ export class ActivePlayer extends Player {
             if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
               this.direction = Direction.NORTH;
               this.running = true;
-              this.emitEvent("move", Direction.NORTH);
+              this.emitEvent(Event.MOVE, Direction.NORTH);
             }
             break;
           case "ArrowDown":
             if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
               this.direction = Direction.SOUTH;
               this.running = true;
-              this.emitEvent("move", Direction.SOUTH);
+              this.emitEvent(Event.MOVE, Direction.SOUTH);
             }
             break;
           case "ArrowRight":
             if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
               this.direction = Direction.EAST;
               this.running = true;
-              this.emitEvent("move", Direction.EAST);
+              this.emitEvent(Event.MOVE, Direction.EAST);
             }
             break;
           case "ArrowLeft":
             if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
               this.direction = Direction.WEST;
               this.running = true;
-              this.emitEvent("move", Direction.WEST);
+              this.emitEvent(Event.MOVE, Direction.WEST);
             }
             break;
           case "Enter":
@@ -231,7 +231,7 @@ export class ActivePlayer extends Player {
                 this.onItem.SIZE_Y,
                 item
               );
-              this.emitEvent("drop", 1);
+              this.emitEvent(Event.DROP, ActionBomb.DEFAULT_BOMB);
             }
         }
       }

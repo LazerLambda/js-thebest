@@ -4,6 +4,7 @@ import * as path from "path";
 import { GameBackend } from "./GameBackend";
 //import { SocketState } from "./SocketState";
 import * as fs from "fs";
+import { isRegExp } from "util";
 
 enum SocketStateEnum {
   SELECTION = 0,
@@ -40,6 +41,10 @@ export class Server {
     let io = require("socket.io")(http);
 
     app.get("/", (req: any, res: any) => {
+      res.sendFile(path.resolve("./dist/index.html"));
+    });
+
+    app.get("/game", (req: any, res: any) => {
       res.sendFile(path.resolve("./dist/index.html"));
     });
 
@@ -114,10 +119,12 @@ export class Server {
         socket.on("event", function(data: any) {});
 
         socket.on("disconnecting", function(data: any) {
-          var room = <GameBackend>socket.room;
-          if (room.sendPlayerHasLeft !== null) {
-            room.sendPlayerHasLeft(socket);
-            console.log("disconnecting");
+          if (socket.room) {
+            var room = <GameBackend>socket.room;
+            if (room.sendPlayerHasLeft !== null) {
+              room.sendPlayerHasLeft(socket);
+              console.log("disconnecting");
+            }
           }
         });
 

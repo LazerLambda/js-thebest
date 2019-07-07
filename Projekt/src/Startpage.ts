@@ -20,12 +20,18 @@ export class Startpage {
     {
       if (e.key === "y" && this.gameState.state === 0) {
         this.gameState.socket.emit("mode", "game");
+        if (!this.gameState.socket.connected) {
+          alert("Connection Error");
+        }
         this.gameState.initWaitPageGame();
         document.removeEventListener("keyup", this.eventFunction);
         this.gameState.startpage = null;
       }
       if (e.key === "x" && this.gameState.state === 0) {
         this.gameState.socket.emit("mode", "editor");
+        if (!this.gameState.socket.connected) {
+          alert("Connection Error");
+        }
         this.gameState.initEditor();
         document.removeEventListener("keyup", this.eventFunction);
         this.gameState.startpage = null;
