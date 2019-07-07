@@ -35,14 +35,26 @@ export class GameBackend {
     console.log("Game created");
   }
 
-  emitServerReady() {
+
+  /**
+   * @description
+   * Methode, um die Antwort auf die Anfrage für den Editor oder das Spiel zu beantworten.
+   * Es wird neben der Event-Id die cllientspezifische Nummer für einen Raum mitgesendet.
+   */
+  public emitServerReady() {
     for (let e of this.sockets) {
       console.log("Send to " + e.playerNr);
       e.emit("S_ready", e.playerNr);
     }
   }
 
-  initField(): void {
+
+  /**
+   * @description
+   * Methode für das versenden des Feldes. Der State der Sockets wird nach 
+   * Übersendung dem neuen Zustand angepasst, sodass keine Duplikate gesendet werden.
+   */
+  public initField(): void {
     // Hier optional noch levelcounter überprüfen.
     // für weitere Levels
 
