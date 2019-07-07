@@ -7,11 +7,10 @@ import * as fs from "fs";
 
 enum SocketStateEnum {
   SELECTION = 0,
-  GAME_WAIT= 1,
+  GAME_WAIT = 1,
   DESIGN = 2,
   GAME = 3
 }
-
 
 export class Server {
   server: any;
@@ -66,7 +65,7 @@ export class Server {
               socket.waitingForEditor = true;
               socket.playerNr = this.connectionCounter;
               if (this.checkOtherPlayerPreferences(true)) {
-                var room : GameBackend = <GameBackend> socket.room;
+                var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
                 socket.state = SocketStateEnum.DESIGN;
               }
@@ -75,7 +74,7 @@ export class Server {
               socket.waitingForGame = true;
               socket.playerNr = this.connectionCounter;
               if (this.checkOtherPlayerPreferences(false)) {
-                var room : GameBackend = <GameBackend> socket.room;
+                var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
                 socket.state = SocketStateEnum.GAME_WAIT;
               }
@@ -90,29 +89,23 @@ export class Server {
           }.bind(this)
         );
 
-
         socket.on(
           "G_ready",
           function(data: any) {
             console.log("G_ready received");
             console.log(data);
             if (socket.room !== null) {
-
-              var room : GameBackend = <GameBackend> socket.room;
+              var room: GameBackend = <GameBackend>socket.room;
               room.initField();
-
             }
           }.bind(this)
         );
 
-        socket.on(
-          'event',
-          function(data : any){
-            console.log("'event' received: "+ data);
-            var room = <GameBackend> socket.room;
-            room.sendEventsToPeers(data);
-          }
-        )
+        socket.on("event", function(data: any) {
+          console.log("'event' received: " + data);
+          var room = <GameBackend>socket.room;
+          room.sendEventsToPeers(data);
+        });
 
         console.log(
           "Connection established\n\t'-> Conn Nr : " + this.connectionCounter
@@ -121,8 +114,11 @@ export class Server {
         socket.on("event", function(data: any) {});
 
         socket.on("disconnecting", function(data: any) {
-          console.log(socket.hallo);
-          console.log("disconnecting");
+          var room = <GameBackend>socket.room;
+          if (room.sendPlayerHasLeft !== null) {
+            room.sendPlayerHasLeft(socket);
+            console.log("disconnecting");
+          }
         });
 
         socket.on("disconnect", function(data: any) {});

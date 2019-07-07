@@ -6,6 +6,7 @@ import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
 import { Editor } from "./Editor";
 import { RoomWait } from "./RoomWait";
+import { UserHasLeft } from "./UserHasLeft";
 import * as io from "socket.io-client";
 
 enum serverState {
@@ -32,6 +33,7 @@ export class GameState {
   roomwaitpage: RoomWait;
   editor: Editor;
   state: serverState;
+  userhasleft : UserHasLeft = null;
 
   field: any[][];
   items: Item[];
@@ -197,6 +199,19 @@ export class GameState {
         this.eventQueue.push(data);
       }.bind(this)
     );
+
+    this.socket.on(
+      "user_left",
+      function(data: any) {
+        console.log("HIER");
+        var playerNrTmp = <number>data;
+        this.passivePlayers = this.passivePlayers.filter(function(e: Player) {
+          return e.playerNr !== playerNrTmp;
+        });
+        this.userhasleft = new UserHasLeft(this.context, "" + playerNrTmp, this);
+        this.updateGameInfos();
+      }.bind(this)
+    );
   }
 
   /**
@@ -283,6 +298,9 @@ export class GameState {
         break;
       case serverState.GAME:
         this.updateGame();
+        if(this.userhasleft !== null){
+          this.userhasleft.updateUserHasLeft();
+        }
         break;
       case serverState.GAMEOVER:
         this.updateGame();
@@ -322,6 +340,9 @@ export class GameState {
         break;
       case serverState.GAME: {
         this.showGame();
+        if(this.userhasleft !== null){
+          this.userhasleft.drawUserHasLeft();
+        }
         break;
       }
       case serverState.GAMEOVER:
@@ -356,19 +377,6 @@ export class GameState {
           }
         }.bind(this)
       );
-      // this.context.fillStyle = "blue";
-      // this.context.font = "30px Arial";
-      // this.context.fillText("Player: " + "TESTNAME", 500, 50);
-      // this.context.font = "10px Arial";
-      // this.context.fillText("Punkte: " + "0", 520, 75);
-
-      // // if (!this.player[0].alive) {
-      // //   this.context.fillStyle = "red";
-      // //   this.context.fillRect(600, 60, 100, 20);
-      // //   this.context.fillStyle = "yellow";
-      // //   this.context.font = "10px Arial";
-      // //   this.context.fillText("You loooose xD", 600, 75);
-      // // }
     }
   }
 }

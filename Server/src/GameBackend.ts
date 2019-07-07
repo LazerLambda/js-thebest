@@ -108,4 +108,13 @@ export class GameBackend {
       }
     }
   }
+
+
+  sendPlayerHasLeft(socket : any){
+    for(let e of this.sockets){
+      if(e.id !== socket.id){
+        e.emit('user_left', socket.playerNr);
+      }
+    }
+  }
 }
