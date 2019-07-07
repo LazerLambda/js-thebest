@@ -111,8 +111,6 @@ export class GameState {
     this.socket.on(
       "init_field",
       function(data: any) {
-
-        console.log("EMPFANGEN");
         this.field = data["game_field"];
         this.items = new Array();
 
@@ -175,6 +173,11 @@ export class GameState {
             var passivePlayer = new PassivePlayer(this.context, i);
             passivePlayer.initField(this, field);
             this.passivePlayers.push(passivePlayer);
+
+            if(this.passivePlayers.length > 3){
+              throw "Too many passive Players in list";
+            }
+
             this.update();
             this.draw();
           }
@@ -205,18 +208,20 @@ export class GameState {
       var event = <string>evObject["event"];
       var action = <number>evObject["action"];
 
+      console.log(event);
+
       for (let e of this.passivePlayers) {
         if (e.playerNr === playerNrTmp) {
           if (e.transitionLock) {
             switch (event) {
-              case "bomb":
+              case "drop":
+                console.log("Hier");
                 e.placeBomb();
 
                 this.eventQueue.pop();
 
                 break;
               case "move":
-                console.log(e.onItem.x + " " + e.onItem.y + "\nNummer" + e.playerNr);
                 e.setTarget(action);
 
                 this.eventQueue.pop();
@@ -296,8 +301,6 @@ export class GameState {
         for (let elem of this.items) {
           elem.draw();
         }
-
-        console.log(this.passivePlayers.length);
         for (let elem of this.passivePlayers) {
           elem.drawPlayer();
         }
