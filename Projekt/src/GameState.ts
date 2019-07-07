@@ -27,25 +27,24 @@ enum fieldType {
   BRICK = 3
 }
 
-enum Event{
-  MOVE = 'move',
-  DROP = 'drop',
+enum Event {
+  MOVE = "move",
+  DROP = "drop"
 }
 
-enum ActionBomb{
-  DEFAULT_BOMB = 1,
-  
+enum ActionBomb {
+  DEFAULT_BOMB = 1
 }
 
 export class GameState {
   playerNr: number;
   startpage: Startpage;
   gameover: GameOver;
-  winner : Winner;
+  winner: Winner;
   roomwaitpage: RoomWait;
   editor: Editor;
   state: serverState;
-  userhasleft : UserHasLeft = null;
+  userhasleft: UserHasLeft = null;
 
   field: any[][];
   items: Item[];
@@ -220,7 +219,11 @@ export class GameState {
         this.passivePlayers = this.passivePlayers.filter(function(e: Player) {
           return e.playerNr !== playerNrTmp;
         });
-        this.userhasleft = new UserHasLeft(this.context, "" + playerNrTmp, this);
+        this.userhasleft = new UserHasLeft(
+          this.context,
+          "" + playerNrTmp,
+          this
+        );
         this.updateGameInfos();
       }.bind(this)
     );
@@ -264,6 +267,11 @@ export class GameState {
     }
   }
 
+  /**
+   * Prozedur für die Aktualisierung des Spiels
+   * Nicht nur während des Spiels bedeuetsam, sondern auch während der Gameover oder Winning- Sequenz.
+   */
+
   updateGame() {
     for (let i = 0; i < this.items.length; i++) {
       if (this.items[i] instanceof Hallway) {
@@ -287,16 +295,16 @@ export class GameState {
     var winner = true;
     for (let elem of this.passivePlayers) {
       this.handleNetworkInput();
-      winner = !elem.alive && winner;         // überprüfe, ob die anderen Spieler noch teilnehmen
+      winner = !elem.alive && winner; // überprüfe, ob die anderen Spieler noch teilnehmen
       elem.renderPlayer();
     }
     console.log(winner);
 
-    if(winner || this.passivePlayers.length === 0){
+    if (winner || this.passivePlayers.length === 0) {
       this.winner = new Winner(this.context);
       this.state = serverState.WINNER;
     }
-    
+
     if (this.activePlayer !== null) {
       this.activePlayer.renderPlayer();
       if (!this.activePlayer.alive) {
@@ -306,6 +314,11 @@ export class GameState {
     }
   }
 
+
+
+  /**
+   * Standard update Methode für alle Zustände
+   */
   update() {
     switch (this.state) {
       case serverState.SELECTION:
@@ -319,7 +332,7 @@ export class GameState {
         break;
       case serverState.GAME:
         this.updateGame();
-        if(this.userhasleft !== null){
+        if (this.userhasleft !== null) {
           this.userhasleft.updateUserHasLeft();
         }
         break;
@@ -335,7 +348,14 @@ export class GameState {
     }
   }
 
-  showGame() {
+
+
+  /**
+   * Prozedur für die Aktualisierung des Spiels
+   * Nicht nur während des Spiels bedeuetsam, sondern auch während der Gameover oder Winning- Sequenz.
+   */
+
+  drawGame() {
     this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
     for (let elem of this.items) {
       elem.draw();
@@ -348,6 +368,12 @@ export class GameState {
       this.activePlayer.drawPlayer();
     }
   }
+
+
+
+  /**
+   * Standard draw Methode für alle Zustände
+   */
 
   draw() {
     switch (this.state) {
@@ -362,42 +388,44 @@ export class GameState {
       case serverState.FIELD_WAIT:
         break;
       case serverState.GAME: {
-        this.showGame();
-        if(this.userhasleft !== null){
+        this.drawGame();
+        if (this.userhasleft !== null) {
           this.userhasleft.drawUserHasLeft();
         }
         break;
       }
       case serverState.GAMEOVER:
-        this.showGame();
+        this.drawGame();
         this.gameover.drawGameOver();
         break;
       case serverState.WINNER:
-          this.showGame();
-          this.winner.drawWinner();
+        this.drawGame();
+        this.winner.drawWinner();
         break;
     }
   }
 
+
+/**
+ *  Methode zur Anzeige der Informationen auf der rechten Seite
+ */
   updateGameInfos() {
     if (this.state === serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);
-      this.context.fillStyle = "yellow";
+      this.context.fillStyle = "#cccccc";
       this.context.fillRect(480, 0, 300, 480);
 
       let players: Player[] = <Player[]>this.passivePlayers.slice();
       players.concat(this.activePlayer).forEach(
         function(e: Player, i: number) {
-          this.context.fillStyle = "blue";
-          this.context.font = "25px Arial";
+          this.context.fillStyle = "black";
+          this.context.font = "25px Mistral";
           this.context.fillText("Player: " + e.playerNr, 500, (i + 1) * 50); // Dynamisch machen
-          this.context.font = "10px Arial";
+          this.context.font = "13px Avenir";
           this.context.fillText("Punkte: " + "0", 520, (i + 1) * 50 + 25);
           if (!e.alive) {
-            //this.context.fillStyle = "red";
-            //this.context.fillRect(600, 60, 100, 20);
-            this.context.fillStyle = "red";
-            this.context.font = "10px Arial";
+            this.context.fillStyle = "#f1651c";
+            this.context.font = "10px Avenir";
             this.context.fillText("You loooose xD", 600, (i + 1) * 50 + 25);
           }
         }.bind(this)
