@@ -4,7 +4,6 @@ import * as path from "path";
 import { GameBackend } from "./GameBackend";
 //import { SocketState } from "./SocketState";
 import * as fs from "fs";
-import { Game } from "./Game";
 
 enum SocketStateEnum {
   SELECTION = 0,
