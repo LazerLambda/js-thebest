@@ -1,18 +1,20 @@
 import { ActivePlayer, Player, PassivePlayer } from "./Player";
 import { Hallway, Hole, Item, Wall } from "./Item";
-import { Brick } from './Brick';
+import { Brick } from "./Brick";
 import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
 import { Editor } from "./Editor";
+import { RoomWait } from "./RoomWait";
 import * as io from "socket.io-client";
 
 enum serverState {
   SELECTION = 0,
-  DESIGN = 1,
-  FIELD_WAIT = 2,
-  GAME = 3,
-  GAMEOVER = 4,
-  CONNECTION_LOST = 5
+  ROOM_WAIT = 1,
+  DESIGN = 2,
+  FIELD_WAIT = 3,
+  GAME = 4,
+  GAMEOVER = 5,
+  CONNECTION_LOST = 6
 }
 
 enum fieldType {
@@ -25,6 +27,7 @@ enum fieldType {
 export class GameState {
   playerNr: number;
   startpage: Startpage;
+  roomwaitpage: RoomWait;
   editor: Editor;
   state: serverState;
 
@@ -45,6 +48,8 @@ export class GameState {
 
   explosions: Explosion[] = [];
 
+  eventQueue: object[] = [];
+
   playerObj: Object = {
     1: null,
     2: null,
@@ -64,9 +69,32 @@ export class GameState {
     this.ySize = canvas.height / 8;
 
     this.initStartPage();
+  }
 
-    // this.socket.emit("mode", "game");
-    // this.initGame();
+  initWaitPageGame() {
+    this.state = serverState.ROOM_WAIT;
+    this.roomwaitpage = new RoomWait(this.context, this);
+    this.socket.on(
+      "S_ready",
+      function(data: any) {
+        this.playerNr = <number>data;
+        this.socket.emit("G_ready", "Name");
+        this.initGame();
+      }.bind(this)
+    );
+  }
+
+  initWaitPageEditor() {
+    this.state = serverState.ROOM_WAIT;
+    this.roomwaitpage = new RoomWait(this.context, this);
+    this.socket.on(
+      "S_ready",
+      function(data: any) {
+        this.playerNr = <number>data;
+        this.socket.emit("G_ready", "Name");
+        this.initEditor();
+      }.bind(this)
+    );
   }
 
   initStartPage() {
@@ -74,22 +102,17 @@ export class GameState {
     this.startpage = new Startpage(this.context, this);
   }
 
-  initDesign() {
+  initEditor() {
     this.state = serverState.DESIGN;
     this.editor = new Editor(this.context);
   }
 
   initGame() {
     this.socket.on(
-      "S_ready",
-      function(data: any) {
-        this.playerNr = <number>data;
-        this.socket.emit("G_ready", "Name");
-      }.bind(this)
-    );
-    this.socket.on(
       "init_field",
       function(data: any) {
+
+        console.log("EMPFANGEN");
         this.field = data["game_field"];
         this.items = new Array();
 
@@ -138,7 +161,7 @@ export class GameState {
           var x: number = <number>player["startpos"]["x"];
           var y: number = <number>player["startpos"]["y"];
 
-          this.state = serverState.GAME;
+          // this.state = serverState.GAME;
           // 8 dynamisch
 
           var pos: number = x + y * 8;
@@ -155,15 +178,65 @@ export class GameState {
             this.update();
             this.draw();
           }
+          this.state = serverState.GAME;
         }
         this.updateGameInfos();
       }.bind(this)
     );
+
+    // Verarbeitung von eingehenden Events
+
+    this.socket.on(
+      "event",
+      function(data: any) {
+        this.eventQueue.push(data);
+      }.bind(this)
+    );
+  }
+
+  /**
+   * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
+   */
+  handleNetworkInput(): void {
+    if (this.eventQueue.length > 0) {
+      
+      var evObject: any = this.eventQueue[0];
+      var playerNrTmp = <number>evObject["playerId"];
+      var event = <string>evObject["event"];
+      var action = <number>evObject["action"];
+
+      for (let e of this.passivePlayers) {
+        if (e.playerNr === playerNrTmp) {
+          if (e.transitionLock) {
+            switch (event) {
+              case "bomb":
+                e.placeBomb();
+
+                this.eventQueue.pop();
+
+                break;
+              case "move":
+                console.log(e.onItem.x + " " + e.onItem.y + "\nNummer" + e.playerNr);
+                e.setTarget(action);
+
+                this.eventQueue.pop();
+
+                break;
+            }
+          }
+        }
+      }
+    } else {
+      return;
+    }
   }
 
   update() {
     switch (this.state) {
       case serverState.SELECTION:
+        break;
+      case serverState.ROOM_WAIT:
+        this.roomwaitpage.updateRoomWait();
         break;
       case serverState.DESIGN:
         break;
@@ -173,12 +246,6 @@ export class GameState {
         for (let i = 0; i < this.items.length; i++) {
           if (this.items[i] instanceof Hallway) {
             var tmpItem = <Hallway>this.items[i];
-
-            // if(tmpItem.x)
-            // for(let e of tmpItem.playerOn){
-            //   // console.log("x :" + tmpItem.y + ", y:" + tmpItem.y);
-            //   // console.log("Nr: " + e.playerNr);
-            // }
             if (tmpItem.bombOnItem !== null) {
               if (tmpItem.bombOnItem.explode) {
                 this.explosions.push(new Explosion(tmpItem, this));
@@ -196,6 +263,7 @@ export class GameState {
         }
 
         for (let elem of this.passivePlayers) {
+          this.handleNetworkInput();
           elem.renderPlayer();
         }
         if (this.activePlayer !== null) {
@@ -215,6 +283,10 @@ export class GameState {
     switch (this.state) {
       case serverState.SELECTION:
         break;
+      case serverState.ROOM_WAIT:
+        this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.roomwaitpage.drawRoomWait();
+        break;
       case serverState.DESIGN:
         break;
       case serverState.FIELD_WAIT:
@@ -225,6 +297,7 @@ export class GameState {
           elem.draw();
         }
 
+        console.log(this.passivePlayers.length);
         for (let elem of this.passivePlayers) {
           elem.drawPlayer();
         }
