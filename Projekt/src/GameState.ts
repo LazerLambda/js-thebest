@@ -1,5 +1,6 @@
 import { ActivePlayer, Player, PassivePlayer } from "./Player";
 import { Hallway, Hole, Item, Wall } from "./Item";
+import { GameOver } from "./GameOver";
 import { Brick } from "./Brick";
 import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
@@ -27,6 +28,7 @@ enum fieldType {
 export class GameState {
   playerNr: number;
   startpage: Startpage;
+  gameover: GameOver;
   roomwaitpage: RoomWait;
   editor: Editor;
   state: serverState;
@@ -174,7 +176,7 @@ export class GameState {
             passivePlayer.initField(this, field);
             this.passivePlayers.push(passivePlayer);
 
-            if(this.passivePlayers.length > 3){
+            if (this.passivePlayers.length > 3) {
               throw "Too many passive Players in list";
             }
 
@@ -202,7 +204,6 @@ export class GameState {
    */
   handleNetworkInput(): void {
     if (this.eventQueue.length > 0) {
-      
       var evObject: any = this.eventQueue[0];
       var playerNrTmp = <number>evObject["playerId"];
       var event = <string>evObject["event"];
@@ -236,6 +237,39 @@ export class GameState {
     }
   }
 
+  updateGame() {
+    for (let i = 0; i < this.items.length; i++) {
+      if (this.items[i] instanceof Hallway) {
+        var tmpItem = <Hallway>this.items[i];
+        if (tmpItem.bombOnItem !== null) {
+          if (tmpItem.bombOnItem.explode) {
+            this.explosions.push(new Explosion(tmpItem, this));
+          }
+        }
+      }
+    }
+
+    for (let elem of this.explosions) {
+      elem.update();
+    }
+
+    for (let elem of this.items) {
+      elem.update();
+    }
+
+    for (let elem of this.passivePlayers) {
+      this.handleNetworkInput();
+      elem.renderPlayer();
+    }
+    if (this.activePlayer !== null) {
+      this.activePlayer.renderPlayer();
+      if (!this.activePlayer.alive) {
+        this.gameover = new GameOver(this.context);
+        this.state = serverState.GAMEOVER;
+      }
+    }
+  }
+
   update() {
     switch (this.state) {
       case serverState.SELECTION:
@@ -247,40 +281,30 @@ export class GameState {
         break;
       case serverState.FIELD_WAIT:
         break;
-      case serverState.GAME: {
-        for (let i = 0; i < this.items.length; i++) {
-          if (this.items[i] instanceof Hallway) {
-            var tmpItem = <Hallway>this.items[i];
-            if (tmpItem.bombOnItem !== null) {
-              if (tmpItem.bombOnItem.explode) {
-                this.explosions.push(new Explosion(tmpItem, this));
-              }
-            }
-          }
-        }
-
-        for (let elem of this.explosions) {
-          elem.update();
-        }
-
-        for (let elem of this.items) {
-          elem.update();
-        }
-
-        for (let elem of this.passivePlayers) {
-          this.handleNetworkInput();
-          elem.renderPlayer();
-        }
-        if (this.activePlayer !== null) {
-          this.activePlayer.renderPlayer();
-        }
-
+      case serverState.GAME:
+        this.updateGame();
         break;
-      }
       case serverState.GAMEOVER:
+        this.updateGame();
+        this.gameover.updateGameOver();
+        this.updateGameInfos();
         break;
       case serverState.CONNECTION_LOST:
         break;
+    }
+  }
+
+  showGame() {
+    this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
+    for (let elem of this.items) {
+      elem.draw();
+    }
+    for (let elem of this.passivePlayers) {
+      elem.drawPlayer();
+    }
+
+    if (this.activePlayer !== null) {
+      this.activePlayer.drawPlayer();
     }
   }
 
@@ -289,7 +313,7 @@ export class GameState {
       case serverState.SELECTION:
         break;
       case serverState.ROOM_WAIT:
-        this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
         this.roomwaitpage.drawRoomWait();
         break;
       case serverState.DESIGN:
@@ -297,20 +321,12 @@ export class GameState {
       case serverState.FIELD_WAIT:
         break;
       case serverState.GAME: {
-        this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-        for (let elem of this.items) {
-          elem.draw();
-        }
-        for (let elem of this.passivePlayers) {
-          elem.drawPlayer();
-        }
-
-        if (this.activePlayer !== null) {
-          this.activePlayer.drawPlayer();
-        }
+        this.showGame();
         break;
       }
       case serverState.GAMEOVER:
+        this.showGame();
+        this.gameover.drawGameOver();
         break;
       case serverState.CONNECTION_LOST:
         break;
@@ -322,20 +338,37 @@ export class GameState {
       this.context.clearRect(480, 0, 300, 480);
       this.context.fillStyle = "yellow";
       this.context.fillRect(480, 0, 300, 480);
-      this.context.fillStyle = "blue";
-      this.context.font = "30px Arial";
-      this.context.fillText("Player: " + "TESTNAME", 500, 50);
-      this.context.font = "10px Arial";
-      this.context.fillText("Punkte: " + "0", 520, 75);
 
-      // if (!this.player[0].alive) {
-      //   this.context.fillStyle = "red";
-      //   this.context.fillRect(600, 60, 100, 20);
-      //   this.context.fillStyle = "yellow";
-      //   this.context.font = "10px Arial";
-      //   this.context.fillText("You loooose xD", 600, 75);
-      // }
+      let players: Player[] = <Player[]>this.passivePlayers.slice();
+      players.concat(this.activePlayer).forEach(
+        function(e: Player, i: number) {
+          this.context.fillStyle = "blue";
+          this.context.font = "25px Arial";
+          this.context.fillText("Player: " + e.playerNr, 500, (i + 1) * 50); // Dynamisch machen
+          this.context.font = "10px Arial";
+          this.context.fillText("Punkte: " + "0", 520, (i + 1) * 50 + 25);
+          if (!e.alive) {
+            //this.context.fillStyle = "red";
+            //this.context.fillRect(600, 60, 100, 20);
+            this.context.fillStyle = "red";
+            this.context.font = "10px Arial";
+            this.context.fillText("You loooose xD", 600, (i + 1) * 50 + 25);
+          }
+        }.bind(this)
+      );
+      // this.context.fillStyle = "blue";
+      // this.context.font = "30px Arial";
+      // this.context.fillText("Player: " + "TESTNAME", 500, 50);
+      // this.context.font = "10px Arial";
+      // this.context.fillText("Punkte: " + "0", 520, 75);
+
+      // // if (!this.player[0].alive) {
+      // //   this.context.fillStyle = "red";
+      // //   this.context.fillRect(600, 60, 100, 20);
+      // //   this.context.fillStyle = "yellow";
+      // //   this.context.font = "10px Arial";
+      // //   this.context.fillText("You loooose xD", 600, 75);
+      // // }
     }
   }
-  updateIncommingPlayerMove(playerName: string, move: number) {}
 }
