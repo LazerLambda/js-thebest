@@ -27,6 +27,16 @@ enum fieldType {
   BRICK = 3
 }
 
+enum Event{
+  MOVE = 'move',
+  DROP = 'drop',
+}
+
+enum ActionBomb{
+  DEFAULT_BOMB = 1,
+  
+}
+
 export class GameState {
   playerNr: number;
   startpage: Startpage;
@@ -232,14 +242,14 @@ export class GameState {
         if (e.playerNr === playerNrTmp) {
           if (e.transitionLock) {
             switch (event) {
-              case "drop":
+              case Event.DROP:
                 console.log("Hier");
                 e.placeBomb();
 
                 this.eventQueue.pop();
 
                 break;
-              case "move":
+              case Event.MOVE:
                 e.setTarget(action);
 
                 this.eventQueue.pop();

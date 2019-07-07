@@ -13,18 +13,11 @@ enum Direction {
 enum Event{
   MOVE = 'move',
   DROP = 'drop',
-
 }
 
-//Animation
-let img: any = new Image();
-img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
-img.onload = function() {
-  init();
-};
-
-function init() {
-  this.startAnimating(200);
+enum ActionBomb{
+  DEFAULT_BOMB = 1,
+  
 }
 
 export class Player {
@@ -238,7 +231,7 @@ export class ActivePlayer extends Player {
                 this.onItem.SIZE_Y,
                 item
               );
-              this.emitEvent(Event.DROP, 1);
+              this.emitEvent(Event.DROP, ActionBomb.DEFAULT_BOMB);
             }
         }
       }
