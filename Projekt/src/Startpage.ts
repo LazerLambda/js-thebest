@@ -21,7 +21,7 @@ export class Startpage {
       if (e.key === "y" && this.gameState.state === 0) {
         this.gameState.socket.emit("mode", "game");
         if (!this.gameState.socket.connected) {
-          alert("Connection Error");
+          alert("Connection Error\n\t'->Maybe Server isn't running");
         }
         this.gameState.initWaitPageGame();
         document.removeEventListener("keyup", this.eventFunction);
@@ -30,7 +30,7 @@ export class Startpage {
       if (e.key === "x" && this.gameState.state === 0) {
         this.gameState.socket.emit("mode", "editor");
         if (!this.gameState.socket.connected) {
-          alert("Connection Error");
+          alert("Connection Error\n\t'->Maybe Server isn't running");
         }
         this.gameState.initEditor();
         document.removeEventListener("keyup", this.eventFunction);
