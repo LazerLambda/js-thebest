@@ -8,9 +8,11 @@ import { Game } from "./Game";
 
 enum SocketStateEnum {
   SELECTION = 0,
-  DESIGN = 1,
-  GAME = 2
+  GAME_WAIT= 1,
+  DESIGN = 2,
+  GAME = 3
 }
+
 
 export class Server {
   server: any;
@@ -52,49 +54,66 @@ export class Server {
         socket.state = SocketStateEnum.SELECTION;
         socket.waitingForEditor = false;
         socket.waitingForGame = false;
-        socket.room =  null;
+        socket.room = null;
+        socket.playerNr = 0;
 
         socket.on(
           "mode",
           function(data: any) {
             console.log(socket.id + "has joined");
             console.log("Received 'mode': " + data);
+
             if (data === "editor") {
               socket.waitingForEditor = true;
+              socket.playerNr = this.connectionCounter;
               if (this.checkOtherPlayerPreferences(true)) {
-                socket.emit("S_ready", this.connectionCounter);
+                var room : GameBackend = <GameBackend> socket.room;
+                room.emitServerReady();
                 socket.state = SocketStateEnum.DESIGN;
               }
             }
             if (data === "game") {
               socket.waitingForGame = true;
+              socket.playerNr = this.connectionCounter;
               if (this.checkOtherPlayerPreferences(false)) {
-                socket.emit("S_ready", 2);
-                socket.state = SocketStateEnum.GAME;
+                var room : GameBackend = <GameBackend> socket.room;
+                room.emitServerReady();
+                socket.state = SocketStateEnum.GAME_WAIT;
               }
             }
 
             // Erst hier erhöhen, damit nur valide Verbindungen gezählt werden
             if (this.connectionCounter === this.MAX_PLAYER) {
-                this.connectionCounter = 1;
-              } else {
-                ++this.connectionCounter;
-              }
+              this.connectionCounter = 1;
+            } else {
+              ++this.connectionCounter;
+            }
           }.bind(this)
         );
+
 
         socket.on(
           "G_ready",
           function(data: any) {
             console.log("G_ready received");
             console.log(data);
-            var file: any = fs.readFileSync("./Fields/Field0.json");
-            var field: Object = JSON.parse(file);
-            socket.emit("init_field", field);
-            console.log(field);
-            console.log("Field sent");
+            if (socket.room !== null) {
+
+              var room : GameBackend = <GameBackend> socket.room;
+              room.initField();
+
+            }
           }.bind(this)
         );
+
+        socket.on(
+          'event',
+          function(data : any){
+            console.log("'event' received: "+ data);
+            var room = <GameBackend> socket.room;
+            room.sendEventsToPeers(data);
+          }
+        )
 
         console.log(
           "Connection established\n\t'-> Conn Nr : " + this.connectionCounter

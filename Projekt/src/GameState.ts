@@ -4,8 +4,8 @@ import { Brick } from "./Brick";
 import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
 import { Editor } from "./Editor";
-import * as io from "socket.io-client";
 import { RoomWait } from "./RoomWait";
+import * as io from "socket.io-client";
 
 enum serverState {
   SELECTION = 0,
@@ -47,6 +47,8 @@ export class GameState {
   passivePlayers: PassivePlayer[] = [];
 
   explosions: Explosion[] = [];
+
+  eventQueue: object[] = [];
 
   playerObj: Object = {
     1: null,
@@ -109,6 +111,8 @@ export class GameState {
     this.socket.on(
       "init_field",
       function(data: any) {
+
+        console.log("EMPFANGEN");
         this.field = data["game_field"];
         this.items = new Array();
 
@@ -157,7 +161,7 @@ export class GameState {
           var x: number = <number>player["startpos"]["x"];
           var y: number = <number>player["startpos"]["y"];
 
-          this.state = serverState.GAME;
+          // this.state = serverState.GAME;
           // 8 dynamisch
 
           var pos: number = x + y * 8;
@@ -174,10 +178,57 @@ export class GameState {
             this.update();
             this.draw();
           }
+          this.state = serverState.GAME;
         }
         this.updateGameInfos();
       }.bind(this)
     );
+
+    // Verarbeitung von eingehenden Events
+
+    this.socket.on(
+      "event",
+      function(data: any) {
+        this.eventQueue.push(data);
+      }.bind(this)
+    );
+  }
+
+  /**
+   * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
+   */
+  handleNetworkInput(): void {
+    if (this.eventQueue.length > 0) {
+      
+      var evObject: any = this.eventQueue[0];
+      var playerNrTmp = <number>evObject["playerId"];
+      var event = <string>evObject["event"];
+      var action = <number>evObject["action"];
+
+      for (let e of this.passivePlayers) {
+        if (e.playerNr === playerNrTmp) {
+          if (e.transitionLock) {
+            switch (event) {
+              case "bomb":
+                e.placeBomb();
+
+                this.eventQueue.pop();
+
+                break;
+              case "move":
+                console.log(e.onItem.x + " " + e.onItem.y + "\nNummer" + e.playerNr);
+                e.setTarget(action);
+
+                this.eventQueue.pop();
+
+                break;
+            }
+          }
+        }
+      }
+    } else {
+      return;
+    }
   }
 
   update() {
@@ -195,12 +246,6 @@ export class GameState {
         for (let i = 0; i < this.items.length; i++) {
           if (this.items[i] instanceof Hallway) {
             var tmpItem = <Hallway>this.items[i];
-
-            // if(tmpItem.x)
-            // for(let e of tmpItem.playerOn){
-            //   // console.log("x :" + tmpItem.y + ", y:" + tmpItem.y);
-            //   // console.log("Nr: " + e.playerNr);
-            // }
             if (tmpItem.bombOnItem !== null) {
               if (tmpItem.bombOnItem.explode) {
                 this.explosions.push(new Explosion(tmpItem, this));
@@ -218,6 +263,7 @@ export class GameState {
         }
 
         for (let elem of this.passivePlayers) {
+          this.handleNetworkInput();
           elem.renderPlayer();
         }
         if (this.activePlayer !== null) {
@@ -251,6 +297,7 @@ export class GameState {
           elem.draw();
         }
 
+        console.log(this.passivePlayers.length);
         for (let elem of this.passivePlayers) {
           elem.drawPlayer();
         }

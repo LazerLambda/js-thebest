@@ -1,18 +1,25 @@
-// import { SocketState } from "./SocketState";
+import * as fs from "fs";
 import { Server } from "./Server";
 
+enum SocketStateEnum {
+  SELECTION = 0,
+  GAME_WAIT= 1,
+  DESIGN = 2,
+  GAME = 3
+}
 
 export class GameBackend {
   sockets: any[] = [];
   server: Server = null;
   gameNumber: any = 0;
+  levelCounter: number = 1;
 
   constructor(sockets: any[], server: Server) {
     this.sockets = sockets;
     this.server = server;
 
-    for(let e of sockets){
-        console.log(e.id);
+    for (let e of sockets) {
+      console.log(e.id);
     }
 
     for (let e of sockets) {
@@ -26,6 +33,30 @@ export class GameBackend {
     }
 
     console.log("Game created");
+  }
+
+  emitServerReady() {
+    for (let e of this.sockets) {
+      console.log("Send to " + e.playerNr);
+      e.emit("S_ready", e.playerNr);
+    }
+  }
+
+  initField(): void {
+    // Hier optional noch levelcounter überprüfen.
+    // für weitere Levels
+
+    var file: any = fs.readFileSync("./Fields/Field0.json");
+    var field: Object = JSON.parse(file);
+    for (let e of this.sockets) {
+      if (e.state !== SocketStateEnum.GAME) {
+        e.emit("init_field", field);
+        console.log(e.id + "" + e.state);
+        e.state = SocketStateEnum.GAME;
+        console.log(e.id + "" + e.state);
+        console.log("Field sent to " + e.id);
+      }
+    }
   }
 
   /**
@@ -48,14 +79,20 @@ export class GameBackend {
     return getSock(listTmp);
   }
 
+  /**
+   * Methode, um die Bewegungen der weiteren Spieler an die
+   * @param eventObjectToSend Objekt, welches an die weiteren Spieler gesendet werden soll
+   */
+
   sendEventsToPeers(eventObjectToSend: any) {
     var playerNrTMP: number = <number>eventObjectToSend["playerId"];
-
+    console.log(playerNrTMP);
     for (let i = 0; i < this.sockets.length; i++) {
-      if (playerNrTMP === i) {
+      if (playerNrTMP === this.sockets[i].playerNr) {
         continue;
       } else {
-        this.sockets[i].socket.emit(eventObjectToSend);
+        console.log("Sent to " + this.sockets[i].id);
+        this.sockets[i].emit("event", eventObjectToSend);
       }
     }
   }
