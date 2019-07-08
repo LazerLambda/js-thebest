@@ -44,7 +44,8 @@ export class GameBackend {
   public emitServerReady() {
     for (let e of this.sockets) {
       console.log("Send to " + e.playerNr);
-      e.emit("S_ready", e.playerNr);
+      var toSend : object = {'playerId': e.playerNr, 'playerName': e.name}
+      e.emit("S_ready", toSend);
     }
   }
 
