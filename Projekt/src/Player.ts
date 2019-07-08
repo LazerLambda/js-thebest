@@ -10,13 +10,12 @@ enum Direction {
   EAST = 3
 }
 
-
 //Animation
-let img : any = new Image();
-img.src = 'http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png';
+let img: any = new Image();
+img.src = "http://tsgk.captainn.net/sheets/nes/bomberman2_various_sheet.png";
 img.onload = function() {
   init();
-}
+};
 
 function init() {
   this.startAnimating(200);
@@ -49,23 +48,27 @@ export class Player {
 
   xPos: number;
   yPos: number;
-  constructor(context: any) {
+
+  playerNr: number;
+
+  constructor(context: any, playerNr: any) {
     this.xPos = 0;
     this.yPos = 0;
+    this.playerNr = playerNr;
 
     this.field = null;
     this.onItem = null;
     this.running = false;
     this.animatedObject = new AnimatedObject(this);
+    this.context = context;
 
-    this.canvas = <HTMLCanvasElement>document.getElementById("game-layer");
-    this.context = this.canvas.getContext("2d");
+    this.currentDirection = 3;
   }
 
   initField(field: GameState, item: Hallway) {
     this.field = field;
-
-    item.playerOn = this;
+    item.playerOn.push(this);
+    this.target = item.x + item.y * 8;
     this.onItem = item;
     this.xPos = item.x * this.field.xSize;
     this.yPos = item.y * this.field.ySize;
@@ -105,9 +108,10 @@ export class Player {
         // Player auf neues Feld setzen
         var tmpItem = <Hallway>this.onItem;
         this.onItem = this.field.items[this.target];
-        this.onItem.playerOn = this;
-        tmpItem.playerOn = null;
-        this.field.playerPos = this.target;
+        this.onItem.playerOn.push(this);
+        tmpItem.playerOn = tmpItem.playerOn.filter(e => {
+          e.playerNr !== this.playerNr;
+        });
 
         this.xPos = this.onItem.x * this.field.xSize;
         this.yPos = this.onItem.y * this.field.ySize;
@@ -116,14 +120,15 @@ export class Player {
   }
 
   drawPlayer() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.alive) {
       // GameOverAnimation
 
       if (this.loosingSequence < 0) {
         // Game over
 
-        this.onItem.playerOn = null;
+        this.onItem.playerOn = this.onItem.playerOn.filter(e => {
+          e.playerNr !== this.playerNr;
+        });
         this.field.updateGameInfos();
       } else {
         /**
@@ -135,19 +140,14 @@ export class Player {
       }
       --this.loosingSequence;
     } else {
-      this.animatedObject.animate(
-        this.currentDirection,
-        this.xPos,
-        this.yPos
-      );
+      this.animatedObject.animate(this.currentDirection, this.xPos, this.yPos);
     }
   }
-
 }
 
 export class ActivePlayer extends Player {
-  constructor(context: any) {
-    super(context);
+  constructor(context: any, playerNr: number) {
+    super(context, playerNr);
 
     document.addEventListener("keydown", e => {
       if (!this.running && this.alive) {
@@ -226,5 +226,11 @@ export class ActivePlayer extends Player {
         }
       }
     }
+  }
+}
+
+export class PassivePlayer extends Player {
+  constructor(context: any, playerNr: number) {
+    super(context, playerNr);
   }
 }
