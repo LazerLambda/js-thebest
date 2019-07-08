@@ -1,9 +1,9 @@
 import { Player } from "./Player";
 import { Explosion } from "./Explosion";
-import { Item } from "./Item";
+import { Item, Bomb, Hallway } from "./Item";
 
 export class useableItem {
-
+defaultName : string = "Item 0"
 playerOn: Player = null;
 usingPlayer: Player = null;
 static: boolean = false;  // der Spieler kann das Item aufnehmen | nicht aufnehmen
@@ -14,26 +14,25 @@ SIZE_Y: number;
 x: number;  //koordinaten
 y: number;
 
-inventorySpaceX:number = 0; //Koordinaten der inventaranzeige
-inventorySpaceY:number = 0;
+
 
 spriteWidth: number = 40;
 spriteHeight: number = 30;
 
 constructor(
     context: any,
-    xPos: number,
-    yPos: number,
-    xSize: number,
-    ySize: number
+    //xPos: number,
+    //yPos: number,
+    //xSize: number,
+    //ySize: number
   ) {
     this.context = context;
 
-    this.x = xPos;
-    this.y = yPos;
+    //this.x = xPos;
+    //this.y = yPos;
 
-    this.SIZE_X = xSize;
-    this.SIZE_Y = ySize;
+    //this.SIZE_X = xSize;
+    //this.SIZE_Y = ySize;
   }
 
 
@@ -72,7 +71,7 @@ export class remoteBombKit extends useableItem {
     trigger: remote;
     
     use() {
-         this.trigger = new remote("2d",this.inventorySpaceX,this.inventorySpaceY,40,30);
+         //this.trigger = new remote("2d",this.inventorySpaceX,this.inventorySpaceY,40,30);
          this.usingPlayer.inventory = this.trigger;
          new remoteBomb("2d",this.usingPlayer.xPos,this.usingPlayer.yPos,40,30,this.trigger);
          
@@ -100,7 +99,7 @@ export class remoteBomb extends useableItem {
         ySize: number,
         RemoteControl:remote
         ) {
-        super(context, xPos, yPos, xSize, ySize);
+        super(context) //xPos, yPos, xSize, ySize);
         this.trigger = RemoteControl;
 
     }
@@ -153,22 +152,22 @@ export class spring extends Item {
  PLS: possibleLandingSpot[] = [];
    
  getPossibleLandingSpots(){
-        for (let i  = 0;i < fields.MaxX;i++){ // höchste x Koordinate
-            for (let j  = 0;i < fields.MaxY;i++){ //höchste y Koordinate
-                if (fields[this.x][this.y].fieldtype == HALLWAY || 
-                    fields[this.x][this.y].fieldtype == HOLE){
+        for (let i  = 0;i <= 8;i++){ // höchste x Koordinate
+            for (let j  = 0;i <= 8;i++){ //höchste y Koordinate
+                if (this.playerOn.field.field[this.x][this.y].fieldtype == HALLWAY || 
+                    this.playerOn.field.field[this.x][this.y].fieldtype == HOLE){
                     this.PLS.push(new possibleLandingSpot(i,j));
                 }
         }
 
     }
-}
-    
+}  
     update() {
         if (this.playerOn != null){
                  this.getPossibleLandingSpots();
                  var x = Math.floor(Math.random()*(this.PLS.length - 1));
-                 this.playerOn.field = fields[this.PLS[x].x][this.PLS[x].y];
+                 var test : number = <number> this.PLS[x].x * <number> this.PLS[x].y * 8 ; // dynamisch machen
+                 this.playerOn.field = this.playerOn.field.field[test];
             
         }
 
@@ -177,7 +176,7 @@ export class spring extends Item {
     
 
 // Bombe mit größerem Radius
-export class nuke extends useableItem {
+export class nuke extends Bomb {
 
     use() {
          
@@ -185,34 +184,56 @@ export class nuke extends useableItem {
 }
 //Spieler fügt allen gegnern in einer geraden Linie Schaden zu
 export class laserGun extends useableItem {
+     
 
-    use() {
+    use() {switch (this.playerOn.direction) {
+        case this.playerOn.direction = 0: {
+           
+     
+          break;
+        }
+        case this.playerOn.direction = 1: {
+          
+          break;
+        }
+        case this.playerOn.direction = 2: {
+
+           break;
+        }
+        case this.playerOn.direction = 3: {
+        
+          break;
+        }
+      }
+    this.usingPlayer.inventory = null;
+    
+}
          
     }
-}
+
 //plazierbares Hole-Feld
 export class portableHole extends useableItem {
 
     use() {
         switch (this.playerOn.direction) {
             case this.playerOn.direction = 0: {
-                if (fields[this.playerOn.xPos][this.playerOn.yPos-1].fieldtype = HALLWAY){
-                fields[this.playerOn.xPos][this.playerOn.yPos-1].fieldtype = HOLE;}
+                if (this.usingPlayer.field.field[this.playerOn.xPos][this.playerOn.yPos-1].fieldtype = HALLWAY){ //check ob zielfeld frei ist
+                    this.usingPlayer.field.field[this.playerOn.xPos][this.playerOn.yPos-1].fieldtype = HOLE;}    //typ von zielfeld wird in Hole geändert
               break;
             }
             case this.playerOn.direction = 1: {
-                if (fields[this.playerOn.xPos+1][this.playerOn.yPos].fieldtype = HALLWAY){
-                fields[this.playerOn.xPos+1][this.playerOn.yPos].fieldtype = HOLE;}
+                if (this.usingPlayer.field.field[this.playerOn.xPos+1][this.playerOn.yPos].fieldtype = HALLWAY){
+                    this.usingPlayer.field.field[this.playerOn.xPos+1][this.playerOn.yPos].fieldtype = HOLE;}
               break;
             }
             case this.playerOn.direction = 2: {
-                if (fields[this.playerOn.xPos][this.playerOn.yPos+1].fieldtype = HALLWAY){
-                fields[this.playerOn.xPos][this.playerOn.yPos+1].fieldtype = HOLE;}
+                if (this.usingPlayer.field.field[this.playerOn.xPos][this.playerOn.yPos+1].fieldtype = HALLWAY){
+                    this.usingPlayer.field.field[this.playerOn.xPos][this.playerOn.yPos+1].fieldtype = HOLE;}
               break;
             }
             case this.playerOn.direction = 3: {
-                if (fields[this.playerOn.xPos-1][this.playerOn.yPos].fieldtype = HALLWAY){
-                fields[this.playerOn.xPos-1][this.playerOn.yPos].fieldtype = HOLE;}
+                if (this.usingPlayer.field.field[this.playerOn.xPos-1][this.playerOn.yPos].fieldtype = HALLWAY){
+                    this.usingPlayer.field.field[this.playerOn.xPos-1][this.playerOn.yPos].fieldtype = HOLE;}
               break;
             }
           }

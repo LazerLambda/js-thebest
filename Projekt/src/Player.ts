@@ -1,6 +1,6 @@
 import { Bomb, Hallway, Hole, Item } from "./Item";
 import { GameState } from "./GameState";
-import { useableItem } from "./UsableItems";
+import { useableItem, portableHole } from "./UsableItems";
 import { AnimatedObject } from "./AnimatedObject";
 
 enum Direction {
@@ -191,11 +191,14 @@ export class ActivePlayer extends Player {
             }
           case "x":
               if (e.key === "x"){
-                if (this.inventory != null){
+              // if (this.inventory ! = null) 
+              
+                  this.inventory = new portableHole(this.context); // test mit portableHole
                   this.inventory.use();
-                }
+                
                 break;
-              }
+              
+            }
         }
       }
     });
@@ -203,7 +206,7 @@ export class ActivePlayer extends Player {
 
   checkCollide(x: number, y: number): boolean {
     if (this.onItem === null) {
-      throw new Error(
+      throw new Error( 
         'Field is not connected to Player:\n\t"this.onItem === null"'
       );
       return false;
