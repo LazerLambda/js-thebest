@@ -59,6 +59,7 @@ export class GameState {
 
   MAX_PLAYERS: number = 4;
   activePlayer: ActivePlayer = null;
+  playerName : string = "";
   passivePlayers: PassivePlayer[] = [];
 
   explosions: Explosion[] = [];
@@ -92,8 +93,9 @@ export class GameState {
     this.socket.on(
       "S_ready",
       function(data: any) {
-        this.playerNr = <number>data;
-        this.socket.emit("G_ready", "Name");
+        this.playerNr = <number>data['playerId'];
+        this.playerName = <string>data['playerName'];
+        this.socket.emit("G_ready", this.playerName);
         this.initGame();
       }.bind(this)
     );
@@ -106,7 +108,7 @@ export class GameState {
       "S_ready",
       function(data: any) {
         this.playerNr = <number>data;
-        this.socket.emit("G_ready", "Name");
+        this.socket.emit("G_ready", this.playerName);
         this.initEditor();
       }.bind(this)
     );
@@ -322,6 +324,7 @@ export class GameState {
   update() {
     switch (this.state) {
       case serverState.SELECTION:
+        this.startpage.update();
         break;
       case serverState.ROOM_WAIT:
         this.roomwaitpage.updateRoomWait();
@@ -378,6 +381,7 @@ export class GameState {
   draw() {
     switch (this.state) {
       case serverState.SELECTION:
+        this.startpage.draw();
         break;
       case serverState.ROOM_WAIT:
         this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
