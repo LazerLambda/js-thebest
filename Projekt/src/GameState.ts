@@ -93,7 +93,8 @@ export class GameState {
     this.socket.on(
       "S_ready",
       function(data: any) {
-        this.playerNr = <number>data;
+        this.playerNr = <number>data['playerId'];
+        this.playerName = <string>data['playerName'];
         this.socket.emit("G_ready", this.playerName);
         this.initGame();
       }.bind(this)
