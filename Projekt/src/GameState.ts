@@ -28,7 +28,7 @@ export class GameState {
   editor: Editor;
   state: serverState;
 
-  field: any[][];
+  field: any[];
   items: Item[];
   context: any;
   socket: any;
@@ -175,7 +175,7 @@ export class GameState {
             var tmpItem = <Hallway>this.items[i];
             if (tmpItem.bombOnItem !== null) {
               if (tmpItem.bombOnItem.explode) {
-                this.explosions.push(new Explosion(tmpItem, this));
+                this.explosions.push(new Explosion(tmpItem, this, 3));
               }
             }
           }

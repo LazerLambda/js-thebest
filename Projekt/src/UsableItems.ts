@@ -1,6 +1,6 @@
 import { Player } from "./Player";
 import { Explosion } from "./Explosion";
-import { Item, Bomb, Hallway } from "./Item";
+import { Item, Bomb, Hallway, Hole } from "./Item";
 
 export class useableItem {
 defaultName : string = "Item 0"
@@ -154,10 +154,14 @@ export class spring extends Item {
  getPossibleLandingSpots(){
         for (let i  = 0;i <= 8;i++){ // höchste x Koordinate
             for (let j  = 0;i <= 8;i++){ //höchste y Koordinate
-                if (this.playerOn.field.field[this.x][this.y].fieldtype == HALLWAY || 
-                    this.playerOn.field.field[this.x][this.y].fieldtype == HOLE){
-                    this.PLS.push(new possibleLandingSpot(i,j));
-                }
+                var pos = this.x + this.y * 8;                          // dynamisch machen
+                this.playerOn.forEach(e => {
+                    if (e.field.field[pos] instanceof Hallway|| 
+                        e.field.field[pos] instanceof Hole){
+                        this.PLS.push(new possibleLandingSpot(i,j));
+                    }
+                })
+
         }
 
     }
@@ -167,7 +171,10 @@ export class spring extends Item {
                  this.getPossibleLandingSpots();
                  var x = Math.floor(Math.random()*(this.PLS.length - 1));
                  var test : number = <number> this.PLS[x].x * <number> this.PLS[x].y * 8 ; // dynamisch machen
-                 this.playerOn.field = this.playerOn.field.field[test];
+                 this.playerOn.forEach(e => {
+                    e.onItem = <Item> e.field.field[test];
+                 });
+                 
             
         }
 
