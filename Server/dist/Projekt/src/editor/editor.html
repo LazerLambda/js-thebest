@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+	<body>
+
+	<div style="float:left">
+	<canvas id="cv" width="480" height="480"></canvas>
+		<div>
+
+		</div>
+		<div>
+			<button onclick="chgTs(document.getElementById('ts-path-txtfld').value)">Change tileset</button>
+			<input type="text" id="ts-path-txtfld" placeholder="path/dir"/>
+		</div>
+		<div>
+			<button onclick ="saveMap(document.getElementById('map-name-txtfld').value)">Save map</button>
+			<input type="text" id="map-name-txtfld" placeholder="filename"/>
+		</div>
+		<div>
+			Load map: <input type="file" id="map-input"/>
+		</div>
+	</div>
+		<div style="float:left" id="tl-img">
+			<p>HALLWAY</p>
+			<button onclick ="setItem(HALLWAY)" id="btn-hallway"><p></p></button>
+			<p>WALL</p>
+			<button onclick ="setItem(WALL);"   id="btn-wall"   ><p></p></button>
+			<p>HOLE</p>
+			<button onclick ="setItem(HOLE)"    id="btn-hole"   ><p></p></button>
+			<p>BRICK</p>
+			<button onclick ="setItem(BRICK)"   id="btn-brick"  ><p></p></button>
+			<style>
+				#tl-img {
+					padding-left:50px;
+					width: 60;
+					height: 60;
+				}
+				img {
+					max-height:100%;
+					max-width: 100%;
+				}
+			</style>
+		</div>
+		<script src="filesaver.js"></script>
+		<script src = "editor.js"></script>
+		<div class="img"></div>
+	</body>
+	<style>
+	</style>
+</html>
