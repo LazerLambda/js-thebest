@@ -1,4 +1,4 @@
-import { Hallway } from "./Item";
+import { Hallway, Item } from "./Item";
 
 export class Brick {
   breakBricks: boolean = false;
@@ -10,6 +10,7 @@ export class Brick {
 
   x: number;
   y: number;
+
   constructor(
     context: any,
     xPos: number,
