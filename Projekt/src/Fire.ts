@@ -27,11 +27,10 @@ export class Fire {
   drawFire() {
     const x = this.xPos * this.xSize;
     const y = this.yPos * this.ySize;
-    // var im = new Image(this.xSize, this.ySize);
-    // im.src = "tilesets/tileset1/fire.jpg";
-    // this.context.drawImage(im, x, y, this.xSize, this.ySize);
-    this.context.fillStyle = "orange";
-    this.context.fillRect(x, y, this.xSize, this.ySize);
+    var im = new Image(this.xSize, this.ySize);
+    im.src = "tilesets/tileset1/fire.png";
+    this.context.drawImage(im, x, y, this.xSize, this.ySize);
+    
   }
 
   update() {

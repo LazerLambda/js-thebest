@@ -1,6 +1,4 @@
 import { GameState } from "./GameState";
-import { timingSafeEqual } from "crypto";
-import { ClientHttp2Session } from "http2";
 
 export class Startpage {
   gameState: GameState;

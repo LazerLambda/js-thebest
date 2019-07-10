@@ -1,11 +1,18 @@
 import { Player } from "./Player";
+import { Bomb } from "./Item";
 
-let img : any = new Image();
-img.src = 'animations/gopher.png';
-img.onload = function() {
+let imgGopher : any = new Image();
+imgGopher.src = 'animations/gopher.png';
+imgGopher.onload = function() {
   init();
 }
-
+/*
+let imgBomb: any = new Image();
+imgBomb.src = "animations/bomb.png";
+imgBomb.onload = function() {
+  init();
+};
+*/
 function init() {
   this.startAnimating(200);
 }
@@ -14,18 +21,25 @@ export class AnimatedObject {
 
   context: any;
 
-  spriteWidth: number = 100;
-  spriteHeight: number = 100;
+  spriteWidthPlayer: number = 100;
+  spriteHeightPlayer: number = 100;
   cycleLoopPlayer = [0, 1, 0, 2];
+
+
+  spriteWidthBomb: number = 500;
+  spriteHeightBomb: number = 500;
+  cycleLoopBomb = [0, 1, 0, 1];
+  
   currentLoopIndex: number = 0;
   frameCount: number = 0;
   player: Player;
+  bomb: Bomb;
 
   constructor(player: Player) {
     this.player = player;
   }
 
-  animate(spriteSheetNumber: number, canvasX: number, canvasY: number) {
+  animatePlayer(spriteSheetNumber: number, canvasX: number, canvasY: number) {
     if(this.player.running) {
       let time = 1; // Zeit für Bildwechsel in der Animation
       if (this.frameCount <= 4 * time) {
@@ -41,11 +55,11 @@ export class AnimatedObject {
       ++this.frameCount;
       
       this.player.context.drawImage(
-        img,
-        spriteSheetNumber * this.spriteWidth,
-        this.cycleLoopPlayer[this.currentLoopIndex] * this.spriteHeight,
-        this.spriteWidth,
-        this.spriteHeight,
+        imgGopher,
+        spriteSheetNumber * this.spriteWidthPlayer,
+        this.cycleLoopPlayer[this.currentLoopIndex] * this.spriteHeightPlayer,
+        this.spriteWidthPlayer,
+        this.spriteHeightPlayer,
         canvasX,
         canvasY,
         this.player.field.xSize,
@@ -53,11 +67,11 @@ export class AnimatedObject {
       );
     } else {
       this.player.context.drawImage(
-        img,
-        spriteSheetNumber * this.spriteWidth,
-        0 * this.spriteHeight,
-        this.spriteWidth,
-        this.spriteHeight,
+        imgGopher,
+        spriteSheetNumber * this.spriteWidthPlayer,
+        0 * this.spriteHeightPlayer,
+        this.spriteWidthPlayer,
+        this.spriteHeightPlayer,
         canvasX,
         canvasY,
         this.player.field.xSize,
@@ -66,4 +80,46 @@ export class AnimatedObject {
     }
     
   }
+   /*
+  animateBomb() {
+    if (this.bomb.explode) {
+      const x = this.bomb.x * this.bomb.SIZE_X;
+      const y = this.bomb.y * this.bomb.SIZE_Y;
+
+      this.context.drawImage(
+        imgBomb,
+        0,
+        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
+        this.spriteWidthBomb,
+        this.spriteHeightBomb,
+        x - 10,
+        y - 10,
+        this.bomb.SIZE_X,
+        this.bomb.SIZE_Y
+      );
+      this.currentLoopIndex++;
+      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+        this.currentLoopIndex = 0;
+      }
+    } else {
+      const x = this.bomb.x * this.bomb.SIZE_X;
+      const y = this.bomb.y * this.bomb.SIZE_Y;
+
+      this.context.drawImage(
+        imgBomb,
+        0,
+        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
+        this.spriteWidthBomb,
+        this.spriteHeightBomb,
+        x,
+        y,
+        this.bomb.SIZE_X,
+        this.bomb.SIZE_Y
+        );
+      this.currentLoopIndex++;
+      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+        this.currentLoopIndex = 0;
+      }
+    }
+  }*/
 }

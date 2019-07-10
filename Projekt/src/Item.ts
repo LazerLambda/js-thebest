@@ -1,11 +1,11 @@
 import { Player } from "./Player";
 import { Brick } from "./Brick";
 import { Fire } from "./Fire";
+import { AnimatedObject } from "./AnimatedObject";
 
-//Animation
-let img: any = new Image();
-img.src = "animations/bomb.png";
-img.onload = function() {
+let imgBomb: any = new Image();
+imgBomb.src = "animations/bomb.png";
+imgBomb.onload = function() {
   init();
 };
 
@@ -23,12 +23,12 @@ export class Item {
   x: number;
   y: number;
 
-  //Animation
-  spriteWidth: number = 500;
-  spriteHeight: number = 500;
+  spriteWidthBomb: number = 500;
+  spriteHeightBomb: number = 500;
   cycleLoopBomb = [0, 1, 0, 1];
   currentLoopIndex: number = 0;
-
+  
+ 
   constructor(
     context: any,
     xPos: number,
@@ -45,34 +45,17 @@ export class Item {
     this.SIZE_Y = ySize;
   }
 
-  draw() {
-    const x = this.x * this.SIZE_X;
-    const y = this.y * this.SIZE_Y;
-    this.context.fillStyle = "yellow";
-    this.context.fillRect(x, y, this.SIZE_X, this.SIZE_Y);
-  }
+  draw() {}
 
   update() {}
   setOnFire() {}
 
-  //Animation
-  drawAnimation(
-    frameX: number,
-    frameY: number,
-    canvasX: number,
-    canvasY: number
-  ) {
-    this.context.drawImage(
-      img,
-      frameX * this.spriteWidth,
-      frameY * this.spriteHeight,
-      this.spriteWidth,
-      this.spriteHeight,
-      canvasX,
-      canvasY,
-      this.SIZE_X,
-      this.SIZE_Y
-    );
+  drawField(imageSource: string) {
+    const x = this.x * this.SIZE_X;
+    const y = this.y * this.SIZE_Y;
+    var im = new Image(this.SIZE_X, this.SIZE_Y);
+    im.src = imageSource;
+    this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
   }
 }
 
@@ -88,11 +71,7 @@ export class Wall extends Item {
   }
 
   draw() {
-    const x = this.x * this.SIZE_X;
-    const y = this.y * this.SIZE_Y;
-    var im = new Image(this.SIZE_X, this.SIZE_Y);
-    im.src = "tilesets/tileset1/wall.jpg";
-    this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
+    this.drawField("tilesets/tileset1/wall.jpg");
   }
 }
 
@@ -128,17 +107,7 @@ export class Hallway extends Item {
   }
 
   draw() {
-    var im = new Image(this.SIZE_X, this.SIZE_Y);
-    if (this.playerOn.length === 0) {
-      im.src = "tilesets/tileset1/hallway.jpg";
-    } else {
-      im.src = "tilesets/tileset1/hallway.jpg";
-    }
-
-    const x = this.x * this.SIZE_X;
-    const y = this.y * this.SIZE_Y;
-
-    this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
+      this.drawField("tilesets/tileset1/hallway.jpg");
 
     if (this.bombOnItem !== null) {
       this.bombOnItem.draw();
@@ -181,11 +150,7 @@ export class Hole extends Hallway {
   }
 
   draw() {
-    const x = this.x * this.SIZE_X;
-    const y = this.y * this.SIZE_Y;
-    var im = new Image(this.SIZE_X, this.SIZE_Y);
-    im.src = "tilesets/tileset1/hole.jpg";
-    this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
+    this.drawField("tilesets/tileset1/hole.jpg");
 
     // evtl. diese Methode in eine andere Methode schreiben mit der aus Hallway
     if (this.onFire !== null) {
@@ -218,6 +183,7 @@ export class Bomb extends Item {
   timeLeft: number;
   explode: boolean = false;
   placedOn: Hallway;
+  animatedObject: AnimatedObject;
 
   constructor(
     context: any,
@@ -234,15 +200,21 @@ export class Bomb extends Item {
   }
 
   draw() {
+    //this.animatedObject.animateBomb();
     if (this.explode) {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
 
-      this.drawAnimation(
+      this.context.drawImage(
+        imgBomb,
         0,
-        this.cycleLoopBomb[this.currentLoopIndex],
+        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
+        this.spriteWidthBomb,
+        this.spriteHeightBomb,
         x - 10,
-        y - 10
+        y - 10,
+        this.SIZE_X,
+        this.SIZE_Y
       );
       this.currentLoopIndex++;
       if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
@@ -252,12 +224,23 @@ export class Bomb extends Item {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
 
-      this.drawAnimation(0, this.cycleLoopBomb[this.currentLoopIndex], x, y);
+      this.context.drawImage(
+        imgBomb,
+        0,
+        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
+        this.spriteWidthBomb,
+        this.spriteHeightBomb,
+        x,
+        y,
+        this.SIZE_X,
+        this.SIZE_Y
+        );
       this.currentLoopIndex++;
       if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
         this.currentLoopIndex = 0;
       }
     }
+
   }
 
   update() {
