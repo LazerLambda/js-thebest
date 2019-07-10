@@ -157,7 +157,7 @@ export class Player {
       }
       --this.loosingSequence;
     } else {
-      this.animatedObject.animate(this.currentDirection, this.xPos, this.yPos);
+      this.animatedObject.animatePlayer(this.currentDirection, this.xPos, this.yPos);
     }
   }
 
