@@ -24,7 +24,8 @@ enum fieldType {
   HALLWAY = 0,
   WALL = 1,
   HOLE = 2,
-  BRICK = 3
+  BRICK = 3,
+  USABLEITEM = 4
 }
 
 enum Event {
@@ -46,7 +47,7 @@ export class GameState {
   state: serverState;
   userhasleft: UserHasLeft = null;
 
-  field: any[][];
+  field: any[];
   items: Item[];
   context: any;
   socket: any;
@@ -281,7 +282,7 @@ export class GameState {
         var tmpItem = <Hallway>this.items[i];
         if (tmpItem.bombOnItem !== null) {
           if (tmpItem.bombOnItem.explode) {
-            this.explosions.push(new Explosion(tmpItem, this));
+            this.explosions.push(new Explosion(tmpItem, this,3));
           }
         }
       }
@@ -436,5 +437,7 @@ export class GameState {
         }.bind(this)
       );
     }
+    
+    
   }
 }

@@ -1,5 +1,6 @@
 import { Bomb, Hallway, Hole, Item } from "./Item";
 import { GameState } from "./GameState";
+import { useableItem, portableHole } from "./UsableItems";
 import { AnimatedObject } from "./AnimatedObject";
 
 enum Direction {
@@ -34,6 +35,15 @@ export class Player {
   canvas: any;
   onItem: Item;
   field: GameState;
+  hitPoints: number = 1;
+  movementSpeed: number = 10; 
+  inventory: useableItem = null;
+  visible: boolean = true;
+
+  //Animation
+  spriteWidth: number = 28;
+  spriteHeight: number = 30;
+  cycleLoopPlayer = [0, 1, 0, 2];
   currentDirection: number;
   animatedObject: AnimatedObject;
 
@@ -220,8 +230,8 @@ export class ActivePlayer extends Player {
               this.emitEvent(Event.MOVE, Direction.WEST);
             }
             break;
-          case "Enter":
-            if (e.key === "Enter") {
+          case "y":
+            if (e.key === "y") {
               var item = <Hallway>this.onItem;
               item.bombOnItem = new Bomb(
                 this.onItem.context,
