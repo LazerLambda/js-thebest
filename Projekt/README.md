@@ -17,3 +17,8 @@
 - Server immer mit Ctrl-C beenden!
 - Optional Terminal in zwei Tabs laufen lassen
 - Server kann während Arbeiten am Client auch im Hintergrund laufen.
+
+# Ordnerstruktur:
+- Im Planungsordner befinden sich die Vorplanungen (Nicht die Sequenzdiagramme oder Protokollinformationen)
+- Im Projektordner liegt der Client als Projekt separat.
+- Im Serverordner befinden sich alle Serverdateien, Felder und Informationen.

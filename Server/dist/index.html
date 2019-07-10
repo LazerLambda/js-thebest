@@ -5,11 +5,83 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>TypeScript</title>
     <style>
+      @font-face {
+        font-family: "Avenir";
+        src: url("AvenirLTStd-Heavy.otf");
+      }
+      @font-face {
+        font-family: "Mistral";
+        src: url("MISTRAL.TTF");
+        /* src: url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.eot");
+        src: url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.eot?#iefix")
+            format("embedded-opentype"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.woff2")
+            format("woff2"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.woff")
+            format("woff"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.ttf")
+            format("truetype"),
+          url("//db.onlinewebfonts.com/t/f43c61b480b234923426d3378be141a4.svg#Mistral")
+            format("svg"); */
+      }
       #stage {
         width: 780px;
         height: 480px;
         position: relative;
         border: 2px solid black;
+      }
+      #stage {
+        position: absolute;
+        top: 30%;
+        left: 30%;
+        bottom: 30%;
+        right: 30%;
+      }
+
+      #logo {
+        width: 400px;
+        height: 60px;
+        position: absolute;
+        top: 10%;
+        left: 40%;
+        right: 50%;
+      }
+
+      #logoIn {
+        position: absolute;
+        text-align: center;
+        font-size: 19px;
+        background-color: #f1651c;
+        color: #ffffff;
+        top: 00%;
+        left: 20%;
+        right: 20%;
+        font-family: Avenir;
+      }
+
+      body {
+        background-color: #cccccc;
+      }
+
+      #H1 {
+        position: absolute;
+        background-color: #f1651c;
+        color: #000000;
+        font-family: Avenir;
+        font-size: 60px;
+        top: 10px;
+        left: 10px;
+      }
+
+      h2 {
+        position: absolute;
+        font-family: Mistral;
+        /* transform: rotate(-23deg); */
+        transform: skew(-20deg, -5deg);
+        top: 45px;
+        left: 180px;
+        bottom: 60px;
+        right: 0px;
       }
 
       canvas {
@@ -25,51 +97,52 @@
   </head>
 
   <body>
-    <h1>Hallo Welt SKRRRRRRRRRRRR</h1>
-    
-    <button onClick="sendMsg()">Hit Me</button>
-    <button onClick="disconnect()">disonnect</button>
+    <div id="logo">
+      <div id="logoIn">
+        <h1 id="logoH1">GRUPPE HH</h1>
+      </div>
+      <h2>BomberMan 2019</h2>
+    </div>
+    <h1 id="H1">GRUPPE HH TEST</h1>
+    <div id="stage">
+      <button onClick="sendMsgEditor()">Editor</button>
+      <button onClick="sendMsgGame()">Game</button>
+      <br>
+      <button onClick="disconnect()">disonnect</button>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-    <script>
-            // const socket = io("http://localhost:3000");
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+      <script>
+        // const socket = io("http://localhost:3000");
 
-            // function sendMsg() {
-            //   socket.emit("message", "HELLO WORLD");
-            // }
-            // socket.on("message", function(data) {
-            //   document.write(data);
 
-            // });
-            // var socket = io();
-            // socket.on('connectToRoom',function(data) {
-            //   if(data === 'S_ready'){
-            //    document.body.innerHTML = '';
-            //    document.write("Server ist bereit");
-            //    io.emit('message', "G_ready")
-            //   }
-            // });
-            var socket = io('http://localhost:3000');;
+        var socket = io("http://localhost:3000");
+        socket.emit('mode', 'game'); 
 
-            function disconnect(){
-              socket.disconnect();
-            }
-            socket.on('S_ready',function(data) {
-              //  document.body.innerHTML = '';
-              //  document.write("Server ist bereit");
-               socket.emit('G_ready', "My-Name");
-            });
-            socket.on('user_left', function(data){
-            });
+        function disconnect() {
+          socket.disconnect();
+        }
+        socket.on("S_ready", function(data) {
+          //  document.body.innerHTML = '';
+          //  document.write("Server ist bereit");
+          socket.emit("G_ready", "My-Name");
+        });
+        socket.on("user_left", function(data) {});
 
-            socket.on('move', function(data){console.log(data.move);});
+        socket.on("move", function(data) {
+          console.log(data.move);
+        });
 
-            socket.on('Initial_Field', function(data){
-              // document.write(data.field);
-            })
-            function sendMsg(){
-              socket.emit('move', "Test");
-            }
-    </script>
+        socket.on("Initial_Field", function(data) {
+          // document.write(data.field);
+        });
+        // function sendMsgEditor() {
+        //   socket.emit('mode', 'editor'); 
+        // }
+
+        function sendMsgGame() {
+          socket.emit('mode', 'game'); 
+        }
+      </script>
+    </div>
   </body>
 </html>

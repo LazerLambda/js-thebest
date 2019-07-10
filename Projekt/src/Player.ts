@@ -9,7 +9,19 @@ enum Direction {
   EAST = 3
 }
 
+
+enum Event{
+  MOVE = 'move',
+  DROP = 'drop',
+}
+
+enum ActionBomb{
+  DEFAULT_BOMB = 1,
+  
+}
+
 export class Player {
+  transitionLock : boolean = true;
   transitionCounter: number = 0;
   TRANSITION_UPPER_BOUND: number = 5;
   target: number = 0;
@@ -89,22 +101,22 @@ export class Player {
         this.onItem = this.field.items[this.target];
         this.onItem.playerOn.push(this);
         var oldPos = tmpItem.x + tmpItem.y * 8;
-        this.field.items[oldPos].playerOn.forEach(e => {console.log("hier" + e.playerNr);});
-
 
         // this.field.items[oldPos].playerOn = this.field.items[oldPos].playerOn.filter(function(e){
         //   return <number> e.playerNr !== <number> this.playerNr;
         // });
 
         var newArr = new Array();
-        for (let i = 0; i < this.field.items[oldPos].playerOn.length; i++){
-          console.log("" + this.field.items[oldPos].playerOn[(i)].playerNr);
-          if(this.field.items[oldPos].playerOn[(i)].playerNr !== this.playerNr){
-            newArr.push(this.field.items[oldPos].playerOn[(i)]);
+        for (let i = 0; i < this.field.items[oldPos].playerOn.length; i++) {
+          if (this.field.items[oldPos].playerOn[i].playerNr !== this.playerNr) {
+            newArr.push(this.field.items[oldPos].playerOn[i]);
           }
         }
         this.field.items[oldPos].playerOn = newArr;
-       
+
+        // Freigabe des transitionsLocks
+
+        this.transitionLock = true;
 
         this.xPos = this.onItem.x * this.field.xSize;
         this.yPos = this.onItem.y * this.field.ySize;
@@ -119,13 +131,21 @@ export class Player {
       if (this.loosingSequence < 0) {
         // Game over
 
-        this.onItem.playerOn = this.onItem.playerOn.filter(e => {
-          // console.log("drawPlayer: !this.alive");
-          // console.log(e.playerNr + "");
-          e.playerNr !== this.playerNr;
-        });
-        this.context.fillStyle = "red";
-        this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
+        // this.onItem.playerOn = this.onItem.playerOn.filter(e => {
+        //   e.playerNr !== this.playerNr;
+        // });
+
+        var pos = this.onItem.x + this.onItem.y * 8;
+        var newArr = new Array();
+        for (let i = 0; i < this.field.items[pos].playerOn.length; i++) {
+          if (this.field.items[pos].playerOn[i].playerNr !== this.playerNr) {
+            newArr.push(this.field.items[pos].playerOn[i]);
+          }
+        }
+        this.field.items[pos].playerOn = newArr;
+
+        // this.context.fillStyle = "red";
+        // this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
         this.field.updateGameInfos();
       } else {
         /**
@@ -138,6 +158,27 @@ export class Player {
       --this.loosingSequence;
     } else {
       this.animatedObject.animatePlayer(this.currentDirection, this.xPos, this.yPos);
+    }
+  }
+
+  checkCollide(x: number, y: number): boolean {
+    if (this.onItem === null) {
+      throw new Error(
+        'Field is not connected to Player:\n\t"this.onItem === null"'
+      );
+      return false;
+    } else {
+      var pos = y * 8 + x;
+      var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
+      var checkType = this.field.items[pos] instanceof Hallway;
+
+      if (inBounds && checkType) {
+        let tempField = <Hallway>this.field.items[pos];
+        if (tempField.brickOnItem === null) {
+          this.target = pos;
+          return true;
+        }
+      }
     }
   }
 }
@@ -153,30 +194,30 @@ export class ActivePlayer extends Player {
         switch (e.key) {
           case "ArrowUp":
             if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
-              socket.emit("event", "Test");
               this.direction = Direction.NORTH;
               this.running = true;
+              this.emitEvent(Event.MOVE, Direction.NORTH);
             }
             break;
           case "ArrowDown":
             if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
-              socket.emit("event", "Test");
               this.direction = Direction.SOUTH;
               this.running = true;
+              this.emitEvent(Event.MOVE, Direction.SOUTH);
             }
             break;
           case "ArrowRight":
             if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
-              socket.emit("event", "Test");
               this.direction = Direction.EAST;
               this.running = true;
+              this.emitEvent(Event.MOVE, Direction.EAST);
             }
             break;
           case "ArrowLeft":
             if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
-              socket.emit("event", "Test");
               this.direction = Direction.WEST;
               this.running = true;
+              this.emitEvent(Event.MOVE, Direction.WEST);
             }
             break;
           case "Enter":
@@ -190,41 +231,85 @@ export class ActivePlayer extends Player {
                 this.onItem.SIZE_Y,
                 item
               );
+              this.emitEvent(Event.DROP, ActionBomb.DEFAULT_BOMB);
             }
         }
       }
-
-      socket.emit("event", "Test");
     });
   }
 
-  checkCollide(x: number, y: number): boolean {
-    if (this.onItem === null) {
-      throw new Error(
-        'Field is not connected to Player:\n\t"this.onItem === null"'
-      );
-      return false;
-    } else {
-      var pos = y * 8 + x;
-      var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
-      var checkType = this.field.items[pos] instanceof Hallway;
-
-      if (inBounds && checkType) {
-        /**
-         * GameState hier anpassen
-         */
-        let tempField = <Hallway>this.field.items[pos];
-        if (tempField.brickOnItem === null) {
-          this.target = pos;
-          return true;
-        }
-      }
-    }
+  emitEvent(event: string, action: number) {
+    var evObject: object = {
+      playerId: this.playerNr,
+      event: event,
+      action: action
+    };
+    this.socket.emit("event", evObject);
   }
 }
 
 export class PassivePlayer extends Player {
   constructor(context: any, playerNr: number) {
     super(context, playerNr);
+  }
+
+  setTarget(action: number) {
+    
+    switch (action) {
+      case Direction.NORTH:
+        if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
+          
+          this.transitionLock = false;
+
+          this.target = this.onItem.x + (this.onItem.y - 1) * 8;
+          this.running = true;
+          this.direction = Direction.NORTH;
+        }
+        break;
+
+      case Direction.SOUTH:
+        if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
+          
+          this.transitionLock = false;
+
+          this.target = this.onItem.x + (this.onItem.y + 1) * 8;
+          this.running = true;
+          this.direction = Direction.SOUTH;
+        }
+        break;
+
+      case Direction.EAST:
+        if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
+
+          this.transitionLock = false;
+          
+          this.target = this.onItem.x + 1 + this.onItem.y * 8;
+          this.running = true;
+          this.direction = Direction.EAST;
+        }
+        break;
+      case Direction.WEST:
+        if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
+
+          this.transitionLock = false;
+          
+          this.target = this.onItem.x - 1 + this.onItem.y * 8;
+          this.running = true;
+          this.direction = Direction.WEST;
+          break;
+        }
+    }
+  }
+
+  placeBomb() {
+    var item = <Hallway>this.onItem;
+    item.bombOnItem = new Bomb(
+      this.onItem.context,
+      this.onItem.x,
+      this.onItem.y,
+      this.onItem.SIZE_X,
+      this.onItem.SIZE_Y,
+      item
+    );
   }
 }
