@@ -11,8 +11,12 @@
       href="//fonts.googleapis.com/css?family=Raleway"
     />
     <style>
+      @font-face {
+        font-family: "Krungthep";
+        src: url("Krungthep.ttf");
+      }
 
-      @font-face{
+      @font-face {
         font-family: "Avenir";
         src: url("AvenirLTStd-Heavy.otf");
       }
@@ -35,7 +39,7 @@
         width: 780px;
         height: 480px;
         position: relative;
-        border: 2px solid rgb(255,225,165);
+        border: 2px solid rgb(255, 225, 165);
       }
       #stage {
         position: absolute;
@@ -46,7 +50,6 @@
       }
 
       #logo {
-        
         width: 400px;
         height: 60px;
         position: absolute;
@@ -55,20 +58,20 @@
         right: 50%;
       }
 
-      #logoIn{
+      #logoIn {
         position: absolute;
         text-align: center;
         font-size: 19px;
         background-color: #f1651c;
-        color: #ffffff; 
+        color: #ffffff;
         top: 00%;
         left: 20%;
         right: 20%;
         font-family: Avenir;
       }
 
-      body{
-        background-color: rgb(255,225,165);
+      body {
+        background-color: rgb(255, 225, 165);
       }
 
       h2 {
@@ -95,7 +98,7 @@
   </head>
 
   <body>
-    <img src="images/bomberman.png" width="400" height="200" hspace="500">
+    <img src="images/bomberman.png" width="400" height="200" hspace="500" />
     <div id="stage">
       <canvas id="background" width="780" height="480"></canvas>
       <canvas id="game-layer" width="780" height="480"></canvas>
