@@ -4,7 +4,7 @@ import { GameOver } from "./GameOver";
 import { Brick } from "./Brick";
 import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
-import { Editor2 } from "./Editor2";
+import { Editor } from "./Editor";
 import { RoomWait } from "./RoomWait";
 import { UserHasLeft } from "./UserHasLeft";
 import * as io from "socket.io-client";
@@ -43,7 +43,7 @@ export class GameState {
   gameover: GameOver;
   winner: Winner;
   roomwaitpage: RoomWait;
-  editor: Editor2;
+  editor: Editor;
   state: serverState;
   userhasleft: UserHasLeft = null;
 
@@ -123,7 +123,7 @@ export class GameState {
 
   initEditor() {
     this.state = serverState.DESIGN;
-    this.editor = new Editor2(this.context);
+    this.editor = new Editor();
   }
 
   initGame() {
