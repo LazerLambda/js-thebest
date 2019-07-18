@@ -3,8 +3,19 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>TypeScript</title>
+
+    <title>Advanced AI Algorithms - Triple A</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="//fonts.googleapis.com/css?family=Raleway"
+    />
     <style>
+      @font-face {
+        font-family: "Krungthep";
+        src: url("Krungthep.ttf");
+      }
+
       @font-face {
         font-family: "Avenir";
         src: url("AvenirLTStd-Heavy.otf");
@@ -28,7 +39,7 @@
         width: 780px;
         height: 480px;
         position: relative;
-        border: 2px solid black;
+        border: 2px solid rgb(255, 225, 165);
       }
       #stage {
         position: absolute;
@@ -60,17 +71,7 @@
       }
 
       body {
-        background-color: #cccccc;
-      }
-
-      #H1 {
-        position: absolute;
-        background-color: #f1651c;
-        color: #000000;
-        font-family: Avenir;
-        font-size: 60px;
-        top: 10px;
-        left: 10px;
+        background-color: rgb(255, 225, 165);
       }
 
       h2 {
@@ -97,52 +98,11 @@
   </head>
 
   <body>
-    <div id="logo">
-      <div id="logoIn">
-        <h1 id="logoH1">GRUPPE HH</h1>
-      </div>
-      <h2>BomberMan 2019</h2>
-    </div>
-    <h1 id="H1">GRUPPE HH TEST</h1>
+    <img src="images/bomberman.png" width="400" height="200" hspace="500" />
     <div id="stage">
-      <button onClick="sendMsgEditor()">Editor</button>
-      <button onClick="sendMsgGame()">Game</button>
-      <br>
-      <button onClick="disconnect()">disonnect</button>
-
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-      <script>
-        // const socket = io("http://localhost:3000");
-
-
-        var socket = io("http://localhost:3000");
-        socket.emit('mode', 'game'); 
-
-        function disconnect() {
-          socket.disconnect();
-        }
-        socket.on("S_ready", function(data) {
-          //  document.body.innerHTML = '';
-          //  document.write("Server ist bereit");
-          socket.emit("G_ready", "My-Name");
-        });
-        socket.on("user_left", function(data) {});
-
-        socket.on("move", function(data) {
-          console.log(data.move);
-        });
-
-        socket.on("Initial_Field", function(data) {
-          // document.write(data.field);
-        });
-        // function sendMsgEditor() {
-        //   socket.emit('mode', 'editor'); 
-        // }
-
-        function sendMsgGame() {
-          socket.emit('mode', 'game'); 
-        }
-      </script>
+      <canvas id="background" width="880" height="580"></canvas>
     </div>
+
+    <script type="text/javascript" src="bundle.js"></script>
   </body>
 </html>
