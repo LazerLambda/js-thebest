@@ -54,6 +54,7 @@ export class Server {
         this.queue.push(socket);
 
         // Init States on socket
+        socket.alive = true;
         socket.state = SocketStateEnum.SELECTION;
         socket.waitingForEditor = false;
         socket.waitingForGame = false;
@@ -118,6 +119,13 @@ export class Server {
 
         socket.on("event", function(data: any) {});
 
+        socket.on('isOver', function(data : any)
+        {
+          console.log("'isOver' received: " + data);
+          var room = <GameBackend>socket.room;
+          room.playerIsDead(socket);
+        });
+
         socket.on("disconnecting", function(data: any) {
           if (socket.room) {
             var room = <GameBackend>socket.room;
@@ -136,6 +144,8 @@ export class Server {
       console.log("listening on *:" + port);
     });
   }
+
+
 
   /**
    * Methode, um zu suchen, ob es weitere Spieler mit der selben Präferenz gibt, um
@@ -174,6 +184,8 @@ export class Server {
     }
     return false;
   }
+
+
 
   /**
    * Methode, welche einen spezifischen Socket von der Queue entfernt.
