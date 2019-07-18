@@ -25,7 +25,6 @@ export class Startpage {
     this.gameState = gameState;
 
     this.canvas = <HTMLCanvasElement>document.getElementById("background");
-    //document.addEventListener("keyup", this.eventFunction.bind(this));
     document.addEventListener("mousemove", this.buttonEvents.bind(this));
     document.addEventListener("mousedown", this.buttonClick.bind(this));
     document.addEventListener("keyup", this.nameFunction.bind(this));
@@ -54,7 +53,7 @@ export class Startpage {
       if (!this.gameState.socket.connected) {
         alert("Connection Error\n\t'->Maybe Server isn't running");
       }
-      this.gameState.initWaitPageGame();
+      this.gameState.initWaitPage(false);
       document.removeEventListener("keyup", this.nameFunction);
       this.gameState.playerName = this.name;
       this.gameState.startpage = null;
@@ -69,7 +68,7 @@ export class Startpage {
       if (!this.gameState.socket.connected) {
         alert("Connection Error\n\t'->Maybe Server isn't running");
       }
-      this.gameState.initEditor();
+      this.gameState.initWaitPage(true)
       document.removeEventListener("keyup", this.nameFunction);
       this.gameState.playerName = this.name;
       this.gameState.startpage = null;
@@ -122,7 +121,7 @@ export class Startpage {
         if (!this.gameState.socket.connected) {
           alert("Connection Error\n\t'->Maybe Server isn't running");
         }
-        this.gameState.initWaitPageGame();
+        this.gameState.initWaitPage(false);
         document.removeEventListener("keyup", this.eventFunction);
         this.gameState.startpage = null;
       }
@@ -131,7 +130,7 @@ export class Startpage {
         if (!this.gameState.socket.connected) {
           alert("Connection Error\n\t'->Maybe Server isn't running");
         }
-        this.gameState.initEditor();
+        this.gameState.initWaitPage(true);
         document.removeEventListener("keyup", this.eventFunction);
         this.gameState.startpage = null;
       }
