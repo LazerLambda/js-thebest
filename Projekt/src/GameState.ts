@@ -7,8 +7,9 @@ import { Startpage } from "./Startpage";
 import { Editor } from "./Editor";
 import { RoomWait } from "./RoomWait";
 import { UserHasLeft } from "./UserHasLeft";
-import * as io from "socket.io-client";
 import { Winner } from "./Winner";
+
+import * as io from "socket.io-client";
 
 enum serverState {
   SELECTION = 0,
@@ -36,6 +37,10 @@ enum Event {
 enum ActionBomb {
   DEFAULT_BOMB = 1
 }
+
+
+
+let URL : string = "http://localhost:3000";
 
 export class GameState {
   playerNr: number;
@@ -75,7 +80,7 @@ export class GameState {
   };
 
   constructor() {
-    this.socket = io("http://localhost:3000");
+    this.socket = io(URL);
     const canvas = <HTMLCanvasElement>document.getElementById("background");
     this.context = canvas.getContext("2d");
 
