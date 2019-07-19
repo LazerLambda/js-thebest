@@ -41,7 +41,7 @@ enum ActionBomb {
 let URL: string = "http://localhost:3000";
 
 export class GameState {
-  playerNr: number;
+  clientrId: number;
   startpage: Startpage;
   gameover: GameOver;
   winner: Winner;
@@ -85,7 +85,7 @@ export class GameState {
     // dynamisch machen
     this.canvasHeight = canvas.height;
     this.canvasWidth = canvas.width;
-    this.xSize = (canvas.width - 300) / 8;
+    this.xSize = (canvas.width - (canvas.width * 1 / 6)) / 8;
     this.ySize = canvas.height / 8;
 
     this.initStartPage();
@@ -93,16 +93,17 @@ export class GameState {
 
   /**
    * @description
-   * Initialisierung des Editors
+   * Initialisierung des der WarteSeite mit EventListener für das Verhalten
+   * bei positiver Rückmeldung vom Server. Ist vom Startseiten Objekt zu erreichen.
    */
 
-  initWaitPage(editorChoosen: boolean) {
+  public initWaitPage(editorChoosen: boolean) {
     this.state = serverState.ROOM_WAIT;
     this.roomwaitpage = new RoomWait(this.context, this);
     this.socket.on(
       "S_ready",
       function(data: any) {
-        this.playerNr = <number>data["playerId"];
+        this.clientId = <number>data["playerId"];
         this.playerName = <string>data["playerName"];
         this.socket.emit("G_ready", this.playerName);
         if (editorChoosen) {
@@ -118,7 +119,7 @@ export class GameState {
    * @description
    * Initialisierung der Startseite
    */
-  initStartPage() {
+  private initStartPage() {
     this.state = serverState.SELECTION;
     this.startpage = new Startpage(this.context, this);
   }
@@ -127,7 +128,7 @@ export class GameState {
    * @description
    * Initialisierung des Editors
    */
-  initEditor() {
+  private initEditor(): void {
     this.state = serverState.DESIGN;
     this.editor = new Editor();
   }
@@ -137,7 +138,7 @@ export class GameState {
    * Eventhandler für das Game werden initialisiert
    */
 
-  initGame(): void {
+  private initGame(): void {
     this.socket.on(
       "init_field",
       function(data: any) {
@@ -194,7 +195,7 @@ export class GameState {
 
           var pos: number = x + y * 8;
           var field = this.items[pos];
-          if (this.playerNr === i) {
+          if (this.clientId === i) {
             this.activePlayer = new ActivePlayer(this.context, this.socket, i);
             this.activePlayer.initField(this, field);
             this.update();
@@ -432,22 +433,21 @@ export class GameState {
   updateGameInfos() {
     if (this.state === serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);
-      this.context.fillStyle = "#fff2c6";
+      this.context.fillStyle = "#cccccc";
       this.context.fillRect(480, 0, 300, 480);
 
       let players: Player[] = <Player[]>this.passivePlayers.slice();
       players.concat(this.activePlayer).forEach(
         function(e: Player, i: number) {
-          this.context.fillStyle = "#e44b43";
-          this.context.font = "25px Krungthep";
-          this.context.fillText("Player: " + e.playerNr, 500, (i + 1) * 70); // Dynamisch machen
-          this.context.fillStyle = "#ff9944";
-          this.context.font = "13px Krungthep";
-          this.context.fillText("Punkte: " + "0", 520, (i + 1) * 70 + 25);
+          this.context.fillStyle = "black";
+          this.context.font = "25px Mistral";
+          this.context.fillText("Player: " + e.playerNr, 500, (i + 1) * 50); // Dynamisch machen
+          this.context.font = "13px Avenir";
+          this.context.fillText("Punkte: " + "0", 520, (i + 1) * 50 + 25);
           if (!e.alive) {
             this.context.fillStyle = "#f1651c";
-            this.context.font = "10px Krungthep";
-            this.context.fillText("You loooose xD", 600, (i + 1) * 70 + 25);
+            this.context.font = "10px Avenir";
+            this.context.fillText("You loooose xD", 600, (i + 1) * 50 + 25);
           }
         }.bind(this)
       );

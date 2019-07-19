@@ -28,6 +28,7 @@ export class Item {
   spriteHeightBomb: number = 500;
   cycleLoopBomb = [0, 1, 0, 1];
   currentLoopIndex: number = 0;
+  frameCount : number = 0;
 
   constructor(
     context: any,
