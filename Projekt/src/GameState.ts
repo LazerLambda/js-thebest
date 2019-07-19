@@ -41,7 +41,7 @@ enum ActionBomb {
 let URL: string = "http://localhost:3000";
 
 export class GameState {
-  playerNr: number;
+  clientrId: number;
   startpage: Startpage;
   gameover: GameOver;
   winner: Winner;
@@ -93,16 +93,17 @@ export class GameState {
 
   /**
    * @description
-   * Initialisierung des Editors
+   * Initialisierung des der WarteSeite mit EventListener für das Verhalten
+   * bei positiver Rückmeldung vom Server. Ist vom Startseiten Objekt zu erreichen.
    */
 
-  initWaitPage(editorChoosen: boolean) {
+  public initWaitPage(editorChoosen: boolean) {
     this.state = serverState.ROOM_WAIT;
     this.roomwaitpage = new RoomWait(this.context, this);
     this.socket.on(
       "S_ready",
       function(data: any) {
-        this.playerNr = <number>data["playerId"];
+        this.clientId = <number>data["playerId"];
         this.playerName = <string>data["playerName"];
         this.socket.emit("G_ready", this.playerName);
         if (editorChoosen) {
@@ -118,7 +119,7 @@ export class GameState {
    * @description
    * Initialisierung der Startseite
    */
-  initStartPage() {
+  private initStartPage() {
     this.state = serverState.SELECTION;
     this.startpage = new Startpage(this.context, this);
   }
@@ -127,7 +128,7 @@ export class GameState {
    * @description
    * Initialisierung des Editors
    */
-  initEditor() {
+  private initEditor(): void {
     this.state = serverState.DESIGN;
     this.editor = new Editor();
   }
@@ -137,7 +138,7 @@ export class GameState {
    * Eventhandler für das Game werden initialisiert
    */
 
-  initGame(): void {
+  private initGame(): void {
     this.socket.on(
       "init_field",
       function(data: any) {
@@ -194,7 +195,7 @@ export class GameState {
 
           var pos: number = x + y * 8;
           var field = this.items[pos];
-          if (this.playerNr === i) {
+          if (this.clientId === i) {
             this.activePlayer = new ActivePlayer(this.context, this.socket, i);
             this.activePlayer.initField(this, field);
             this.update();
