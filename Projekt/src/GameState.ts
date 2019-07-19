@@ -85,7 +85,7 @@ export class GameState {
     // dynamisch machen
     this.canvasHeight = canvas.height;
     this.canvasWidth = canvas.width;
-    this.xSize = (canvas.width - 300) / 8;
+    this.xSize = (canvas.width - (canvas.width * 1 / 6)) / 8;
     this.ySize = canvas.height / 8;
 
     this.initStartPage();
