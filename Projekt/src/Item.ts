@@ -25,9 +25,9 @@ export class Item {
 
   spriteWidthBomb: number = 500;
   spriteHeightBomb: number = 500;
-  cycleLoopBomb = [0, 1, 0, 1];
-  currentLoopIndex: number = 0;
-  
+  cycleLoopBomb = [0, 1, 2, 3];
+  currentLoopIndex: number = 0;  
+  frameCount: number = 0;
  
   constructor(
     context: any,
@@ -201,9 +201,23 @@ export class Bomb extends Item {
 
   draw() {
     //this.animatedObject.animateBomb();
+    
     if (this.explode) {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
+
+      let time = 2; // Zeit für Bildwechsel in der Animation
+      if (this.frameCount <= 4 * time) {
+        if (this.frameCount % time === 0) {
+          this.currentLoopIndex++;
+          if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+            this.currentLoopIndex = 0;
+          }
+        }
+      } else {
+        this.frameCount = 0;
+      }
+      ++this.frameCount;
 
       this.context.drawImage(
         imgBomb,
@@ -216,13 +230,22 @@ export class Bomb extends Item {
         this.SIZE_X,
         this.SIZE_Y
       );
-      this.currentLoopIndex++;
-      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-        this.currentLoopIndex = 0;
-      }
     } else {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
+
+      let time = 2; // Zeit für Bildwechsel in der Animation
+      if (this.frameCount <= 4 * time) {
+        if (this.frameCount % time === 0) {
+          this.currentLoopIndex++;
+          if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+            this.currentLoopIndex = 0;
+          }
+        }
+      } else {
+        this.frameCount = 0;
+      }
+      ++this.frameCount;
 
       this.context.drawImage(
         imgBomb,
@@ -235,12 +258,7 @@ export class Bomb extends Item {
         this.SIZE_X,
         this.SIZE_Y
         );
-      this.currentLoopIndex++;
-      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-        this.currentLoopIndex = 0;
-      }
     }
-
   }
 
   update() {
