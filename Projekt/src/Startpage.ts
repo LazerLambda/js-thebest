@@ -8,14 +8,14 @@ export class Startpage {
   name: string = "";
 
   button1_X_start: number = 50;
-  button1_X_length: number = 100;
+  button1_X_length: number = 150;
   button1_Y_start: number = 375;
-  button1_Y_length: number = 40;
+  button1_Y_length: number = 50;
 
   button2_X_start: number = 300;
-  button2_X_length: number = 100;
+  button2_X_length: number = 150;
   button2_Y_start: number = 375;
-  button2_Y_length: number = 40;
+  button2_Y_length: number = 50;
 
   mouseOverButton1: boolean = false;
   mouseOverButton2: boolean = false;
@@ -140,16 +140,16 @@ export class Startpage {
   update() {}
 
   draw() {
-    this.context.fillStyle = "yellow";
+    this.context.fillStyle = "#fff2c6";
     this.context.fillRect(0, 0, 480, 480);
-    this.context.fillStyle = "blue";
-    this.context.font = "30px Mistral";
+    this.context.fillStyle = "#e44b43";
+    this.context.font = "30px Krungthep";
     this.context.fillText("Editor x Start y", 100, 50);
 
     if (this.mouseOverButton1) {
-      this.context.fillStyle = "blue";
+      this.context.fillStyle = "#ffe1a5";
     } else {
-      this.context.fillStyle = "red";
+      this.context.fillStyle = "#ff9944";
     }
     this.context.fillRect(
       this.button1_X_start,
@@ -157,7 +157,7 @@ export class Startpage {
       this.button1_X_length,
       this.button1_Y_length
     );
-    this.context.fillStyle = "green";
+    this.context.fillStyle = "#e44b43";
     this.context.fillText(
       "Game",
       this.button1_X_start + 30,
@@ -165,9 +165,9 @@ export class Startpage {
     );
 
     if (this.mouseOverButton2) {
-      this.context.fillStyle = "blue";
+      this.context.fillStyle = "#ffe1a5";
     } else {
-      this.context.fillStyle = "red";
+      this.context.fillStyle = "#ff9944";
     }
     this.context.fillRect(
       this.button2_X_start,
@@ -175,15 +175,15 @@ export class Startpage {
       this.button2_X_length,
       this.button2_Y_length
     );
-    this.context.fillStyle = "green";
+    this.context.fillStyle = "#e44b43";
     this.context.fillText(
       "Editor",
       this.button2_X_start + 30,
       this.button2_Y_start + 35
     );
 
-    this.context.fillStyle = "red";
-    this.context.font = "20px Mistral";
+    this.context.fillStyle = "#e44b43";
+    this.context.font = "20px Krungthep";
     this.context.fillText("Name: " + this.name, 100, 300);
   }
 }
