@@ -3,7 +3,7 @@ import { Server } from "./Server";
 
 enum SocketStateEnum {
   SELECTION = 0,
-  GAME_WAIT= 1,
+  GAME_WAIT = 1,
   DESIGN = 2,
   GAME = 3
 }
@@ -35,7 +35,6 @@ export class GameBackend {
     console.log("Game created");
   }
 
-
   /**
    * @description
    * Methode, um die Antwort auf die Anfrage für den Editor oder das Spiel zu beantworten.
@@ -44,15 +43,14 @@ export class GameBackend {
   public emitServerReady() {
     for (let e of this.sockets) {
       console.log("Send to " + e.playerNr);
-      var toSend : object = {'playerId': e.playerNr, 'playerName': e.name}
+      var toSend: object = { playerId: e.playerNr, playerName: e.name };
       e.emit("S_ready", toSend);
     }
   }
 
-
   /**
    * @description
-   * Methode für das versenden des Feldes. Der State der Sockets wird nach 
+   * Methode für das versenden des Feldes. Der State der Sockets wird nach
    * Übersendung dem neuen Zustand angepasst, sodass keine Duplikate gesendet werden.
    */
   public initField(): void {
@@ -93,10 +91,10 @@ export class GameBackend {
   }
 
   /**
+   * @description
    * Methode, um die Bewegungen der weiteren Spieler an die
    * @param eventObjectToSend Objekt, welches an die weiteren Spieler gesendet werden soll
    */
-
   sendEventsToPeers(eventObjectToSend: any) {
     var playerNrTMP: number = <number>eventObjectToSend["playerId"];
     console.log(playerNrTMP);
@@ -110,11 +108,30 @@ export class GameBackend {
     }
   }
 
+  /**
+   *
+   * @param socket
+   */
+  sendPlayerHasLeft(socket: any) {
+    for (let e of this.sockets) {
+      if (e.id !== socket.id) {
+        e.emit("user_left", socket.playerNr);
+      }
+    }
+  }
 
-  sendPlayerHasLeft(socket : any){
-    for(let e of this.sockets){
-      if(e.id !== socket.id){
-        e.emit('user_left', socket.playerNr);
+  /**
+   * @description
+   * Methode, um den weiteren Spielern zu signalisieren, dass ein Spieler
+   * in seiner eigenen Logik verloren hat. Dies ist auf Grund von höheren
+   * Latenzen nötig, damit nur eine Logik für die Teilnahme verantwortlich ist.
+   * @param socket
+   */
+  playerIsDead(socket: any) {
+    for (let e of this.sockets) {
+      if (e.id !== socket.id) {
+        e.emit('passivePlayerGameOver', socket.playerNr);
+        console.log("'passivePlayerGameOver' emitted\nt'-> To player " + socket.playerNr)
       }
     }
   }

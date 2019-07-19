@@ -14,8 +14,8 @@ export class Explosion {
   west: boolean = true;
   east: boolean = true;
 
-  constructor(item: Hallway, field: GameState) {
-    this.explosionRad = 3;
+  constructor(item: Hallway, field: GameState, explosionRad:number) {
+    this.explosionRad = explosionRad;
 
     this.field = field;
 
@@ -33,7 +33,7 @@ export class Explosion {
     }
   }
 
-  update() {
+    update() {
     if (this.counter < this.explosionRad) {
       var posNorth = (this.startPosY - this.counter) * 8 + this.startPosX;
       var posSouth = (this.startPosY + this.counter) * 8 + this.startPosX;

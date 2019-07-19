@@ -1,7 +1,8 @@
 import { Player } from "./Player";
 import { Brick } from "./Brick";
 import { Fire } from "./Fire";
-import { AnimatedObject } from "./AnimatedObject";
+import { AnimatedObject } from "./AnimatedObject";
+import { ActivePlayer } from "./Player";
 
 let imgBomb: any = new Image();
 imgBomb.src = "animations/bomb.png";
@@ -25,10 +26,9 @@ export class Item {
 
   spriteWidthBomb: number = 500;
   spriteHeightBomb: number = 500;
-  cycleLoopBomb = [0, 1, 2, 3];
-  currentLoopIndex: number = 0;  
-  frameCount: number = 0;
- 
+  cycleLoopBomb = [0, 1, 0, 1];
+  currentLoopIndex: number = 0;
+
   constructor(
     context: any,
     xPos: number,
@@ -101,13 +101,15 @@ export class Hallway extends Item {
     if (this.onFire !== null) {
       this.onFire.update();
       for (let e of this.playerOn) {
-        e.alive = false;
+        if (e instanceof ActivePlayer) {
+          e.setLose();
+        }
       }
     }
   }
 
   draw() {
-      this.drawField("tilesets/tileset1/hallway.jpg");
+    this.drawField("tilesets/tileset1/hallway.jpg");
 
     if (this.bombOnItem !== null) {
       this.bombOnItem.draw();
@@ -161,8 +163,10 @@ export class Hole extends Hallway {
 
   update() {
     for (let e of this.playerOn) {
-      e.alive = false;
-
+      if (e instanceof ActivePlayer) {
+        console.log("Hier auf dem Feuer");
+        e.setLose();
+      }
     }
   }
 
@@ -257,7 +261,11 @@ export class Bomb extends Item {
         y,
         this.SIZE_X,
         this.SIZE_Y
-        );
+      );
+      this.currentLoopIndex++;
+      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
+        this.currentLoopIndex = 0;
+      }
     }
   }
 

@@ -4,11 +4,12 @@ import { GameOver } from "./GameOver";
 import { Brick } from "./Brick";
 import { Explosion } from "./Explosion";
 import { Startpage } from "./Startpage";
-import { Editor2 } from "./Editor2";
+import { Editor } from "./Editor";
 import { RoomWait } from "./RoomWait";
 import { UserHasLeft } from "./UserHasLeft";
-import * as io from "socket.io-client";
 import { Winner } from "./Winner";
+
+import * as io from "socket.io-client";
 
 enum serverState {
   SELECTION = 0,
@@ -24,7 +25,8 @@ enum fieldType {
   HALLWAY = 0,
   WALL = 1,
   HOLE = 2,
-  BRICK = 3
+  BRICK = 3,
+  USABLEITEM = 4
 }
 
 enum Event {
@@ -36,17 +38,19 @@ enum ActionBomb {
   DEFAULT_BOMB = 1
 }
 
+let URL: string = "http://localhost:3000";
+
 export class GameState {
   playerNr: number;
   startpage: Startpage;
   gameover: GameOver;
   winner: Winner;
   roomwaitpage: RoomWait;
-  editor: Editor2;
+  editor: Editor;
   state: serverState;
   userhasleft: UserHasLeft = null;
 
-  field: any[][];
+  field: any[];
   items: Item[];
   context: any;
   socket: any;
@@ -59,7 +63,7 @@ export class GameState {
 
   MAX_PLAYERS: number = 4;
   activePlayer: ActivePlayer = null;
-  playerName : string = "";
+  playerName: string = "";
   passivePlayers: PassivePlayer[] = [];
 
   explosions: Explosion[] = [];
@@ -74,7 +78,7 @@ export class GameState {
   };
 
   constructor() {
-    this.socket = io("http://localhost:3000");
+    this.socket = io(URL);
     const canvas = <HTMLCanvasElement>document.getElementById("background");
     this.context = canvas.getContext("2d");
 
@@ -87,45 +91,53 @@ export class GameState {
     this.initStartPage();
   }
 
-  initWaitPageGame() {
+  /**
+   * @description
+   * Initialisierung des Editors
+   */
+
+  initWaitPage(editorChoosen: boolean) {
     this.state = serverState.ROOM_WAIT;
     this.roomwaitpage = new RoomWait(this.context, this);
     this.socket.on(
       "S_ready",
       function(data: any) {
-        this.playerNr = <number>data['playerId'];
-        this.playerName = <string>data['playerName'];
+        this.playerNr = <number>data["playerId"];
+        this.playerName = <string>data["playerName"];
         this.socket.emit("G_ready", this.playerName);
-        this.initGame();
+        if (editorChoosen) {
+          this.initEditor();
+        } else {
+          this.initGame();
+        }
       }.bind(this)
     );
   }
 
-  initWaitPageEditor() {
-    this.state = serverState.ROOM_WAIT;
-    this.roomwaitpage = new RoomWait(this.context, this);
-    this.socket.on(
-      "S_ready",
-      function(data: any) {
-        this.playerNr = <number>data['playerId'];
-        this.playerName = <string>data['playerName'];
-        this.socket.emit("G_ready", this.playerName);
-        this.initEditor();
-      }.bind(this)
-    );
-  }
-
+  /**
+   * @description
+   * Initialisierung der Startseite
+   */
   initStartPage() {
     this.state = serverState.SELECTION;
     this.startpage = new Startpage(this.context, this);
   }
 
+  /**
+   * @description
+   * Initialisierung des Editors
+   */
   initEditor() {
     this.state = serverState.DESIGN;
-    this.editor = new Editor2(this.context);
+    this.editor = new Editor();
   }
 
-  initGame() {
+  /**
+   * @description
+   * Eventhandler für das Game werden initialisiert
+   */
+
+  initGame(): void {
     this.socket.on(
       "init_field",
       function(data: any) {
@@ -217,7 +229,6 @@ export class GameState {
     this.socket.on(
       "user_left",
       function(data: any) {
-        console.log("HIER");
         var playerNrTmp = <number>data;
         this.passivePlayers = this.passivePlayers.filter(function(e: Player) {
           return e.playerNr !== playerNrTmp;
@@ -230,9 +241,22 @@ export class GameState {
         this.updateGameInfos();
       }.bind(this)
     );
+
+    this.socket.on(
+      "passivePlayerGameOver",
+      function(data: any) {
+        var playerNrTmp = <number>data;
+        this.passivePlayers.forEach((element: any) => {
+          if (element.playerNr === playerNrTmp) {
+            element.setLose();
+          }
+        });
+      }.bind(this)
+    );
   }
 
   /**
+   * @desctiption
    * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
    */
   handleNetworkInput(): void {
@@ -242,14 +266,11 @@ export class GameState {
       var event = <string>evObject["event"];
       var action = <number>evObject["action"];
 
-      console.log(event);
-
       for (let e of this.passivePlayers) {
         if (e.playerNr === playerNrTmp) {
           if (e.transitionLock) {
             switch (event) {
               case Event.DROP:
-                console.log("Hier");
                 e.placeBomb();
 
                 this.eventQueue.pop();
@@ -281,7 +302,7 @@ export class GameState {
         var tmpItem = <Hallway>this.items[i];
         if (tmpItem.bombOnItem !== null) {
           if (tmpItem.bombOnItem.explode) {
-            this.explosions.push(new Explosion(tmpItem, this));
+            this.explosions.push(new Explosion(tmpItem, this, 3));
           }
         }
       }
@@ -301,7 +322,6 @@ export class GameState {
       winner = !elem.alive && winner; // überprüfe, ob die anderen Spieler noch teilnehmen
       elem.renderPlayer();
     }
-    console.log(winner);
 
     if (winner || this.passivePlayers.length === 0) {
       this.winner = new Winner(this.context);
@@ -312,12 +332,12 @@ export class GameState {
       this.activePlayer.renderPlayer();
       if (!this.activePlayer.alive) {
         this.gameover = new GameOver(this.context);
+        this.activePlayer.removeEventLister();
+        this.activePlayer.running = false;
         this.state = serverState.GAMEOVER;
       }
     }
   }
-
-
 
   /**
    * Standard update Methode für alle Zustände
@@ -352,8 +372,6 @@ export class GameState {
     }
   }
 
-
-
   /**
    * Prozedur für die Aktualisierung des Spiels
    * Nicht nur während des Spiels bedeuetsam, sondern auch während der Gameover oder Winning- Sequenz.
@@ -372,8 +390,6 @@ export class GameState {
       this.activePlayer.drawPlayer();
     }
   }
-
-
 
   /**
    * Standard draw Methode für alle Zustände
@@ -410,10 +426,9 @@ export class GameState {
     }
   }
 
-
-/**
- *  Methode zur Anzeige der Informationen auf der rechten Seite
- */
+  /**
+   *  Methode zur Anzeige der Informationen auf der rechten Seite
+   */
   updateGameInfos() {
     if (this.state === serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);

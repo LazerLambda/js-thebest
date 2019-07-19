@@ -1,5 +1,6 @@
 import { Bomb, Hallway, Hole, Item } from "./Item";
 import { GameState } from "./GameState";
+import { useableItem, portableHole } from "./UsableItems";
 import { AnimatedObject } from "./AnimatedObject";
 
 enum Direction {
@@ -9,19 +10,17 @@ enum Direction {
   EAST = 3
 }
 
-
-enum Event{
-  MOVE = 'move',
-  DROP = 'drop',
+enum Event {
+  MOVE = "move",
+  DROP = "drop"
 }
 
-enum ActionBomb{
-  DEFAULT_BOMB = 1,
-  
+enum ActionBomb {
+  DEFAULT_BOMB = 1
 }
 
 export class Player {
-  transitionLock : boolean = true;
+  transitionLock: boolean = true;
   transitionCounter: number = 0;
   TRANSITION_UPPER_BOUND: number = 5;
   target: number = 0;
@@ -34,6 +33,15 @@ export class Player {
   canvas: any;
   onItem: Item;
   field: GameState;
+  hitPoints: number = 1;
+  movementSpeed: number = 10;
+  inventory: useableItem = null;
+  visible: boolean = true;
+
+  //Animation
+  spriteWidth: number = 28;
+  spriteHeight: number = 30;
+  cycleLoopPlayer = [0, 1, 0, 2];
   currentDirection: number;
   animatedObject: AnimatedObject;
 
@@ -124,6 +132,18 @@ export class Player {
     }
   }
 
+  /**
+   * @description
+   * Methode zur Verwaltung der alive Variable
+   */
+
+  setLose() {}
+
+  /**
+   * @description
+   * Methode für die Darstellungslogik des Spielers
+   */
+
   drawPlayer() {
     if (!this.alive) {
       // GameOverAnimation
@@ -157,7 +177,11 @@ export class Player {
       }
       --this.loosingSequence;
     } else {
-      this.animatedObject.animatePlayer(this.currentDirection, this.xPos, this.yPos, this.playerNr);
+      this.animatedObject.animatePlayer(
+        this.currentDirection,
+        this.xPos,
+        this.yPos
+      );
     }
   }
 
@@ -183,59 +207,90 @@ export class Player {
   }
 }
 
+/**
+ * @description
+ * Klasse für die Verwaltung des aktiven Spielers auf dem Client. Verwaltung der Nutzereingabe,
+ * der Spielerlogik und des Versendens der Events
+ */
 export class ActivePlayer extends Player {
   socket: any = null;
   constructor(context: any, socket: any, playerNr: number) {
     super(context, playerNr);
     this.socket = socket;
 
-    document.addEventListener("keydown", e => {
-      if (!this.running && this.alive) {
-        switch (e.key) {
-          case "ArrowUp":
-            if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
-              this.direction = Direction.NORTH;
-              this.running = true;
-              this.emitEvent(Event.MOVE, Direction.NORTH);
-            }
-            break;
-          case "ArrowDown":
-            if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
-              this.direction = Direction.SOUTH;
-              this.running = true;
-              this.emitEvent(Event.MOVE, Direction.SOUTH);
-            }
-            break;
-          case "ArrowRight":
-            if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
-              this.direction = Direction.EAST;
-              this.running = true;
-              this.emitEvent(Event.MOVE, Direction.EAST);
-            }
-            break;
-          case "ArrowLeft":
-            if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
-              this.direction = Direction.WEST;
-              this.running = true;
-              this.emitEvent(Event.MOVE, Direction.WEST);
-            }
-            break;
-          case "Enter":
-            if (e.key === "Enter") {
-              var item = <Hallway>this.onItem;
-              item.bombOnItem = new Bomb(
-                this.onItem.context,
-                this.onItem.x,
-                this.onItem.y,
-                this.onItem.SIZE_X,
-                this.onItem.SIZE_Y,
-                item
-              );
-              this.emitEvent(Event.DROP, ActionBomb.DEFAULT_BOMB);
-            }
-        }
+    document.addEventListener("keydown", this.gameEventListener.bind(this));
+  }
+
+  /**
+   * @description
+   * Funktion für die Verrarbeitung der Spielereingaben.
+   * @param e Event
+   */
+  gameEventListener(e: any) {
+    if (!this.running && this.alive) {
+      switch (e.key) {
+        case "ArrowUp":
+          if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
+            this.direction = Direction.NORTH;
+            this.running = true;
+            this.emitEvent(Event.MOVE, Direction.NORTH);
+          }
+          break;
+        case "ArrowDown":
+          if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
+            this.direction = Direction.SOUTH;
+            this.running = true;
+            this.emitEvent(Event.MOVE, Direction.SOUTH);
+          }
+          break;
+        case "ArrowRight":
+          if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
+            this.direction = Direction.EAST;
+            this.running = true;
+            this.emitEvent(Event.MOVE, Direction.EAST);
+          }
+          break;
+        case "ArrowLeft":
+          if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
+            this.direction = Direction.WEST;
+            this.running = true;
+            this.emitEvent(Event.MOVE, Direction.WEST);
+          }
+          break;
+        case "y":
+          if (e.key === "y") {
+            var item = <Hallway>this.onItem;
+            item.bombOnItem = new Bomb(
+              this.onItem.context,
+              this.onItem.x,
+              this.onItem.y,
+              this.onItem.SIZE_X,
+              this.onItem.SIZE_Y,
+              item
+            );
+            this.emitEvent(Event.DROP, ActionBomb.DEFAULT_BOMB);
+          }
       }
-    });
+    }
+  }
+
+  /**
+   * @description
+   * Entfernung des EventListeners.
+   */
+  removeEventLister() {
+    document.removeEventListener("keydown", this.gameEventListener);
+  }
+
+  /**
+   * @description
+   * Methode zur Verwaltung der alive Variable. Hier wird weiterhin
+   * ein 'isOver' Event an den Server gesendet, um die Spielerlogik nur
+   * auf einem Client ablaufen zu lassen.
+   */
+  setLose() {
+    this.socket.emit("isOver");
+    this.alive = false;
   }
 
   emitEvent(event: string, action: number) {
@@ -248,17 +303,30 @@ export class ActivePlayer extends Player {
   }
 }
 
+/**
+ * @description
+ * Klasse zur Darstellung der Spieler im Netzwerk. Hier wird der Spieler dargestellt, indem die moves
+ * äquivalent zum aktiven Spieler ausgeführt werden. Über ein transition lock und eine Warteschlange,
+ * werden die Spielzüge in korrekter Reihenfolge durchgeführt.
+ */
+
 export class PassivePlayer extends Player {
   constructor(context: any, playerNr: number) {
     super(context, playerNr);
   }
 
+
+  /**
+   * @description
+   * Festlegung der korrekten Laufrichtung des passsiven Spielers.
+   * Belegung des transition locks für die korrekte Hintereinander-
+   * ausführung
+   * @param action Laufrichtung
+   */
   setTarget(action: number) {
-    
     switch (action) {
       case Direction.NORTH:
         if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
-          
           this.transitionLock = false;
 
           this.target = this.onItem.x + (this.onItem.y - 1) * 8;
@@ -269,7 +337,6 @@ export class PassivePlayer extends Player {
 
       case Direction.SOUTH:
         if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
-          
           this.transitionLock = false;
 
           this.target = this.onItem.x + (this.onItem.y + 1) * 8;
@@ -280,9 +347,8 @@ export class PassivePlayer extends Player {
 
       case Direction.EAST:
         if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
-
           this.transitionLock = false;
-          
+
           this.target = this.onItem.x + 1 + this.onItem.y * 8;
           this.running = true;
           this.direction = Direction.EAST;
@@ -290,9 +356,8 @@ export class PassivePlayer extends Player {
         break;
       case Direction.WEST:
         if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
-
           this.transitionLock = false;
-          
+
           this.target = this.onItem.x - 1 + this.onItem.y * 8;
           this.running = true;
           this.direction = Direction.WEST;
@@ -300,6 +365,12 @@ export class PassivePlayer extends Player {
         }
     }
   }
+
+
+  /**
+   * @description
+   * Ablegen einer Bombe des passiven Spielers
+   */
 
   placeBomb() {
     var item = <Hallway>this.onItem;
@@ -311,5 +382,14 @@ export class PassivePlayer extends Player {
       this.onItem.SIZE_Y,
       item
     );
+  }
+
+
+    /**
+   * @description
+   * Methode zur Verwaltung der alive Variable.
+   */
+  setLose(){
+    this.alive = false;
   }
 }
