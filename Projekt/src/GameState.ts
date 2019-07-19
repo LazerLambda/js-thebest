@@ -83,7 +83,10 @@ export class GameState {
     this.context = canvas.getContext("2d");
 
     // dynamisch machen
-
+    this.canvasHeight = canvas.height;
+    this.canvasWidth = canvas.width;
+    this.xSize = (canvas.width - (canvas.width * 1 / 6)) / 8;
+    this.ySize = canvas.height / 8;
 
     this.initStartPage();
   }
@@ -430,22 +433,21 @@ export class GameState {
   updateGameInfos() {
     if (this.state === serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);
-      this.context.fillStyle = "#fff2c6";
+      this.context.fillStyle = "#cccccc";
       this.context.fillRect(480, 0, 300, 480);
 
       let players: Player[] = <Player[]>this.passivePlayers.slice();
       players.concat(this.activePlayer).forEach(
         function(e: Player, i: number) {
-          this.context.fillStyle = "#e44b43";
-          this.context.font = "25px Krungthep";
-          this.context.fillText("Player: " + e.playerNr, 500, (i + 1) * 70); // Dynamisch machen
-          this.context.fillStyle = "#ff9944";
-          this.context.font = "13px Krungthep";
-          this.context.fillText("Punkte: " + "0", 520, (i + 1) * 70 + 25);
+          this.context.fillStyle = "black";
+          this.context.font = "25px Mistral";
+          this.context.fillText("Player: " + e.playerNr, 500, (i + 1) * 50); // Dynamisch machen
+          this.context.font = "13px Avenir";
+          this.context.fillText("Punkte: " + "0", 520, (i + 1) * 50 + 25);
           if (!e.alive) {
             this.context.fillStyle = "#f1651c";
-            this.context.font = "10px Krungthep";
-            this.context.fillText("You loooose xD", 600, (i + 1) * 70 + 25);
+            this.context.font = "10px Avenir";
+            this.context.fillText("You loooose xD", 600, (i + 1) * 50 + 25);
           }
         }.bind(this)
       );

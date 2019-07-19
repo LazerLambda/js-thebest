@@ -163,9 +163,6 @@ export class Player {
           }
         }
         this.field.items[pos].playerOn = newArr;
-
-        // this.context.fillStyle = "red";
-        // this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
         this.field.updateGameInfos();
       } else {
         /**
@@ -180,7 +177,8 @@ export class Player {
       this.animatedObject.animatePlayer(
         this.currentDirection,
         this.xPos,
-        this.yPos
+        this.yPos,
+        this.playerNr
       );
     }
   }
