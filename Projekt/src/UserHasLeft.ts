@@ -27,11 +27,11 @@ export class UserHasLeft {
 
   drawUserHasLeft() {
     this.context.globalAlpha = 1.0 / this.divider;
-    this.context.fillStyle = "grey";
+    this.context.fillStyle = "#ffe1a5";
     this.context.fillRect(0, 0, 480, 480);
     this.context.globalAlpha = 1.0;         // evtl. alpha dynamisch anpassen
-    this.context.fillStyle = "blue";
-    this.context.font = "50px Arial";
+    this.context.fillStyle = "#e44b43";
+    this.context.font = "50px Krungthep";
     this.context.fillText(this.userName + "\n has left the Game", 25, 200);
     this.context.globalAlpha = 1.0;
   }

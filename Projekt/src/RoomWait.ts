@@ -7,7 +7,7 @@ export class RoomWait{
     constructor(context : any, gameState : any){
         this.context = context;
         this.gameState = gameState;
-        this.context.fillStyle = "orange";
+        this.context.fillStyle = "#ff9944";
         this.context.fillRect(0, 0, 480, 480);
     }
 
@@ -16,7 +16,7 @@ export class RoomWait{
     }
 
     drawRoomWait(){
-        this.context.fillStyle = "orange";
+        this.context.fillStyle = "#ff9944";
         this.context.fillRect(0, 0, 480, 480);
     }
 

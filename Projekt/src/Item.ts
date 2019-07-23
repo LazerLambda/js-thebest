@@ -26,7 +26,7 @@ export class Item {
 
   spriteWidthBomb: number = 500;
   spriteHeightBomb: number = 500;
-  cycleLoopBomb = [0, 1, 0, 1];
+  cycleLoopBomb = [0, 1, 2, 3, 2, 1];
   currentLoopIndex: number = 0;
   frameCount : number = 0;
 
