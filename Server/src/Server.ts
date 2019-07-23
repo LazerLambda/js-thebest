@@ -82,6 +82,7 @@ export class Server {
                 var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
                 socket.state = SocketStateEnum.DESIGN;
+                room.handleEditorTimeOut(socket);
               }
             }
             if (data === "game") {
@@ -103,6 +104,17 @@ export class Server {
           }.bind(this)
         );
 
+        socket.on("proposedField", function(data : any){
+          var field: number[][] = <number[][]>data;
+          var room = <GameBackend> socket.room;
+          room.sendEventsToPeers(data);
+          if (room.checkProposedField(socket, field)) {
+            socket.emit("check", 1);
+          } else {
+            socket.emit("check", 0);
+          }
+        }.bind(this));
+
         socket.on(
           "G_ready",
           function(data: any) {
@@ -117,7 +129,7 @@ export class Server {
 
         socket.on("event", function(data: any) {
           console.log("'event' received: " + data);
-          var room = <GameBackend>socket.room;
+          var room = <GameBackend> socket.room;
           room.sendEventsToPeers(data);
         });
 

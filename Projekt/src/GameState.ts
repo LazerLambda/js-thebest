@@ -126,11 +126,14 @@ export class GameState {
 
   /**
    * @description
-   * Initialisierung des Editors
+   * Initialisierung des Editors und des timeouts
    */
   private initEditor(): void {
     this.state = serverState.DESIGN;
     this.editor = new Editor();
+    this.socket.on('timeout', function(data : any){
+      this.initGame();
+    }.bind(this));
   }
 
   /**

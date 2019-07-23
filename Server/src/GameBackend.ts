@@ -61,7 +61,7 @@ export class GameBackend {
   /**
    * Methode zur Überprüfung des vorgeschlagenen Spielfeldes
    */
-  public checkProposedField(socket: any, field: number[][]) {
+  public checkProposedField(socket: any, field: number[][]): boolean {
     var playerIdTmp: number = socket.playerNr;
 
     var door1: number = Math.floor(field.length / 2);
@@ -73,8 +73,8 @@ export class GameBackend {
 
     function testWalls(
       objStrt: { xStart: number; yStart: number },
-      objDoor1 : { x: number; y: number },
-      objDoor2 : { x: number; y: number },
+      objDoor1: { x: number; y: number },
+      objDoor2: { x: number; y: number },
       xDir: number,
       yDir: number
     ) {
@@ -88,7 +88,10 @@ export class GameBackend {
       var visitedFields: object[] = [];
 
       while (loopVar) {
-        if(visitedFields.includes(objDoor1) && visitedFields.includes(objDoor2)){
+        if (
+          visitedFields.includes(objDoor1) &&
+          visitedFields.includes(objDoor2)
+        ) {
           return true;
         }
         if (field[x + xDir][y] === fieldType.HALLWAY) {
@@ -121,6 +124,29 @@ export class GameBackend {
         startpos = { x: field.length, y: field.length }; // bottom right
       default:
         throw "Error something went wrong with the playerId";
+    }
+    return false;
+  }
+
+  /**
+   * @description
+   *
+   */
+  public handleEditorTimeOut(socket: any) {
+    var allStatesOnDesign : boolean = true;
+    for(let e of this.sockets){
+      allStatesOnDesign = (e.state === SocketStateEnum.DESIGN) && allStatesOnDesign;
+    }
+    console.log("All Players ready? " + allStatesOnDesign);
+    if (allStatesOnDesign) {
+
+      setTimeout(function(){
+        for(let e of this.sockets){
+          e.state = SocketStateEnum.GAME;
+          e.emit('timeout');
+        }
+      }.bind(this), 1000 * 60);
+      console.log("Timeout set");
     }
   }
 
