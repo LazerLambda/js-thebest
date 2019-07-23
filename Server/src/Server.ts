@@ -13,6 +13,12 @@ enum SocketStateEnum {
   GAME = 3
 }
 
+enum Event {
+  MOVE = "move",
+  DROP = "drop",
+  PICKUP = 'pickup'
+}
+
 export class Server {
   server: any;
 
@@ -53,6 +59,7 @@ export class Server {
       function(socket: any) {
         this.queue.push(socket);
 
+
         // Init States on socket
         socket.alive = true;
         socket.state = SocketStateEnum.SELECTION;
@@ -60,6 +67,7 @@ export class Server {
         socket.waitingForGame = false;
         socket.room = null;
         socket.playerNr = 0;
+
 
         socket.on(
           "mode",
@@ -116,8 +124,6 @@ export class Server {
         console.log(
           "Connection established\n\t'-> Conn Nr : " + this.connectionCounter
         );
-
-        socket.on("event", function(data: any) {});
 
         socket.on('isOver', function(data : any)
         {

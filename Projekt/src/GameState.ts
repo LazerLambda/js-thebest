@@ -31,7 +31,8 @@ enum fieldType {
 
 enum Event {
   MOVE = "move",
-  DROP = "drop"
+  DROP = "drop",
+  PICKUP = "pickup"
 }
 
 enum ActionBomb {
@@ -85,7 +86,7 @@ export class GameState {
     // dynamisch machen
     this.canvasHeight = canvas.height;
     this.canvasWidth = canvas.width;
-    this.xSize = (canvas.width - (canvas.width * 1 / 6)) / 8;
+    this.xSize = (canvas.width - (canvas.width * 1) / 6) / 8;
     this.ySize = canvas.height / 8;
 
     this.initStartPage();
@@ -96,7 +97,6 @@ export class GameState {
    * Initialisierung des der WarteSeite mit EventListener für das Verhalten
    * bei positiver Rückmeldung vom Server. Ist vom Startseiten Objekt zu erreichen.
    */
-
   public initWaitPage(editorChoosen: boolean) {
     this.state = serverState.ROOM_WAIT;
     this.roomwaitpage = new RoomWait(this.context, this);
@@ -137,7 +137,6 @@ export class GameState {
    * @description
    * Eventhandler für das Game werden initialisiert
    */
-
   private initGame(): void {
     this.socket.on(
       "init_field",
@@ -282,6 +281,10 @@ export class GameState {
 
                 this.eventQueue.pop();
 
+                break;
+
+              case Event.PICKUP:
+                // User pick up
                 break;
             }
           }
@@ -452,5 +455,30 @@ export class GameState {
         }.bind(this)
       );
     }
+  }
+
+  /**
+   * @description
+   * Setze Spieler zu neuer Position
+   * @param player Player für das neue Ziel
+   */
+  setPlayerOnItem(player: Player, target: number) {
+    this.items[target].playerOn.push(player);
+  }
+
+  /**
+   * @description
+   * Entferne den Spieler von der alten Position
+   * @param player
+   */
+  rmPlayerFromItem(player: Player, x: number, y: number) {
+    var newArr = new Array();
+    var oldPos = x + y * 8;
+    for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
+      if (this.items[oldPos].playerOn[i].playerNr !== this.clientrId) {
+        newArr.push(this.items[oldPos].playerOn[i]);
+      }
+    }
+    this.items[oldPos].playerOn = newArr;
   }
 }
