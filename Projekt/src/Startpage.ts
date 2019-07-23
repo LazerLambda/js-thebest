@@ -78,7 +78,6 @@ export class Startpage {
   buttonEvents(e: any) {
     var rect = this.canvas.getBoundingClientRect();
     if (this.onButton1(e.clientX - rect.left, e.clientY - rect.top)) {
-      console.log("sdf");
       this.mouseOverButton1 = true;
     } else {
       this.mouseOverButton1 = false;

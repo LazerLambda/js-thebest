@@ -12,7 +12,8 @@ enum Direction {
 
 enum Event {
   MOVE = "move",
-  DROP = "drop"
+  DROP = "drop",
+  PICKUP = 'pickup'
 }
 
 enum ActionBomb {
@@ -107,23 +108,9 @@ export class Player {
         // Player auf neues Feld setzen
         var tmpItem = <Hallway>this.onItem;
         this.onItem = this.field.items[this.target];
-        this.onItem.playerOn.push(this);
-        var oldPos = tmpItem.x + tmpItem.y * 8;
 
-        // this.field.items[oldPos].playerOn = this.field.items[oldPos].playerOn.filter(function(e){
-        //   return <number> e.playerNr !== <number> this.playerNr;
-        // });
-
-        var newArr = new Array();
-        for (let i = 0; i < this.field.items[oldPos].playerOn.length; i++) {
-          if (this.field.items[oldPos].playerOn[i].playerNr !== this.playerNr) {
-            newArr.push(this.field.items[oldPos].playerOn[i]);
-          }
-        }
-        this.field.items[oldPos].playerOn = newArr;
-
-        // Freigabe des transitionsLocks
-
+        this.field.setPlayerOnItem(this, this.target);
+        this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
         this.transitionLock = true;
 
         this.xPos = this.onItem.x * this.field.xSize;
@@ -150,10 +137,6 @@ export class Player {
 
       if (this.loosingSequence < 0) {
         // Game over
-
-        // this.onItem.playerOn = this.onItem.playerOn.filter(e => {
-        //   e.playerNr !== this.playerNr;
-        // });
 
         var pos = this.onItem.x + this.onItem.y * 8;
         var newArr = new Array();
@@ -313,7 +296,6 @@ export class PassivePlayer extends Player {
     super(context, playerNr);
   }
 
-
   /**
    * @description
    * Festlegung der korrekten Laufrichtung des passsiven Spielers.
@@ -364,7 +346,6 @@ export class PassivePlayer extends Player {
     }
   }
 
-
   /**
    * @description
    * Ablegen einer Bombe des passiven Spielers
@@ -382,12 +363,11 @@ export class PassivePlayer extends Player {
     );
   }
 
-
-    /**
+  /**
    * @description
    * Methode zur Verwaltung der alive Variable.
    */
-  setLose(){
+  setLose() {
     this.alive = false;
   }
 }

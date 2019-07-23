@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { Server } from "./Server";
+import { start } from "repl";
 
 enum SocketStateEnum {
   SELECTION = 0,
@@ -8,11 +9,20 @@ enum SocketStateEnum {
   GAME = 3
 }
 
+enum fieldType {
+  HALLWAY = 0,
+  WALL = 1,
+  HOLE = 2,
+  BRICK = 3,
+  USABLEITEM = 4
+}
+
 export class GameBackend {
   sockets: any[] = [];
   server: Server = null;
   gameNumber: any = 0;
   levelCounter: number = 1;
+  timeoutSet: boolean = false;
 
   constructor(sockets: any[], server: Server) {
     this.sockets = sockets;
@@ -45,6 +55,72 @@ export class GameBackend {
       console.log("Send to " + e.playerNr);
       var toSend: object = { playerId: e.playerNr, playerName: e.name };
       e.emit("S_ready", toSend);
+    }
+  }
+
+  /**
+   * Methode zur Überprüfung des vorgeschlagenen Spielfeldes
+   */
+  public checkProposedField(socket: any, field: number[][]) {
+    var playerIdTmp: number = socket.playerNr;
+
+    var door1: number = Math.floor(field.length / 2);
+    var door2: number = Math.floor(field.length / 2);
+
+    var startpos: object = { x: 0, y: 0 };
+
+    function addToVisitedFields() {}
+
+    function testWalls(
+      objStrt: { xStart: number; yStart: number },
+      objDoor1 : { x: number; y: number },
+      objDoor2 : { x: number; y: number },
+      xDir: number,
+      yDir: number
+    ) {
+      var loopVar: boolean = true;
+      var x = objStrt.xStart;
+      var y = objStrt.yStart;
+
+      if (field[x][y] !== fieldType.HALLWAY) {
+        return false;
+      }
+      var visitedFields: object[] = [];
+
+      while (loopVar) {
+        if(visitedFields.includes(objDoor1) && visitedFields.includes(objDoor2)){
+          return true;
+        }
+        if (field[x + xDir][y] === fieldType.HALLWAY) {
+          var objTmp: object = { x: x + xDir, y: y };
+          if (visitedFields.includes(objTmp)) {
+            visitedFields.push(objTmp);
+          }
+        } else if (field[x + xDir][y] === fieldType.HALLWAY) {
+          var objTmp: object = { x: x, y: y + yDir };
+          if (visitedFields.includes(objTmp)) {
+            visitedFields.push(objTmp);
+          }
+        } else {
+          return false;
+        }
+      }
+    }
+
+    switch (playerIdTmp) {
+      case 1:
+        startpos = { x: 0, y: 0 }; // top left
+        break;
+      case 2:
+        startpos = { x: field.length, y: 0 }; // top right
+        break;
+      case 3:
+        startpos = { x: 0, y: field.length }; // bottom left
+        break;
+      case 4:
+        startpos = { x: field.length, y: field.length }; // bottom right
+      default:
+        throw "Error something went wrong with the playerId";
     }
   }
 
@@ -130,8 +206,10 @@ export class GameBackend {
   playerIsDead(socket: any) {
     for (let e of this.sockets) {
       if (e.id !== socket.id) {
-        e.emit('passivePlayerGameOver', socket.playerNr);
-        console.log("'passivePlayerGameOver' emitted\nt'-> To player " + socket.playerNr)
+        e.emit("passivePlayerGameOver", socket.playerNr);
+        console.log(
+          "'passivePlayerGameOver' emitted\nt'-> To player " + socket.playerNr
+        );
       }
     }
   }
