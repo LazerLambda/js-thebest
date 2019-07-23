@@ -431,7 +431,7 @@ export class GameState {
    *  Methode zur Anzeige der Informationen auf der rechten Seite
    */
   updateGameInfos() {
-    if (this.state === serverState.GAME) {{
+    if (this.state === serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);
       this.context.fillStyle = "#fff2c6";
       this.context.fillRect(480, 0, 300, 480);
