@@ -131,7 +131,7 @@ export class GameState {
    */
   private initEditor(): void {
     this.state = serverState.DESIGN;
-    this.editor = new Editor();
+    this.editor = new Editor(this);
   }
 
   /**
