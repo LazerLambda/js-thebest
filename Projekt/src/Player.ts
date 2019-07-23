@@ -38,6 +38,7 @@ export class Player {
   movementSpeed: number = 10;
   inventory: useableItem = null;
   visible: boolean = true;
+  name : string = ""
 
   //Animation
   spriteWidth: number = 28;
@@ -51,10 +52,11 @@ export class Player {
 
   playerNr: number;
 
-  constructor(context: any, playerNr: any) {
+  constructor(context: any, playerNr: any, name : string) {
     this.xPos = 0;
     this.yPos = 0;
     this.playerNr = playerNr;
+    this.name = name;
 
     this.field = null;
     this.onItem = null;
@@ -200,8 +202,8 @@ export class Player {
  */
 export class ActivePlayer extends Player {
   socket: any = null;
-  constructor(context: any, socket: any, playerNr: number) {
-    super(context, playerNr);
+  constructor(context: any, socket: any, playerNr: number, name : string) {
+    super(context, playerNr, name);
     this.socket = socket;
 
     document.addEventListener("keydown", this.gameEventListener.bind(this));
@@ -297,8 +299,8 @@ export class ActivePlayer extends Player {
  */
 
 export class PassivePlayer extends Player {
-  constructor(context: any, playerNr: number) {
-    super(context, playerNr);
+  constructor(context: any, playerNr: number, name : string) {
+    super(context, playerNr, name);
   }
 
   /**
