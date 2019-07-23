@@ -31,7 +31,8 @@ enum fieldType {
 
 enum Event {
   MOVE = "move",
-  DROP = "drop"
+  DROP = "drop",
+  PICKUP = "pickup"
 }
 
 enum ActionBomb {
@@ -41,7 +42,7 @@ enum ActionBomb {
 let URL: string = "http://localhost:3000";
 
 export class GameState {
-  clientrId: number;
+  clientId: number;
   startpage: Startpage;
   gameover: GameOver;
   winner: Winner;
@@ -283,6 +284,10 @@ export class GameState {
                 this.eventQueue.pop();
 
                 break;
+
+              case Event.PICKUP:
+                // Pickup Event
+                break;
             }
           }
         }
@@ -453,5 +458,30 @@ export class GameState {
         }.bind(this)
       );
     }
+  }
+
+  /**
+   * @description
+   * Setze Spieler zu neuer Position
+   * @param player Player für das neue Ziel
+   */
+  setPlayerOnItem(player: Player, target: number) {
+    this.items[target].playerOn.push(player);
+  }
+
+  /**
+   * @description
+   * Entferne den Spieler von der alten Position
+   * @param player
+   */
+  rmPlayerFromItem(player: Player, x: number, y: number) {
+    var newArr = new Array();
+    var oldPos = x + y * 8;
+    for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
+      if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
+        newArr.push(this.items[oldPos].playerOn[i]);
+      }
+    }
+    this.items[oldPos].playerOn = newArr;
   }
 }
