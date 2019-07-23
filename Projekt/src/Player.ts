@@ -111,6 +111,11 @@ export class Player {
 
         this.field.setPlayerOnItem(this, this.target);
         this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
+
+        // Freigabe des transitionsLocks
+
+        this.field.setPlayerOnItem(this, this.target);
+        this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
         this.transitionLock = true;
 
         this.xPos = this.onItem.x * this.field.xSize;

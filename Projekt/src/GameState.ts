@@ -42,7 +42,7 @@ enum ActionBomb {
 let URL: string = "http://localhost:3000";
 
 export class GameState {
-  clientrId: number;
+  clientId: number;
   startpage: Startpage;
   gameover: GameOver;
   winner: Winner;
@@ -86,7 +86,7 @@ export class GameState {
     // dynamisch machen
     this.canvasHeight = canvas.height;
     this.canvasWidth = canvas.width;
-    this.xSize = (canvas.width - (canvas.width * 1) / 6) / 8;
+    this.xSize = (canvas.width - 300) / 8;
     this.ySize = canvas.height / 8;
 
     this.initStartPage();
@@ -284,7 +284,7 @@ export class GameState {
                 break;
 
               case Event.PICKUP:
-                // User pick up
+                // Pickup Event
                 break;
             }
           }
@@ -476,7 +476,7 @@ updateGameInfos() {
     var newArr = new Array();
     var oldPos = x + y * 8;
     for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
-      if (this.items[oldPos].playerOn[i].playerNr !== this.clientrId) {
+      if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
         newArr.push(this.items[oldPos].playerOn[i]);
       }
     }
