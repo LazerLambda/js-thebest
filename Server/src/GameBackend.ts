@@ -52,9 +52,9 @@ export class GameBackend {
    */
   public emitServerReady() {
     for (let e of this.sockets) {
-      console.log("Send to " + e.playerNr);
       var toSend: object = { playerId: e.playerNr, playerName: e.name };
       e.emit("S_ready", toSend);
+      console.log("'S_ready' emitted to " + e.id + " Name " + e.name);
     }
   }
 
@@ -130,9 +130,9 @@ export class GameBackend {
 
   /**
    * @description
-   *
+   *  Setzen des Timeouts für den Editor.
    */
-  public handleEditorTimeOut(socket: any) {
+  public handleEditorTimeOut(f : () => void) {
     var allStatesOnDesign : boolean = true;
     for(let e of this.sockets){
       allStatesOnDesign = (e.state === SocketStateEnum.DESIGN) && allStatesOnDesign;
@@ -142,10 +142,10 @@ export class GameBackend {
 
       setTimeout(function(){
         for(let e of this.sockets){
-          e.state = SocketStateEnum.GAME;
           e.emit('timeout');
+          console.log("timeout emitted");
         }
-      }.bind(this), 1000 * 60);
+      }.bind(this), 1000 * 2);          // Konstante
       console.log("Timeout set");
     }
   }
@@ -156,17 +156,14 @@ export class GameBackend {
    * Übersendung dem neuen Zustand angepasst, sodass keine Duplikate gesendet werden.
    */
   public initField(): void {
-    // Hier optional noch levelcounter überprüfen.
-    // für weitere Levels
 
     var file: any = fs.readFileSync("./Fields/Field0.json");
     var field: Object = JSON.parse(file);
     for (let e of this.sockets) {
       if (e.state !== SocketStateEnum.GAME) {
+        
         e.emit("init_field", field);
-        console.log(e.id + "" + e.state);
         e.state = SocketStateEnum.GAME;
-        console.log(e.id + "" + e.state);
         console.log("Field sent to " + e.id);
       }
     }

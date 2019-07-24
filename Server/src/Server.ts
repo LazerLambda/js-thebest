@@ -16,7 +16,7 @@ enum SocketStateEnum {
 enum Event {
   MOVE = "move",
   DROP = "drop",
-  PICKUP = 'pickup'
+  PICKUP = "pickup"
 }
 
 export class Server {
@@ -59,7 +59,6 @@ export class Server {
       function(socket: any) {
         this.queue.push(socket);
 
-
         // Init States on socket
         socket.alive = true;
         socket.state = SocketStateEnum.SELECTION;
@@ -67,7 +66,6 @@ export class Server {
         socket.waitingForGame = false;
         socket.room = null;
         socket.playerNr = 0;
-
 
         socket.on(
           "mode",
@@ -78,20 +76,21 @@ export class Server {
             if (data === "editor") {
               socket.waitingForEditor = true;
               socket.playerNr = this.connectionCounter;
+              socket.state = SocketStateEnum.DESIGN;
               if (this.checkOtherPlayerPreferences(true)) {
                 var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
-                socket.state = SocketStateEnum.DESIGN;
-                room.handleEditorTimeOut(socket);
+                
               }
             }
             if (data === "game") {
               socket.waitingForGame = true;
               socket.playerNr = this.connectionCounter;
+              socket.state = SocketStateEnum.GAME_WAIT;
               if (this.checkOtherPlayerPreferences(false)) {
                 var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
-                socket.state = SocketStateEnum.GAME_WAIT;
+                
               }
             }
 
@@ -104,16 +103,19 @@ export class Server {
           }.bind(this)
         );
 
-        socket.on("proposedField", function(data : any){
-          var field: number[][] = <number[][]>data;
-          var room = <GameBackend> socket.room;
-          room.sendEventsToPeers(data);
-          if (room.checkProposedField(socket, field)) {
-            socket.emit("check", 1);
-          } else {
-            socket.emit("check", 0);
-          }
-        }.bind(this));
+        socket.on(
+          "proposedField",
+          function(data: any) {
+            var field: number[][] = <number[][]>data;
+            var room = <GameBackend>socket.room;
+            room.sendEventsToPeers(data);
+            if (room.checkProposedField(socket, field)) {
+              socket.emit("check", 1);
+            } else {
+              socket.emit("check", 0);
+            }
+          }.bind(this)
+        );
 
         socket.on(
           "G_ready",
@@ -129,7 +131,7 @@ export class Server {
 
         socket.on("event", function(data: any) {
           console.log("'event' received: " + data);
-          var room = <GameBackend> socket.room;
+          var room = <GameBackend>socket.room;
           room.sendEventsToPeers(data);
         });
 
@@ -137,8 +139,7 @@ export class Server {
           "Connection established\n\t'-> Conn Nr : " + this.connectionCounter
         );
 
-        socket.on('isOver', function(data : any)
-        {
+        socket.on("isOver", function(data: any) {
           console.log("'isOver' received: " + data);
           var room = <GameBackend>socket.room;
           room.playerIsDead(socket);
@@ -163,8 +164,6 @@ export class Server {
     });
   }
 
-
-
   /**
    * Methode, um zu suchen, ob es weitere Spieler mit der selben Präferenz gibt, um
    * dann ein neues Spiel zu erzeugen, welches in diesem Server Objekt auf der games-
@@ -181,7 +180,9 @@ export class Server {
             collector.push(e);
           }
           if (collector.length === this.MAX_PLAYER) {
-            this.games.push(new GameBackend(collector, this));
+            var room : GameBackend = new GameBackend(collector, this);
+            room.handleEditorTimeOut(room.initField);
+            this.games.push(room);
 
             return true;
           }
@@ -202,8 +203,6 @@ export class Server {
     }
     return false;
   }
-
-
 
   /**
    * Methode, welche einen spezifischen Socket von der Queue entfernt.

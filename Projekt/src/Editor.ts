@@ -29,6 +29,8 @@ entry:number[][];
 
 cvsElems:cvsElem[];
 
+timeoutIncoming : boolean = false;
+
 constructor() {
 
 	const cvs = <HTMLCanvasElement>document.getElementById("background");
@@ -65,6 +67,7 @@ constructor() {
 		this.drawLine(i*this.fieldSquareLen, 0, i*this.fieldSquareLen, this.gameAreaHeight);
 	}
 	let inputMap = document.createElement("textarea");
+	inputMap.setAttribute('id', 'inputMap');
 	document.body.append(inputMap);
 	const saveIcon = new Image(300,300);
 	saveIcon.src = "icons/save.jpg";
@@ -84,6 +87,7 @@ constructor() {
 	//TODO eventListener for selecting fieldTypes
 	//TODO eventListener for LoadMap
 	this.cvs.addEventListener('click', this.cvsClick.bind(this));
+	this.initTimeOut();
 }
 
 // Functions -----------------------------------------
@@ -202,4 +206,25 @@ loadMap(mapStr:string) {
 	this.drawCvs();
 }
 
+public initTimeOut(){
+	setTimeout(function(){this.timeoutIncoming = true; this.drawEditor()}.bind(this), 1000 * 1);  // Konstante abhängig vom Timeout am Server
+}
+
+public drawEditor(){
+	if(this.timeoutIncoming){
+		this.ctx.globalAlpha = 0.5;
+		this.ctx.fillStyle = "grey";
+		this.ctx.fillRect(0, 0, 480, 480);
+		this.ctx.globalAlpha = 1.0;
+		this.ctx.fillStyle = "red";
+		this.ctx.font = "50px Arial";
+		this.ctx.fillText("Timeout", 100, 200);
+	}
+}
+
+public cleanUpPage(){
+	this.ctx.clearRect(0,0,10000, 10000);
+	var element = document.getElementById('inputMap');
+    element.parentNode.removeChild(element);
+}
 }

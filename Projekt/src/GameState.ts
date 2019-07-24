@@ -105,10 +105,11 @@ export class GameState {
       function(data: any) {
         this.clientId = <number>data["playerId"];
         this.playerName = <string>data["playerName"];
-        this.socket.emit("G_ready", this.playerName);
+
         if (editorChoosen) {
           this.initEditor();
         } else {
+          this.socket.emit("G_ready", this.playerName);
           this.initGame();
         }
       }.bind(this)
@@ -131,9 +132,14 @@ export class GameState {
   private initEditor(): void {
     this.state = serverState.DESIGN;
     this.editor = new Editor();
-    this.socket.on('timeout', function(data : any){
-      this.initGame();
-    }.bind(this));
+    this.socket.on(
+      "timeout",
+      function(data: any) {
+        this.editor.cleanUpPage();
+        this.socket.emit("G_ready", this.playerName);
+        this.initGame();
+      }.bind(this)
+    );
   }
 
   /**
@@ -191,7 +197,7 @@ export class GameState {
           var player = data["player_" + i];
           var x: number = <number>player["startpos"]["x"];
           var y: number = <number>player["startpos"]["y"];
-          var playerName : string = <string> player["name"];
+          var playerName: string = <string>player["name"];
 
           // this.state = serverState.GAME;
           // 8 dynamisch
@@ -199,7 +205,12 @@ export class GameState {
           var pos: number = x + y * 8;
           var field = this.items[pos];
           if (this.clientId === i) {
-            this.activePlayer = new ActivePlayer(this.context, this.socket, i, playerName);
+            this.activePlayer = new ActivePlayer(
+              this.context,
+              this.socket,
+              i,
+              playerName
+            );
             this.activePlayer.initField(this, field);
             this.update();
             this.draw();
