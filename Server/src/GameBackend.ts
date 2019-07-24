@@ -52,7 +52,7 @@ export class GameBackend {
    */
   public emitServerReady() {
     for (let e of this.sockets) {
-      var toSend: object = { playerId: e.playerNr, playerName: e.name };
+      var toSend: object = { playerId: e.playerNr }; //, playerName: e.name };
       e.emit("S_ready", toSend);
       console.log("'S_ready' emitted to " + e.id + " Name " + e.name);
     }
@@ -132,20 +132,23 @@ export class GameBackend {
    * @description
    *  Setzen des Timeouts für den Editor.
    */
-  public handleEditorTimeOut(f : () => void) {
-    var allStatesOnDesign : boolean = true;
-    for(let e of this.sockets){
-      allStatesOnDesign = (e.state === SocketStateEnum.DESIGN) && allStatesOnDesign;
+  public handleEditorTimeOut(f: () => void) {
+    var allStatesOnDesign: boolean = true;
+    for (let e of this.sockets) {
+      allStatesOnDesign =
+        e.state === SocketStateEnum.DESIGN && allStatesOnDesign;
     }
     console.log("All Players ready? " + allStatesOnDesign);
     if (allStatesOnDesign) {
-
-      setTimeout(function(){
-        for(let e of this.sockets){
-          e.emit('timeout');
-          console.log("timeout emitted");
-        }
-      }.bind(this), 1000 * 2);          // Konstante
+      setTimeout(
+        function() {
+          for (let e of this.sockets) {
+            e.emit("timeout");
+            console.log("timeout emitted");
+          }
+        }.bind(this),
+        1000 * 2
+      ); // Konstante
       console.log("Timeout set");
     }
   }
@@ -156,12 +159,18 @@ export class GameBackend {
    * Übersendung dem neuen Zustand angepasst, sodass keine Duplikate gesendet werden.
    */
   public initField(): void {
-
     var file: any = fs.readFileSync("./Fields/Field0.json");
-    var field: Object = JSON.parse(file);
+    var field: any = JSON.parse(file);
+
+    // TODO Namen senden
+    var allStatesOnGame: boolean = true;
     for (let e of this.sockets) {
-      if (e.state !== SocketStateEnum.GAME) {
-        
+      allStatesOnGame = e.state === SocketStateEnum.GAME && allStatesOnGame;
+    }
+
+    if (allStatesOnGame) {
+      for (let e of this.sockets) {
+        console.log(field);
         e.emit("init_field", field);
         e.state = SocketStateEnum.GAME;
         console.log("Field sent to " + e.id);

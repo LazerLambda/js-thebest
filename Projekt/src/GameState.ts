@@ -104,7 +104,7 @@ export class GameState {
       "S_ready",
       function(data: any) {
         this.clientId = <number>data["playerId"];
-        this.playerName = <string>data["playerName"];
+        // this.playerName = <string>data["playerName"];
 
         if (editorChoosen) {
           this.initEditor();
@@ -131,11 +131,12 @@ export class GameState {
    */
   private initEditor(): void {
     this.state = serverState.DESIGN;
-    this.editor = new Editor();
+    this.editor = new Editor(this);
     this.socket.on(
       "timeout",
       function(data: any) {
         this.editor.cleanUpPage();
+        this.editor = null;
         this.socket.emit("G_ready", this.playerName);
         this.initGame();
       }.bind(this)

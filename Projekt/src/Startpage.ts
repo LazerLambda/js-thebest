@@ -47,7 +47,6 @@ export class Startpage {
       this.name += e.key;
     }
     if(e.key === 'Backspace'){
-      console.log(e.key);
       this.name = this.name.substring(0, this.name.length - 1);
     }
   }

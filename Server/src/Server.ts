@@ -66,6 +66,7 @@ export class Server {
         socket.waitingForGame = false;
         socket.room = null;
         socket.playerNr = 0;
+        socket.name = "";
 
         socket.on(
           "mode",
@@ -120,10 +121,12 @@ export class Server {
         socket.on(
           "G_ready",
           function(data: any) {
+            socket.name = <string> data;
             console.log("G_ready received");
             console.log(data);
             if (socket.room !== null) {
               var room: GameBackend = <GameBackend>socket.room;
+              socket.state = SocketStateEnum.GAME;
               room.initField();
             }
           }.bind(this)
