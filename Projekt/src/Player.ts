@@ -38,6 +38,7 @@ export class Player {
   movementSpeed: number = 10;
   inventory: useableItem = null;
   visible: boolean = true;
+  name : string = ""
 
   //Animation
   spriteWidth: number = 28;
@@ -51,10 +52,11 @@ export class Player {
 
   playerNr: number;
 
-  constructor(context: any, playerNr: any) {
+  constructor(context: any, playerNr: any, name : string) {
     this.xPos = 0;
     this.yPos = 0;
     this.playerNr = playerNr;
+    this.name = name;
 
     this.field = null;
     this.onItem = null;
@@ -114,6 +116,8 @@ export class Player {
 
         // Freigabe des transitionsLocks
 
+        this.field.setPlayerOnItem(this, this.target);
+        this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
         this.transitionLock = true;
 
         this.xPos = this.onItem.x * this.field.xSize;
@@ -140,10 +144,6 @@ export class Player {
 
       if (this.loosingSequence < 0) {
         // Game over
-
-        // this.onItem.playerOn = this.onItem.playerOn.filter(e => {
-        //   e.playerNr !== this.playerNr;
-        // });
 
         var pos = this.onItem.x + this.onItem.y * 8;
         var newArr = new Array();
@@ -202,8 +202,8 @@ export class Player {
  */
 export class ActivePlayer extends Player {
   socket: any = null;
-  constructor(context: any, socket: any, playerNr: number) {
-    super(context, playerNr);
+  constructor(context: any, socket: any, playerNr: number, name : string) {
+    super(context, playerNr, name);
     this.socket = socket;
 
     document.addEventListener("keydown", this.gameEventListener.bind(this));
@@ -299,10 +299,9 @@ export class ActivePlayer extends Player {
  */
 
 export class PassivePlayer extends Player {
-  constructor(context: any, playerNr: number) {
-    super(context, playerNr);
+  constructor(context: any, playerNr: number, name : string) {
+    super(context, playerNr, name);
   }
-
 
   /**
    * @description
@@ -354,7 +353,6 @@ export class PassivePlayer extends Player {
     }
   }
 
-
   /**
    * @description
    * Ablegen einer Bombe des passiven Spielers
@@ -372,12 +370,11 @@ export class PassivePlayer extends Player {
     );
   }
 
-
-    /**
+  /**
    * @description
    * Methode zur Verwaltung der alive Variable.
    */
-  setLose(){
+  setLose() {
     this.alive = false;
   }
 }
