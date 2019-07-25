@@ -1,5 +1,6 @@
 import { GameState } from "./GameState";
 import { Hallway, Wall } from "./FieldObj";
+import {Consts} from "./Consts";
 
 export class Explosion {
   //bombFields: Item[] = [];
@@ -35,10 +36,10 @@ export class Explosion {
 
     update() {
     if (this.counter < this.explosionRad) {
-      var posNorth = (this.startPosY - this.counter) * 8 + this.startPosX;
-      var posSouth = (this.startPosY + this.counter) * 8 + this.startPosX;
-      var posWest = this.startPosY * 8 + (this.startPosX - this.counter);
-      var posEast = this.startPosY * 8 + (this.startPosX + this.counter);
+      var posNorth = (this.startPosY - this.counter) * Consts.ARRAY_CONST + this.startPosX;
+      var posSouth = (this.startPosY + this.counter) * Consts.ARRAY_CONST + this.startPosX;
+      var posWest = this.startPosY * Consts.ARRAY_CONST + (this.startPosX - this.counter);
+      var posEast = this.startPosY * Consts.ARRAY_CONST + (this.startPosX + this.counter);
 
       if (this.south) {
         if (this.checkBounds(posSouth)) {
