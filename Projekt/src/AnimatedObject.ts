@@ -1,5 +1,5 @@
 import { Player } from "./Player";
-import { Bomb } from "./Item";
+import { Bomb } from "./FieldObj";
 
 let imgGopher: any = new Image();
 imgGopher.src = "animations/gopher.png";

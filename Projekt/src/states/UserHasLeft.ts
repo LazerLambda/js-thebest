@@ -1,4 +1,4 @@
-import { GameState } from "./GameState";
+import { GameState } from "../GameState";
 
 export class UserHasLeft {
   context: any;
@@ -14,22 +14,30 @@ export class UserHasLeft {
     this.gameState = gameState;
   }
 
-  updateUserHasLeft() {
+  /**
+   * @description
+   * update this class
+   */
+  public updateUserHasLeft(): void {
     if (this.fadingCounter < this.fadingBound) {
       this.fadingCounter++;
       if (this.fadingCounter % 20 === 0) {
-        this.divider++
+        this.divider++;
       }
     } else {
       this.gameState.userhasleft = null;
     }
   }
 
-  drawUserHasLeft() {
+  /**
+   * @description
+   * draw this class
+   */
+  public drawUserHasLeft() {
     this.context.globalAlpha = 1.0 / this.divider;
     this.context.fillStyle = "grey";
     this.context.fillRect(0, 0, 480, 480);
-    this.context.globalAlpha = 1.0;         // evtl. alpha dynamisch anpassen
+    this.context.globalAlpha = 1.0; // evtl. alpha dynamisch anpassen
     this.context.fillStyle = "blue";
     this.context.font = "50px Arial";
     this.context.fillText(this.userName + "\n has left the Game", 25, 200);

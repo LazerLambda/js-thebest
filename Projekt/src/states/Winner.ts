@@ -4,8 +4,16 @@ export class Winner {
     this.context = context;
   }
 
+  /**
+   * @description
+   * update this class
+   */
   updateWinner() {}
 
+  /**
+   * @description
+   * draw this class
+   */
   drawWinner() {
     this.context.globalAlpha = 0.5;
     this.context.fillStyle = "grey";

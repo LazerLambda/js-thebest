@@ -4,8 +4,16 @@ export class GameOver {
     this.context = context;
   }
 
+  /**
+   * @description
+   * update this class
+   */
   updateGameOver() {}
 
+  /**
+   * @description
+   * draw this class
+   */
   drawGameOver() {
     this.context.globalAlpha = 0.5;
     this.context.fillStyle = "grey";

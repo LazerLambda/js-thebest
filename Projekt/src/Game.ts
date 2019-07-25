@@ -1,6 +1,5 @@
 import { GameState } from "./GameState";
 import { Player } from "./Player";
-import * as io from "socket.io-client";
 
 export class Game {
   frameTime: number;
