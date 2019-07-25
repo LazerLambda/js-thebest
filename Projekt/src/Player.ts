@@ -4,7 +4,6 @@ import { GameState } from "./GameState";
 import { useableItem, portableHole } from "./UsableItems";
 import { AnimatedObject } from "./AnimatedObject";
 import {Consts} from "./Consts";
-import { Field } from "./Field";
 
 enum Direction {
   NORTH = 2,
