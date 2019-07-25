@@ -1,4 +1,4 @@
-import { Item } from "./Item";
+import { FieldObj } from "./FieldObj";
 
 let imgFire: any = new Image();
 imgFire.src = "animations/fire.png";
@@ -17,7 +17,7 @@ export class Fire {
   yPos: number;
   xSize: number;
   ySize: number;
-  placedOn: Item;
+  placedOn: FieldObj;
 
   spriteWidthFire: number = 500;
   spriteHeightFire: number = 500;
@@ -31,7 +31,7 @@ export class Fire {
     yPos: number,
     xSize: number,
     ySize: number,
-    placedOn: Item
+    placedOn: FieldObj
   ) {
     this.context = context;
     this.xPos = xPos;

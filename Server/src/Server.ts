@@ -2,7 +2,6 @@ import * as express from "express";
 import * as socketio from "socket.io";
 import * as path from "path";
 import { GameBackend } from "./GameBackend";
-//import { SocketState } from "./SocketState";
 import * as fs from "fs";
 import { isRegExp } from "util";
 
@@ -13,23 +12,18 @@ enum SocketStateEnum {
   GAME = 3
 }
 
-enum Event {
-  MOVE = "move",
-  DROP = "drop",
-  PICKUP = "pickup"
-}
-
 export class Server {
-  server: any;
-
-  connectionCounter: number = 1;
-  queue: any[] = [];
-
-  games: GameBackend[] = [];
-
+  // consts
   MAX_PLAYER = 2;
 
+  // state variables
+  games: GameBackend[] = [];
+  connectionCounter: number = 1;
+  queue: any[] = [];
+  server: any = null;
+
   /**
+   * @description
    * Server Objekt für die Verwaltung der Spiele im Backend.
    * Spieler werden zunächst in einer Liste gesammelt und nach
    * Präferenz in entsprechende Kategorie (Editor, Game) eingeteilt.
@@ -81,7 +75,6 @@ export class Server {
               if (this.checkOtherPlayerPreferences(true)) {
                 var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
-                
               }
             }
             if (data === "game") {
@@ -91,11 +84,8 @@ export class Server {
               if (this.checkOtherPlayerPreferences(false)) {
                 var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
-                
               }
             }
-
-            // Erst hier erhöhen, damit nur valide Verbindungen gezählt werden
             if (this.connectionCounter === this.MAX_PLAYER) {
               this.connectionCounter = 1;
             } else {
@@ -107,6 +97,7 @@ export class Server {
         socket.on(
           "proposedField",
           function(data: any) {
+            console.log("Received 'propsedField': " + data);
             var field: number[][] = <number[][]>data;
             var room = <GameBackend>socket.room;
             room.sendEventsToPeers(data);
@@ -121,8 +112,8 @@ export class Server {
         socket.on(
           "G_ready",
           function(data: any) {
-            socket.name = <string> data;
-            console.log("G_ready received");
+            socket.name = <string>data;
+            console.log("Received 'G_ready': " + data);
             console.log(data);
             if (socket.room !== null) {
               var room: GameBackend = <GameBackend>socket.room;
@@ -133,7 +124,7 @@ export class Server {
         );
 
         socket.on("event", function(data: any) {
-          console.log("'event' received: " + data);
+          console.log("Received 'event': " + data);
           var room = <GameBackend>socket.room;
           room.sendEventsToPeers(data);
         });
@@ -143,18 +134,17 @@ export class Server {
         );
 
         socket.on("isOver", function(data: any) {
-          console.log("'isOver' received: " + data);
+          console.log("Received 'isOver': " + data);
           var room = <GameBackend>socket.room;
           room.playerIsDead(socket);
         });
 
         socket.on("disconnecting", function(data: any) {
-          if (socket.room) {
-            var room = <GameBackend>socket.room;
-            if (room.sendPlayerHasLeft !== null) {
-              room.sendPlayerHasLeft(socket);
-              console.log("disconnecting");
-            }
+          console.log("Received 'disconnecting': " + data);
+          var room = <GameBackend>socket.room;
+          if (room.sendPlayerHasLeft !== null) {
+            room.sendPlayerHasLeft(socket);
+            console.log("disconnecting");
           }
         });
 
@@ -168,13 +158,14 @@ export class Server {
   }
 
   /**
+   * @description
    * Methode, um zu suchen, ob es weitere Spieler mit der selben Präferenz gibt, um
    * dann ein neues Spiel zu erzeugen, welches in diesem Server Objekt auf der games-
    * Liste gespeichert wird.
    * @param chooseEditor Wenn Editor gewählt wurde, muss diese Variable true sein
    * @return boolean
    */
-  checkOtherPlayerPreferences(chooseEditor: boolean): boolean {
+  private checkOtherPlayerPreferences(chooseEditor: boolean): boolean {
     var collector: any[] = new Array();
     if (chooseEditor) {
       for (let e of this.queue) {
@@ -183,8 +174,8 @@ export class Server {
             collector.push(e);
           }
           if (collector.length === this.MAX_PLAYER) {
-            var room : GameBackend = new GameBackend(collector, this);
-            room.handleEditorTimeOut(room.initField);
+            var room: GameBackend = new GameBackend(collector, this);
+            room.handleEditorTimeOut();
             this.games.push(room);
 
             return true;
@@ -208,14 +199,13 @@ export class Server {
   }
 
   /**
+   * @description
    * Methode, welche einen spezifischen Socket von der Queue entfernt.
    * @param socketS Socket, welcher von der Queue entfernt werden soll
    */
-
-  removeFromQueue(socketS: any): void {
+  public removeFromQueue(socketS: any): void {
     this.queue = this.queue.filter(e => {
       e.id !== socketS.id;
     });
-    console.log("removeFromQueue.length : " + this.queue.length);
   }
 }

@@ -1,5 +1,5 @@
 import { GameState } from "./GameState";
-import { Hallway, Wall } from "./Item";
+import { Hallway, Wall } from "./FieldObj";
 
 export class Explosion {
   //bombFields: Item[] = [];

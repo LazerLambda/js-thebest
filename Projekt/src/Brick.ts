@@ -1,4 +1,4 @@
-import { Hallway, Item } from "./Item";
+import { Hallway, FieldObj } from "./FieldObj";
 
 export class Brick {
   breakBricks: boolean = false;
