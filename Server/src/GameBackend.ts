@@ -147,7 +147,7 @@ export class GameBackend {
             console.log("timeout emitted");
           }
         }.bind(this),
-        1000 * 2
+        1000 * 6
       ); // Konstante
       console.log("Timeout set");
     }
@@ -169,6 +169,13 @@ export class GameBackend {
     }
 
     if (allStatesOnGame) {
+      for (let i = 0; i < this.sockets.length; i++){
+        var index : number = i + 1;
+        var playerObj : any = field['player_' + index];
+        if(this.sockets[i].name !== ""){
+          playerObj['name'] = this.sockets[i].name;
+        }
+      }
       for (let e of this.sockets) {
         console.log(field);
         e.emit("init_field", field);
