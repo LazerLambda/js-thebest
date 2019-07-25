@@ -1,5 +1,6 @@
 import { CustomArea, EnemyArea, MenuElement } from "./EditorUtil";
 import { GameState } from "./GameState";
+import { Game } from "./Game";
 
 enum fieldType {
   HALLWAY = 0,
@@ -10,9 +11,20 @@ enum fieldType {
   CONNECTION = 5
 }
 
+enum serverState {
+  SELECTION = 0,
+  ROOM_WAIT = 1,
+  DESIGN = 2,
+  FIELD_WAIT = 3,
+  GAME = 4,
+  GAMEOVER = 5,
+  WINNER = 6
+}
+
 export class Editor {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
+  gameState: GameState;
   menuWidth: number = 300;
   fields: number[][];
   tileset: HTMLImageElement[];
@@ -37,6 +49,7 @@ export class Editor {
   alreadyVisited: { y: number; x: number }[];
 
   constructor(gameState: GameState) {
+    this.gameState = gameState;
     this.startPosition.y = undefined;
     this.startPosition.x = undefined;
 
@@ -48,7 +61,6 @@ export class Editor {
     this.canvas.height = this.mapPixelHeight;
     this.canvas.width = this.mapPixelWidth + this.menuWidth;
     this.playerNr = gameState.clientId;
-    this.playerNr = 2;
     const x: number = Math.ceil(this.boardWidth / 2) * this.tileSquareLen;
     const topLeftCorners: { x: number; y: number }[] = [
       { y: 0, x: 0 },
@@ -371,54 +383,57 @@ waitForImages(paths:string[]) {
   }
 
   canvasClick(event: MouseEvent) {
-    this.drawCanvas();
-    let xPixel: number = event.layerX - this.canvas.offsetLeft;
-    let yPixel: number = event.layerY - this.canvas.offsetTop;
-    if (xPixel < this.mapPixelWidth) {
-      //Make coordinates relative to top-left of customArea
-      xPixel -= this.customArea.topLeftPixelX;
-      yPixel -= this.customArea.topLeftPixelY;
-    }
-
-    if (
-      xPixel > 0 &&
-      yPixel > 0 &&
-      xPixel < this.customArea.pixelWidth &&
-      yPixel < this.customArea.pixelHeight
-    ) {
-      let row: number = Math.floor(yPixel / this.tileSquareLen);
-      let col: number = Math.floor(xPixel / this.tileSquareLen);
-      if (this.fields[row][col] == fieldType.STARTPOSITION) {
-        this.startPosition.x = undefined;
-        this.startPosition.y = undefined;
+    console.log(this.gameState.state);
+    if (this.gameState.state === serverState.DESIGN) {
+      this.drawCanvas();
+      let xPixel: number = event.layerX - this.canvas.offsetLeft;
+      let yPixel: number = event.layerY - this.canvas.offsetTop;
+      if (xPixel < this.mapPixelWidth) {
+        //Make coordinates relative to top-left of customArea
+        xPixel -= this.customArea.topLeftPixelX;
+        yPixel -= this.customArea.topLeftPixelY;
       }
-      this.fields[row][col] = this.item;
-      this.context.drawImage(
-        this.tileset[this.item],
-        this.customArea.topLeftPixelX + col * this.tileSquareLen,
-        this.customArea.topLeftPixelY + row * this.tileSquareLen,
-        this.tileSquareLen,
-        this.tileSquareLen
-      );
-      if (this.item == fieldType.STARTPOSITION) {
-        if (this.startPosition.y != undefined)
-          this.fields[this.startPosition.y][this.startPosition.x] =
-            fieldType.HALLWAY;
+
+      if (
+        xPixel > 0 &&
+        yPixel > 0 &&
+        xPixel < this.customArea.pixelWidth &&
+        yPixel < this.customArea.pixelHeight
+      ) {
+        let row: number = Math.floor(yPixel / this.tileSquareLen);
+        let col: number = Math.floor(xPixel / this.tileSquareLen);
+        if (this.fields[row][col] == fieldType.STARTPOSITION) {
+          this.startPosition.x = undefined;
+          this.startPosition.y = undefined;
+        }
+        this.fields[row][col] = this.item;
         this.context.drawImage(
-          this.tileset[fieldType.HALLWAY],
-          this.customArea.topLeftPixelX +
-            this.startPosition.x * this.tileSquareLen,
-          this.customArea.topLeftPixelY +
-            this.startPosition.y * this.tileSquareLen,
+          this.tileset[this.item],
+          this.customArea.topLeftPixelX + col * this.tileSquareLen,
+          this.customArea.topLeftPixelY + row * this.tileSquareLen,
           this.tileSquareLen,
           this.tileSquareLen
         );
-        this.startPosition.y = row;
-        this.startPosition.x = col;
+        if (this.item == fieldType.STARTPOSITION) {
+          if (this.startPosition.y != undefined)
+            this.fields[this.startPosition.y][this.startPosition.x] =
+              fieldType.HALLWAY;
+          this.context.drawImage(
+            this.tileset[fieldType.HALLWAY],
+            this.customArea.topLeftPixelX +
+              this.startPosition.x * this.tileSquareLen,
+            this.customArea.topLeftPixelY +
+              this.startPosition.y * this.tileSquareLen,
+            this.tileSquareLen,
+            this.tileSquareLen
+          );
+          this.startPosition.y = row;
+          this.startPosition.x = col;
+        }
       }
+      if (xPixel > this.mapPixelWidth)
+        this.getClickedMenuElement(this.menuElements, yPixel, xPixel).f();
     }
-    if (xPixel > this.mapPixelWidth)
-      this.getClickedMenuElement(this.menuElements, yPixel, xPixel).f();
   }
 
   getClickedMenuElement(
@@ -573,5 +588,6 @@ waitForImages(paths:string[]) {
     this.context.clearRect(0, 0, 10000, 10000);
     var element = document.getElementById("inputMap");
     element.parentNode.removeChild(element);
+    this.canvas.removeEventListener("click", this.canvasClick.bind(this));
   }
 }
