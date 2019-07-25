@@ -42,6 +42,17 @@ enum ActionBomb {
 let URL: string = "http://localhost:3000";
 
 export class GameState {
+  // consts
+  MAX_PLAYERS: number = 4;
+
+  // dynamic assigned variables
+  xSize: number;
+  ySize: number;
+  canvasHeight: number;
+  canvasWidth: number;
+  field: any[];
+
+  // State machine variables
   clientId: number;
   startpage: Startpage;
   gameover: GameOver;
@@ -51,32 +62,15 @@ export class GameState {
   state: serverState;
   userhasleft: UserHasLeft = null;
 
-  field: any[];
-  items: Item[];
-  context: any;
-  socket: any;
-
-  xSize: number;
-  ySize: number;
-
-  canvasHeight: number;
-  canvasWidth: number;
-
-  MAX_PLAYERS: number = 4;
+  // Necessary variables
+  items: Item[] = null;
+  context: any = null;
+  socket: any = null;
   activePlayer: ActivePlayer = null;
   playerName: string = "";
   passivePlayers: PassivePlayer[] = [];
-
   explosions: Explosion[] = [];
-
   eventQueue: object[] = [];
-
-  playerObj: Object = {
-    1: null,
-    2: null,
-    3: null,
-    4: null
-  };
 
   constructor() {
     this.socket = io(URL);
@@ -92,12 +86,16 @@ export class GameState {
     this.initStartPage();
   }
 
+  ////////////////////////////
+  /// State machine functions
+  ////////////////////////////
+
   /**
    * @description
    * Initialisierung des der WarteSeite mit EventListener für das Verhalten
    * bei positiver Rückmeldung vom Server. Ist vom Startseiten Objekt zu erreichen.
    */
-  public initWaitPage(editorChoosen: boolean) {
+  public initWaitPage(editorChoosen: boolean): void {
     this.state = serverState.ROOM_WAIT;
     this.roomwaitpage = new RoomWait(this.context, this);
     this.socket.on(
@@ -120,7 +118,7 @@ export class GameState {
    * @description
    * Initialisierung der Startseite
    */
-  private initStartPage() {
+  private initStartPage(): void {
     this.state = serverState.SELECTION;
     this.startpage = new Startpage(this.context, this);
   }
@@ -233,8 +231,6 @@ export class GameState {
       }.bind(this)
     );
 
-    // Verarbeitung von eingehenden Events
-
     this.socket.on(
       "event",
       function(data: any) {
@@ -272,10 +268,95 @@ export class GameState {
   }
 
   /**
-   * @desctiption
+   * @description
+   * Methode, um in den GameOver Zustand überzugehen
+   */
+  private initGameOver(): void {
+    this.gameover = new GameOver(this.context);
+    this.activePlayer.removeEventLister();
+    this.activePlayer.running = false;
+    this.state = serverState.GAMEOVER;
+  }
+
+  /**
+   * @description
+   * Standard update Methode für alle Zustände
+   */
+  public update() {
+    switch (this.state) {
+      case serverState.SELECTION:
+        this.startpage.update();
+        break;
+      case serverState.ROOM_WAIT:
+        this.roomwaitpage.updateRoomWait();
+        break;
+      case serverState.DESIGN:
+        break;
+      case serverState.FIELD_WAIT:
+        break;
+      case serverState.GAME:
+        this.updateGame();
+        if (this.userhasleft !== null) {
+          this.userhasleft.updateUserHasLeft();
+        }
+        break;
+      case serverState.GAMEOVER:
+        this.updateGame();
+        this.gameover.updateGameOver();
+        this.updateGameInfos();
+        break;
+      case serverState.WINNER:
+        this.updateGame();
+        this.winner.drawWinner();
+        break;
+    }
+  }
+
+  /**
+   * @description
+   * Standard draw Methode für alle Zustände
+   */
+
+  public draw() {
+    switch (this.state) {
+      case serverState.SELECTION:
+        this.startpage.draw();
+        break;
+      case serverState.ROOM_WAIT:
+        this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
+        this.roomwaitpage.drawRoomWait();
+        break;
+      case serverState.DESIGN:
+        break;
+      case serverState.FIELD_WAIT:
+        break;
+      case serverState.GAME: {
+        this.drawGame();
+        if (this.userhasleft !== null) {
+          this.userhasleft.drawUserHasLeft();
+        }
+        break;
+      }
+      case serverState.GAMEOVER:
+        this.drawGame();
+        this.gameover.drawGameOver();
+        break;
+      case serverState.WINNER:
+        this.drawGame();
+        this.winner.drawWinner();
+        break;
+    }
+  }
+
+  ////////////////////////////
+  /// Private functions
+  ////////////////////////////
+
+  /**
+   * @description
    * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
    */
-  handleNetworkInput(): void {
+  private handleNetworkInput(): void {
     if (this.eventQueue.length > 0) {
       var evObject: any = this.eventQueue[0];
       var playerNrTmp = <number>evObject["playerId"];
@@ -310,13 +391,13 @@ export class GameState {
       return;
     }
   }
-
   /**
+   * @description
    * Prozedur für die Aktualisierung des Spiels
    * Nicht nur während des Spiels bedeuetsam, sondern auch während der Gameover oder Winning- Sequenz.
    */
 
-  updateGame() {
+  private updateGame(): void {
     for (let i = 0; i < this.items.length; i++) {
       if (this.items[i] instanceof Hallway) {
         var tmpItem = <Hallway>this.items[i];
@@ -351,53 +432,18 @@ export class GameState {
     if (this.activePlayer !== null) {
       this.activePlayer.renderPlayer();
       if (!this.activePlayer.alive) {
-        this.gameover = new GameOver(this.context);
-        this.activePlayer.removeEventLister();
-        this.activePlayer.running = false;
-        this.state = serverState.GAMEOVER;
+        this.initGameOver();
       }
     }
   }
 
   /**
-   * Standard update Methode für alle Zustände
-   */
-  update() {
-    switch (this.state) {
-      case serverState.SELECTION:
-        this.startpage.update();
-        break;
-      case serverState.ROOM_WAIT:
-        this.roomwaitpage.updateRoomWait();
-        break;
-      case serverState.DESIGN:
-        break;
-      case serverState.FIELD_WAIT:
-        break;
-      case serverState.GAME:
-        this.updateGame();
-        if (this.userhasleft !== null) {
-          this.userhasleft.updateUserHasLeft();
-        }
-        break;
-      case serverState.GAMEOVER:
-        this.updateGame();
-        this.gameover.updateGameOver();
-        this.updateGameInfos();
-        break;
-      case serverState.WINNER:
-        this.updateGame();
-        this.winner.drawWinner();
-        break;
-    }
-  }
-
-  /**
+   * @description
    * Prozedur für die Aktualisierung des Spiels
    * Nicht nur während des Spiels bedeuetsam, sondern auch während der Gameover oder Winning- Sequenz.
    */
 
-  drawGame() {
+  private drawGame(): void {
     this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
     for (let elem of this.items) {
       elem.draw();
@@ -411,45 +457,40 @@ export class GameState {
     }
   }
 
-  /**
-   * Standard draw Methode für alle Zustände
-   */
+  ////////////////////////////
+  /// Public functions
+  ////////////////////////////
 
-  draw() {
-    switch (this.state) {
-      case serverState.SELECTION:
-        this.startpage.draw();
-        break;
-      case serverState.ROOM_WAIT:
-        this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
-        this.roomwaitpage.drawRoomWait();
-        break;
-      case serverState.DESIGN:
-        break;
-      case serverState.FIELD_WAIT:
-        break;
-      case serverState.GAME: {
-        this.drawGame();
-        if (this.userhasleft !== null) {
-          this.userhasleft.drawUserHasLeft();
-        }
-        break;
-      }
-      case serverState.GAMEOVER:
-        this.drawGame();
-        this.gameover.drawGameOver();
-        break;
-      case serverState.WINNER:
-        this.drawGame();
-        this.winner.drawWinner();
-        break;
-    }
+  /**
+   * @description
+   * Setze Spieler zu neuer Position
+   * @param player Player für das neue Ziel
+   */
+  public setPlayerOnItem(player: Player, target: number): void {
+    this.items[target].playerOn.push(player);
   }
 
   /**
+   * @description
+   * Entferne den Spieler von der alten Position
+   * @param player
+   */
+  public rmPlayerFromItem(player: Player, x: number, y: number): void {
+    var newArr = new Array();
+    var oldPos = x + y * 8;
+    for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
+      if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
+        newArr.push(this.items[oldPos].playerOn[i]);
+      }
+    }
+    this.items[oldPos].playerOn = newArr;
+  }
+
+  /**
+   * @private
    *  Methode zur Anzeige der Informationen auf der rechten Seite
    */
-  updateGameInfos() {
+  private updateGameInfos(): void {
     if (this.state === serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);
       this.context.fillStyle = "#fff2c6";
@@ -472,30 +513,5 @@ export class GameState {
         }.bind(this)
       );
     }
-  }
-
-  /**
-   * @description
-   * Setze Spieler zu neuer Position
-   * @param player Player für das neue Ziel
-   */
-  setPlayerOnItem(player: Player, target: number) {
-    this.items[target].playerOn.push(player);
-  }
-
-  /**
-   * @description
-   * Entferne den Spieler von der alten Position
-   * @param player
-   */
-  rmPlayerFromItem(player: Player, x: number, y: number) {
-    var newArr = new Array();
-    var oldPos = x + y * 8;
-    for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
-      if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
-        newArr.push(this.items[oldPos].playerOn[i]);
-      }
-    }
-    this.items[oldPos].playerOn = newArr;
   }
 }

@@ -153,7 +153,6 @@ export class Player {
           }
         }
         this.field.items[pos].playerOn = newArr;
-        this.field.updateGameInfos();
       } else {
         /**
          * Hier Animation implementieren
