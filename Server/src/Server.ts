@@ -1,21 +1,12 @@
+import { Consts } from "../Projekt/src/Consts";
+import { Enums } from "../Projekt/src/Enums";
+import { GameBackend } from "./GameBackend";
+
 import * as express from "express";
 import * as socketio from "socket.io";
 import * as path from "path";
-import { GameBackend } from "./GameBackend";
-import * as fs from "fs";
-import { isRegExp } from "util";
-
-enum SocketStateEnum {
-  SELECTION = 0,
-  GAME_WAIT = 1,
-  DESIGN = 2,
-  GAME = 3
-}
 
 export class Server {
-  // consts
-  MAX_PLAYER = 2;
-
   // state variables
   games: GameBackend[] = [];
   connectionCounter: number = 1;
@@ -51,7 +42,7 @@ export class Server {
 
         // Init States on socket
         socket.alive = true;
-        socket.state = SocketStateEnum.SELECTION;
+        socket.state = Enums.serverState.SELECTION;
         socket.waitingForEditor = false;
         socket.waitingForGame = false;
         socket.room = null;
@@ -67,7 +58,7 @@ export class Server {
             if (data === "editor") {
               socket.waitingForEditor = true;
               socket.playerNr = this.connectionCounter;
-              socket.state = SocketStateEnum.DESIGN;
+              socket.state = Enums.serverState.DESIGN;
               if (this.checkOtherPlayerPreferences(true)) {
                 var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
@@ -76,7 +67,7 @@ export class Server {
             if (data === "game") {
               socket.waitingForGame = true;
               socket.playerNr = this.connectionCounter;
-              socket.state = SocketStateEnum.GAME_WAIT;
+              socket.state = Enums.serverState.ROOM_WAIT;
               if (this.checkOtherPlayerPreferences(false)) {
                 var room: GameBackend = <GameBackend>socket.room;
                 room.emitServerReady();
@@ -113,7 +104,7 @@ export class Server {
             console.log(data);
             if (socket.room !== null) {
               var room: GameBackend = <GameBackend>socket.room;
-              socket.state = SocketStateEnum.GAME;
+              socket.state = Enums.serverState.GAME;
               room.initField();
             }
           }.bind(this)
@@ -169,7 +160,7 @@ export class Server {
           if (e.waitingForEditor) {
             collector.push(e);
           }
-          if (collector.length === this.MAX_PLAYER) {
+          if (collector.length === Consts.MAX_PLAYERS) {
             var room: GameBackend = new GameBackend(collector, this);
             room.handleEditorTimeOut();
             this.games.push(room);
@@ -184,7 +175,7 @@ export class Server {
           if (e.waitingForGame) {
             collector.push(e);
           }
-          if (collector.length === this.MAX_PLAYER) {
+          if (collector.length === Consts.MAX_PLAYERS) {
             this.games.push(new GameBackend(collector, this));
             return true;
           }

@@ -2,6 +2,7 @@ import { CustomArea, EnemyArea, MenuElement } from "./EditorUtil";
 import {Enums } from './Enums'
 import { GameState } from "./GameState";
 import { Game } from "./Game";
+import { Consts } from "./Consts";
 
 export class Editor {
   canvas: HTMLCanvasElement;
@@ -552,7 +553,7 @@ waitForImages(paths:string[]) {
       function() {
         this.drawEditor();
       }.bind(this),
-      1000 * 1
+      1000 * (Consts.TIMEOUT_LENGTH - 3)
     ); // Konstante abhängig vom Timeout am Server
   }
 

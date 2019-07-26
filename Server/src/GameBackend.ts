@@ -1,17 +1,10 @@
-import * as fs from "fs";
+import { Consts } from "../Projekt/src/Consts";
+import { Enums } from "../Projekt/src/Enums";
 import { Server } from "./Server";
 
-enum SocketStateEnum {
-  SELECTION = 0,
-  GAME_WAIT = 1,
-  DESIGN = 2,
-  GAME = 3
-}
+import * as fs from "fs";
 
 export class GameBackend {
-  // consts
-  TIMEOUT_LENGTH: number = 20;
-
   // states
   sockets: any[] = [];
   server: Server = null;
@@ -74,7 +67,7 @@ export class GameBackend {
     var allStatesOnDesign: boolean = true;
     for (let e of this.sockets) {
       allStatesOnDesign =
-        e.state === SocketStateEnum.DESIGN && allStatesOnDesign;
+        e.state === Enums.serverState.DESIGN && allStatesOnDesign;
     }
     console.log("All Players ready? " + allStatesOnDesign);
     if (allStatesOnDesign) {
@@ -85,7 +78,7 @@ export class GameBackend {
             console.log("'timeout' emitted to " + e.id + " Name " + e.name);
           }
         }.bind(this),
-        1000 * this.TIMEOUT_LENGTH
+        1000 * Consts.TIMEOUT_LENGTH
       );
       console.log("Timeout set");
     }
@@ -103,7 +96,7 @@ export class GameBackend {
     // TODO Namen senden
     var allStatesOnGame: boolean = true;
     for (let e of this.sockets) {
-      allStatesOnGame = e.state === SocketStateEnum.GAME && allStatesOnGame;
+      allStatesOnGame = e.state === Enums.serverState.GAME && allStatesOnGame;
     }
 
     if (allStatesOnGame) {
@@ -117,7 +110,7 @@ export class GameBackend {
       for (let e of this.sockets) {
         console.log(field);
         e.emit("init_field", field);
-        e.state = SocketStateEnum.GAME;
+        e.state = Enums.serverState.GAME;
         console.log("'init_field' emitted to " + e.id + " Name " + e.name);
       }
     }
