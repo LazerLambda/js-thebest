@@ -35,17 +35,13 @@ export class Server {
   constructor(port: number) {
     const app = express();
     app.set("port", process.env.PORT || 3000);
-    app.use(express.static("dist"));
+    app.use(express.static("Projekt/dist"));
 
     let http = require("http").Server(app);
     let io = require("socket.io")(http);
 
     app.get("/", (req: any, res: any) => {
-      res.sendFile(path.resolve("./dist/index.html"));
-    });
-
-    app.get("/game", (req: any, res: any) => {
-      res.sendFile(path.resolve("./dist/index.html"));
+      res.sendFile(path.resolve("./Projekt/dist/index.html"));
     });
 
     io.on(
