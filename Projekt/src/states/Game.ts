@@ -1,4 +1,5 @@
 import { Brick } from "../Brick";
+import {Consts } from "../Consts";
 import { Player, ActivePlayer, PassivePlayer } from "../Player";
 import { Enums } from "../Enums";
 import { Explosion } from "../Explosion";
@@ -82,8 +83,8 @@ export class Game {
             }
           }
         }
-
-        for (let i = 1; i <= this.gameState.MAX_PLAYERS; i++) {
+        
+        for (let i = 1; i <= Consts.MAX_PLAYERS; i++) {
           var player = data["player_" + i];
           var x: number = <number>player["startpos"]["x"];
           var y: number = <number>player["startpos"]["y"];
@@ -117,6 +118,7 @@ export class Game {
             this.gameState.update();
             this.gameState.draw();
           }
+          
           this.gameState.state = Enums.serverState.GAME;
         }
         this.gameState.updateGameInfos();

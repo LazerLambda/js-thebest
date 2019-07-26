@@ -4,7 +4,7 @@ export class Brick {
   breakBricks: boolean = false;
   placedOn: Hallway;
 
-  context: any;
+  context: CanvasRenderingContext2D;
   SIZE_X: number;
   SIZE_Y: number;
 
@@ -12,7 +12,7 @@ export class Brick {
   y: number;
 
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,

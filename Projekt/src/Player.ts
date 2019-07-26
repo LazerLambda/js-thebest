@@ -35,7 +35,7 @@ export class Player {
   inventory: useableItem = null;
   visible: boolean = true;
   direction: number = 0;
-  context: any = null;
+  context: CanvasRenderingContext2D = null;
   onItem: FieldObj = null;
   field: GameState = null;
 
@@ -43,7 +43,7 @@ export class Player {
   loosingSequence: number = 0;
   animatedObject: AnimatedObject;
 
-  constructor(context: any, playerNr: any, name: string) {
+  constructor(context: CanvasRenderingContext2D, playerNr: any, name: string) {
     this.xPos = 0;
     this.yPos = 0;
     this.playerNr = playerNr;
@@ -204,7 +204,7 @@ export class Player {
  */
 export class ActivePlayer extends Player {
   socket: any = null;
-  constructor(context: any, socket: any, playerNr: number, name: string) {
+  constructor(context: CanvasRenderingContext2D, socket: any, playerNr: number, name: string) {
     super(context, playerNr, name);
     this.socket = socket;
 
@@ -304,7 +304,7 @@ export class ActivePlayer extends Player {
  */
 
 export class PassivePlayer extends Player {
-  constructor(context: any, playerNr: number, name: string) {
+  constructor(context: CanvasRenderingContext2D, playerNr: number, name: string) {
     super(context, playerNr, name);
   }
 

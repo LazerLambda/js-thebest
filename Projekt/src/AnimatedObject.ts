@@ -40,7 +40,7 @@ function init() {
 export class AnimatedObject {
   image: any;
 
-  context: any;
+  context: CanvasRenderingContext2D;
 
   spriteWidthPlayer: number = 100;
   spriteHeightPlayer: number = 100;

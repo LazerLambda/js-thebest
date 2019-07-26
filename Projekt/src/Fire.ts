@@ -12,7 +12,7 @@ function init() {
 
 export class Fire {
   timeLeft = 20;
-  context: any;
+  context: CanvasRenderingContext2D;
   xPos: number;
   yPos: number;
   xSize: number;
@@ -26,7 +26,7 @@ export class Fire {
   frameCount: number = 0;
 
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,

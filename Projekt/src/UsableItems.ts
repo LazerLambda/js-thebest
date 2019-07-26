@@ -2,14 +2,13 @@ import { Player } from "./Player";
 import { Explosion } from "./Explosion";
 import { FieldObj, Bomb, Hallway, Hole } from "./FieldObj";
 import {Consts} from "./Consts";
-import { Field } from "./Field";
 
 export class useableItem {
 defaultName : string = "Item 0"
 playerOn: Player = null;
 usingPlayer: Player = null;
 static: boolean = false;  // der Spieler kann das Item aufnehmen | nicht aufnehmen
-context: any;
+context: CanvasRenderingContext2D;
 SIZE_X: number;
 SIZE_Y: number;
 
@@ -22,7 +21,7 @@ spriteWidth: number = 40;
 spriteHeight: number = 30;
 
 constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     //xPos: number,
     //yPos: number,
     //xSize: number,
@@ -75,7 +74,7 @@ export class remoteBombKit extends useableItem {
     use() {
          //this.trigger = new remote("2d",this.inventorySpaceX,this.inventorySpaceY,40,30);
          this.usingPlayer.inventory = this.trigger;
-         new remoteBomb("2d",this.usingPlayer.xPos,this.usingPlayer.yPos,40,30,this.trigger);
+         new remoteBomb(this.context,this.usingPlayer.xPos,this.usingPlayer.yPos,40,30,this.trigger);
          
         }
 }
@@ -94,7 +93,7 @@ export class remoteBomb extends useableItem {
     static = true;
 
     constructor(
-        context: any,
+        context: CanvasRenderingContext2D,
         xPos: number,
         yPos: number,
         xSize: number,
