@@ -7,7 +7,7 @@ import { ActivePlayer } from "./Player";
 export class FieldObj {
   onFire: Fire = null;
   playerOn: Player[] = [];
-  context: any;
+  context: CanvasRenderingContext2D;
   SIZE_X: number;
   SIZE_Y: number;
 
@@ -15,7 +15,7 @@ export class FieldObj {
   y: number;
 
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,
@@ -72,7 +72,7 @@ export class FieldObj {
 
 export class Wall extends FieldObj {
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,
@@ -100,7 +100,7 @@ export class Hallway extends FieldObj {
   overlayingItem: FieldObj[];
 
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,
@@ -167,7 +167,7 @@ export class Hallway extends FieldObj {
 
 export class Hole extends Hallway {
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,
@@ -213,7 +213,7 @@ export class Bomb extends FieldObj {
   animatedObject: AnimatedObject;
 
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,

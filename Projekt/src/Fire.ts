@@ -3,7 +3,7 @@ import { FieldObj } from "./FieldObj";
 
 export class Fire {
   timeLeft = 20;
-  context: any;
+  context: CanvasRenderingContext2D;
   xPos: number;
   yPos: number;
   xSize: number;
@@ -12,7 +12,7 @@ export class Fire {
   animatedObject: AnimatedObject;
 
   constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     xPos: number,
     yPos: number,
     xSize: number,

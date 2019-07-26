@@ -3,7 +3,7 @@ import { Enums } from "./Enums";
 import { GameState } from "./GameState";
 import { useableItem, portableHole } from "./UsableItems";
 import { AnimatedObject } from "./AnimatedObject";
-import { Field } from "./Field";
+import {Consts} from "./Consts";
 
 enum Direction {
   NORTH = 2,
@@ -35,7 +35,7 @@ export class Player {
   inventory: useableItem = null;
   visible: boolean = true;
   direction: number = 0;
-  context: any = null;
+  context: CanvasRenderingContext2D = null;
   onItem: FieldObj = null;
   field: GameState = null;
 
@@ -44,7 +44,7 @@ export class Player {
   loosingSequence: number = 0;
   animatedObject: AnimatedObject;
 
-  constructor(context: any, playerNr: any, name: string) {
+  constructor(context: CanvasRenderingContext2D, playerNr: any, name: string) {
     this.xPos = 0;
     this.yPos = 0;
     this.playerNr = playerNr;
@@ -61,7 +61,7 @@ export class Player {
 
   initField(field: GameState, item: Hallway) {
     this.field = field;
-    this.target = item.x + item.y * 8;
+    this.target = item.x + item.y * Consts.ARRAY_CONST;
     this.onItem = item;
     this.onItem.playerOn.push(this);
     this.xPos = item.x * this.field.xSize;
@@ -136,7 +136,7 @@ export class Player {
       // GameOverAnimation
 
       if (this.loosingSequence < 0) {
-        var pos = this.onItem.x + this.onItem.y * 8;
+        var pos = this.onItem.x + this.onItem.y * Consts.ARRAY_CONST;
         var newArr = new Array();
         for (let i = 0; i < this.field.items[pos].playerOn.length; i++) {
           if (this.field.items[pos].playerOn[i].playerNr !== this.playerNr) {
@@ -174,7 +174,7 @@ export class Player {
       );
       return false;
     } else {
-      var pos = y * 8 + x;
+      var pos = y * Consts.ARRAY_CONST + x;
       var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
       var checkType = this.field.items[pos] instanceof Hallway;
 
@@ -205,7 +205,7 @@ export class Player {
  */
 export class ActivePlayer extends Player {
   socket: any = null;
-  constructor(context: any, socket: any, playerNr: number, name: string) {
+  constructor(context: CanvasRenderingContext2D, socket: any, playerNr: number, name: string) {
     super(context, playerNr, name);
     this.socket = socket;
 
@@ -305,7 +305,7 @@ export class ActivePlayer extends Player {
  */
 
 export class PassivePlayer extends Player {
-  constructor(context: any, playerNr: number, name: string) {
+  constructor(context: CanvasRenderingContext2D, playerNr: number, name: string) {
     super(context, playerNr, name);
   }
 
@@ -322,7 +322,7 @@ export class PassivePlayer extends Player {
         if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
           this.transitionLock = false;
 
-          this.target = this.onItem.x + (this.onItem.y - 1) * 8;
+          this.target = this.onItem.x + (this.onItem.y - 1) * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Direction.NORTH;
         }
@@ -332,7 +332,7 @@ export class PassivePlayer extends Player {
         if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
           this.transitionLock = false;
 
-          this.target = this.onItem.x + (this.onItem.y + 1) * 8;
+          this.target = this.onItem.x + (this.onItem.y + 1) * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Direction.SOUTH;
         }
@@ -342,7 +342,7 @@ export class PassivePlayer extends Player {
         if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
           this.transitionLock = false;
 
-          this.target = this.onItem.x + 1 + this.onItem.y * 8;
+          this.target = this.onItem.x + 1 + this.onItem.y * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Direction.EAST;
         }
@@ -351,7 +351,7 @@ export class PassivePlayer extends Player {
         if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
           this.transitionLock = false;
 
-          this.target = this.onItem.x - 1 + this.onItem.y * 8;
+          this.target = this.onItem.x - 1 + this.onItem.y * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Direction.WEST;
           break;

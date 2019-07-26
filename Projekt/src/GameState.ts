@@ -4,6 +4,7 @@ import { Enums } from "./Enums";
 import { Explosion } from "./Explosion";
 import { Game } from "./states/Game";
 import { GameOver } from "./states/GameOver";
+import { Consts } from "./Consts";
 import { RoomWait } from "./states/RoomWait";
 import { Startpage } from "./states/Startpage";
 import { UserHasLeft } from "./states/UserHasLeft";
@@ -13,10 +14,6 @@ import * as io from "socket.io-client";
 import { FieldObj } from "./FieldObj";
 
 export class GameState {
-  // consts
-  MAX_PLAYERS: number = 4;
-  URL: string = "http://localhost:3000";
-
   // dynamic assigned variables
   xSize: number;
   ySize: number;
@@ -46,15 +43,15 @@ export class GameState {
   eventQueue: object[] = [];
 
   constructor() {
-    this.socket = io(this.URL);
+    this.socket = io(Consts.URL);
     const canvas = <HTMLCanvasElement>document.getElementById("background");
     this.context = canvas.getContext("2d");
 
     // dynamisch machen
     this.canvasHeight = canvas.height;
     this.canvasWidth = canvas.width;
-    this.xSize = (canvas.width - 300) / 8;
-    this.ySize = canvas.height / 8;
+    this.xSize = (canvas.width - 300) / Consts.ARRAY_CONST;
+    this.ySize = canvas.height / Consts.ARRAY_CONST;
 
     this.initStartPage();
   }
@@ -267,7 +264,7 @@ export class GameState {
    */
   public rmPlayerFromItem(player: Player, x: number, y: number): void {
     var newArr = new Array();
-    var oldPos = x + y * 8;
+    var oldPos = x + y * Consts.ARRAY_CONST;
     for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
       if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
         newArr.push(this.items[oldPos].playerOn[i]);

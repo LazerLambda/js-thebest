@@ -142,7 +142,7 @@ export class Server {
         socket.on("disconnecting", function(data: any) {
           console.log("Received 'disconnecting': " + data);
           var room = <GameBackend>socket.room;
-          if (room.sendPlayerHasLeft !== null) {
+          if (room !== null) {
             room.sendPlayerHasLeft(socket);
             console.log("disconnecting");
           }

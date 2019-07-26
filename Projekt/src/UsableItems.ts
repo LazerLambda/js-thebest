@@ -1,14 +1,14 @@
 import { Player } from "./Player";
 import { Explosion } from "./Explosion";
 import { FieldObj, Bomb, Hallway, Hole } from "./FieldObj";
-import { Field } from "./Field";
+import {Consts} from "./Consts";
 
 export class useableItem {
 defaultName : string = "Item 0"
 playerOn: Player = null;
 usingPlayer: Player = null;
 static: boolean = false;  // der Spieler kann das Item aufnehmen | nicht aufnehmen
-context: any;
+context: CanvasRenderingContext2D;
 SIZE_X: number;
 SIZE_Y: number;
 
@@ -21,7 +21,7 @@ spriteWidth: number = 40;
 spriteHeight: number = 30;
 
 constructor(
-    context: any,
+    context: CanvasRenderingContext2D,
     //xPos: number,
     //yPos: number,
     //xSize: number,
@@ -74,7 +74,7 @@ export class remoteBombKit extends useableItem {
     use() {
          //this.trigger = new remote("2d",this.inventorySpaceX,this.inventorySpaceY,40,30);
          this.usingPlayer.inventory = this.trigger;
-         new remoteBomb("2d",this.usingPlayer.xPos,this.usingPlayer.yPos,40,30,this.trigger);
+         new remoteBomb(this.context,this.usingPlayer.xPos,this.usingPlayer.yPos,40,30,this.trigger);
          
         }
 }
@@ -93,7 +93,7 @@ export class remoteBomb extends useableItem {
     static = true;
 
     constructor(
-        context: any,
+        context: CanvasRenderingContext2D,
         xPos: number,
         yPos: number,
         xSize: number,
@@ -153,9 +153,9 @@ export class spring extends FieldObj {
  PLS: possibleLandingSpot[] = [];
    
  getPossibleLandingSpots(){
-        for (let i  = 0;i <= 8;i++){ // höchste x Koordinate
-            for (let j  = 0;i <= 8;i++){ //höchste y Koordinate
-                var pos = this.x + this.y * 8;                          // dynamisch machen
+        for (let i  = 0;i <= Consts.ARRAY_CONST;i++){ // höchste x Koordinate
+            for (let j  = 0;i <= Consts.ARRAY_CONST;i++){ //höchste y Koordinate
+                var pos = this.x + this.y * Consts.ARRAY_CONST;                          // dynamisch machen
                 this.playerOn.forEach(e => {
                     if (e.field.field[pos] instanceof Hallway|| 
                         e.field.field[pos] instanceof Hole){
@@ -171,7 +171,7 @@ export class spring extends FieldObj {
         if (this.playerOn != null){
                  this.getPossibleLandingSpots();
                  var x = Math.floor(Math.random()*(this.PLS.length - 1));
-                 var test : number = <number> this.PLS[x].x * <number> this.PLS[x].y * 8 ; // dynamisch machen
+                 var test : number = <number> this.PLS[x].x * <number> this.PLS[x].y * Consts.ARRAY_CONST; // dynamisch machen
                  this.playerOn.forEach(e => {
                     e.onItem = <FieldObj> e.field.field[test];
                  });

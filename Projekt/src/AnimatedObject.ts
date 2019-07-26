@@ -45,7 +45,8 @@ function init() {
 
 export class AnimatedObject {
   image: any;
-  context: any;
+
+  context: CanvasRenderingContext2D;
 
   state: Enums.PlayerSprite;
 
