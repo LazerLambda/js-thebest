@@ -1,13 +1,7 @@
 import { Player } from "./Player";
 import { Bomb } from "./FieldObj";
 import { Fire } from "./Fire";
-
-enum PlayerSprite {
-  RUST = 1,
-  TUX = 2,
-  GOPHER = 3,
-  CLIPPY = 4
-}
+import { Enums } from "./Enums";
 
 let imgGopher: any = new Image();
 imgGopher.src = "animations/gopher.png";
@@ -52,6 +46,9 @@ function init() {
 export class AnimatedObject {
   image: any;
   context: any;
+
+  state: Enums.PlayerSprite;
+
 
   spriteWidthPlayer: number = 100;
   spriteHeightPlayer: number = 100;
@@ -101,16 +98,16 @@ export class AnimatedObject {
 
   animatePlayer(spriteSheetNumber: number, canvasX: number, canvasY: number, playerNumber: number) {
     switch (playerNumber) {
-      case PlayerSprite.RUST:
+      case Enums.PlayerSprite.RUST:
         this.playerSprite = imgRust;
         break;
-      case PlayerSprite.TUX:
+      case Enums.PlayerSprite.TUX:
         this.playerSprite = imgTux;
         break;
-      case PlayerSprite.GOPHER:
+      case Enums.PlayerSprite.GOPHER:
         this.playerSprite = imgGopher;
         break;
-      case PlayerSprite.CLIPPY:
+      case Enums.PlayerSprite.CLIPPY:
         this.playerSprite = imgClippy;
         break;
     }
