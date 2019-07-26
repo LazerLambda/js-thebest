@@ -1,5 +1,5 @@
 import { Player } from "./Player";
-import { Bomb } from "./Item";
+import { Bomb } from "./FieldObj";
 import { Fire } from "./Fire";
 
 enum PlayerSprite {

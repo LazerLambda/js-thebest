@@ -4,7 +4,7 @@ import { Fire } from "./Fire";
 import { AnimatedObject } from "./AnimatedObject";
 import { ActivePlayer } from "./Player";
 
-export class Item {
+export class FieldObj {
   onFire: Fire = null;
   playerOn: Player[] = [];
   context: any;
@@ -30,11 +30,30 @@ export class Item {
     this.SIZE_Y = ySize;
   }
 
+  /**
+   * @description
+   * draw this class
+   */
   draw() {}
-
+  /**
+   * @description
+   * update this class
+   */
   update() {}
+
+
+  /**
+   * @description
+   * react to explosions and fire events 
+   */
   setOnFire() {}
 
+
+  /**
+   * @description
+   * draw the FieldObj
+   * @param imageSource string Path to the image
+   */
   drawField(imageSource: string) {
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
@@ -44,7 +63,14 @@ export class Item {
   }
 }
 
-export class Wall extends Item {
+
+
+
+
+
+
+
+export class Wall extends FieldObj {
   constructor(
     context: any,
     xPos: number,
@@ -60,12 +86,18 @@ export class Wall extends Item {
   }
 }
 
-export class Hallway extends Item {
+
+
+
+
+
+
+export class Hallway extends FieldObj {
   bombOnItem: Bomb = null;
   onFire: Fire = null;
   brickOnItem: Brick = null;
 
-  overlayingItem: Item[];
+  overlayingItem: FieldObj[];
 
   constructor(
     context: any,
@@ -125,6 +157,14 @@ export class Hallway extends Item {
   }
 }
 
+
+
+
+
+
+
+
+
 export class Hole extends Hallway {
   constructor(
     context: any,
@@ -138,10 +178,7 @@ export class Hole extends Hallway {
 
   draw() {
     this.drawField("tilesets/tileset1/hole.jpg");
-
-    // evtl. diese Methode in eine andere Methode schreiben mit der aus Hallway
     if (this.onFire !== null) {
-      this.onFire.update();
       this.onFire.drawFire();
     }
   }
@@ -153,21 +190,22 @@ export class Hole extends Hallway {
         e.setLose();
       }
     }
-  }
-
-  setOnFire() {
-    this.onFire = new Fire(
-      this.context,
-      this.x,
-      this.y,
-      this.SIZE_X,
-      this.SIZE_Y,
-      this
-    );
+    if (this.onFire !== null) {
+      this.onFire.update();
+    }
   }
 }
 
-export class Bomb extends Item {
+
+
+
+
+
+
+
+
+
+export class Bomb extends FieldObj {
   timeLeftToDrop: number;
   timeLeft: number;
   explode: boolean = false;
@@ -193,6 +231,7 @@ export class Bomb extends Item {
     this.animatedObject.animateBomb();
   }
 
+  
   update() {
     if (this.timeLeft < 0) {
       this.explode = true;

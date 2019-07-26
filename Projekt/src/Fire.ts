@@ -1,5 +1,5 @@
-import { Item } from "./Item";
 import { AnimatedObject } from "./AnimatedObject";
+import { FieldObj } from "./FieldObj";
 
 export class Fire {
   timeLeft = 20;
@@ -8,7 +8,7 @@ export class Fire {
   yPos: number;
   xSize: number;
   ySize: number;
-  placedOn: Item;
+  placedOn: FieldObj;
   animatedObject: AnimatedObject;
 
   constructor(
@@ -17,7 +17,7 @@ export class Fire {
     yPos: number,
     xSize: number,
     ySize: number,
-    placedOn: Item
+    placedOn: FieldObj
   ) {
     this.context = context;
     this.xPos = xPos;

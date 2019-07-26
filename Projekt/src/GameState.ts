@@ -1,85 +1,52 @@
 import { ActivePlayer, Player, PassivePlayer } from "./Player";
-import { Hallway, Hole, Item, Wall } from "./Item";
-import { GameOver } from "./GameOver";
-import { Brick } from "./Brick";
-import { Explosion } from "./Explosion";
-import { Startpage } from "./Startpage";
 import { Editor } from "./Editor";
-import { RoomWait } from "./RoomWait";
-import { UserHasLeft } from "./UserHasLeft";
-import { Winner } from "./Winner";
+import { Enums } from "./Enums";
+import { Explosion } from "./Explosion";
+import { Game } from "./states/Game";
+import { GameOver } from "./states/GameOver";
+import { RoomWait } from "./states/RoomWait";
+import { Startpage } from "./states/Startpage";
+import { UserHasLeft } from "./states/UserHasLeft";
+import { Winner } from "./states/Winner";
 
 import * as io from "socket.io-client";
-
-enum serverState {
-  SELECTION = 0,
-  ROOM_WAIT = 1,
-  DESIGN = 2,
-  FIELD_WAIT = 3,
-  GAME = 4,
-  GAMEOVER = 5,
-  WINNER = 6
-}
-
-enum fieldType {
-  HALLWAY = 0,
-  WALL = 1,
-  HOLE = 2,
-  BRICK = 3,
-  USABLEITEM = 4
-}
-
-enum Event {
-  MOVE = "move",
-  DROP = "drop",
-  PICKUP = "pickup"
-}
-
-enum ActionBomb {
-  DEFAULT_BOMB = 1
-}
-
-let URL: string = "http://localhost:3000";
+import { FieldObj } from "./FieldObj";
 
 export class GameState {
+  // consts
+  MAX_PLAYERS: number = 4;
+  URL: string = "http://localhost:3000";
+
+  // dynamic assigned variables
+  xSize: number;
+  ySize: number;
+  canvasHeight: number;
+  canvasWidth: number;
+  field: any[];
+
+  // State machine variables
   clientId: number;
   startpage: Startpage;
+  game: Game;
   gameover: GameOver;
   winner: Winner;
   roomwaitpage: RoomWait;
   editor: Editor;
-  state: serverState;
+  state: Enums.serverState;
   userhasleft: UserHasLeft = null;
 
-  field: any[];
-  items: Item[];
-  context: any;
-  socket: any;
-
-  xSize: number;
-  ySize: number;
-
-  canvasHeight: number;
-  canvasWidth: number;
-
-  MAX_PLAYERS: number = 4;
+  // state ariables
+  items: FieldObj[] = null;
+  context: any = null;
+  socket: any = null;
   activePlayer: ActivePlayer = null;
   playerName: string = "";
   passivePlayers: PassivePlayer[] = [];
-
   explosions: Explosion[] = [];
-
   eventQueue: object[] = [];
 
-  playerObj: Object = {
-    1: null,
-    2: null,
-    3: null,
-    4: null
-  };
-
   constructor() {
-    this.socket = io(URL);
+    this.socket = io(this.URL);
     const canvas = <HTMLCanvasElement>document.getElementById("background");
     this.context = canvas.getContext("2d");
 
@@ -92,19 +59,22 @@ export class GameState {
     this.initStartPage();
   }
 
+  ////////////////////////////
+  /// State machine functions
+  ////////////////////////////
+
   /**
    * @description
    * Initialisierung des der WarteSeite mit EventListener für das Verhalten
    * bei positiver Rückmeldung vom Server. Ist vom Startseiten Objekt zu erreichen.
    */
-  public initWaitPage(editorChoosen: boolean) {
-    this.state = serverState.ROOM_WAIT;
+  public initWaitPage(editorChoosen: boolean): void {
+    this.state = Enums.serverState.ROOM_WAIT;
     this.roomwaitpage = new RoomWait(this.context, this);
     this.socket.on(
       "S_ready",
       function(data: any) {
         this.clientId = <number>data["playerId"];
-        // this.playerName = <string>data["playerName"];
 
         if (editorChoosen) {
           this.initEditor();
@@ -120,8 +90,8 @@ export class GameState {
    * @description
    * Initialisierung der Startseite
    */
-  private initStartPage() {
-    this.state = serverState.SELECTION;
+  public initStartPage(): void {
+    this.state = Enums.serverState.SELECTION;
     this.startpage = new Startpage(this.context, this);
   }
 
@@ -129,8 +99,8 @@ export class GameState {
    * @description
    * Initialisierung des Editors und des timeouts
    */
-  private initEditor(): void {
-    this.state = serverState.DESIGN;
+  public initEditor(): void {
+    this.state = Enums.serverState.DESIGN;
     this.editor = new Editor(this);
     this.socket.on(
       "timeout",
@@ -147,135 +117,101 @@ export class GameState {
    * @description
    * Eventhandler für das Game werden initialisiert
    */
-  private initGame(): void {
-    this.socket.on(
-      "init_field",
-      function(data: any) {
-        this.field = data["game_field"];
-        this.items = new Array();
-
-        for (let i = 0; i < this.field.length; i++) {
-          for (let j = 0; j < this.field[0].length; j++) {
-            switch (this.field[i][j]) {
-              case fieldType.HALLWAY:
-                this.items.push(
-                  new Hallway(this.context, j, i, this.xSize, this.ySize)
-                );
-                break;
-              case fieldType.HOLE:
-                this.items.push(
-                  new Hole(this.context, j, i, this.xSize, this.ySize)
-                );
-                break;
-              case fieldType.WALL:
-                this.items.push(
-                  new Wall(this.context, j, i, this.xSize, this.ySize)
-                );
-                break;
-              case fieldType.BRICK:
-                var item: Hallway = new Hallway(
-                  this.context,
-                  j,
-                  i,
-                  this.xSize,
-                  this.ySize
-                );
-                item.brickOnItem = new Brick(
-                  this.context,
-                  j,
-                  i,
-                  this.xSize,
-                  this.ySize,
-                  item
-                );
-                this.items.push(item);
-                break;
-            }
-          }
-        }
-
-        for (let i = 1; i <= this.MAX_PLAYERS; i++) {
-          var player = data["player_" + i];
-          var x: number = <number>player["startpos"]["x"];
-          var y: number = <number>player["startpos"]["y"];
-          var playerName: string = <string>player["name"];
-
-          // this.state = serverState.GAME;
-          // 8 dynamisch
-
-          var pos: number = x + y * 8;
-          var field = this.items[pos];
-          if (this.clientId === i) {
-            this.activePlayer = new ActivePlayer(
-              this.context,
-              this.socket,
-              i,
-              playerName
-            );
-            this.activePlayer.initField(this, field);
-            this.update();
-            this.draw();
-          } else {
-            var passivePlayer = new PassivePlayer(this.context, i, playerName);
-            passivePlayer.initField(this, field);
-            this.passivePlayers.push(passivePlayer);
-
-            if (this.passivePlayers.length > 3) {
-              throw "Too many passive Players in list";
-            }
-
-            this.update();
-            this.draw();
-          }
-          this.state = serverState.GAME;
-        }
-        this.updateGameInfos();
-      }.bind(this)
-    );
-
-    // Verarbeitung von eingehenden Events
-
-    this.socket.on(
-      "event",
-      function(data: any) {
-        this.eventQueue.push(data);
-      }.bind(this)
-    );
-
-    this.socket.on(
-      "user_left",
-      function(data: any) {
-        var playerNrTmp = <number>data;
-        this.passivePlayers = this.passivePlayers.filter(function(e: Player) {
-          return e.playerNr !== playerNrTmp;
-        });
-        this.userhasleft = new UserHasLeft(
-          this.context,
-          "" + playerNrTmp,
-          this
-        );
-        this.updateGameInfos();
-      }.bind(this)
-    );
-
-    this.socket.on(
-      "passivePlayerGameOver",
-      function(data: any) {
-        var playerNrTmp = <number>data;
-        this.passivePlayers.forEach((element: any) => {
-          if (element.playerNr === playerNrTmp) {
-            element.setLose();
-          }
-        });
-      }.bind(this)
-    );
+  public initGame(): void {
+    this.game = new Game(this);
   }
 
   /**
-   * @desctiption
+   * @description
+   * Methode, um in den GameOver Zustand überzugehen
+   */
+  public initGameOver(): void {
+    this.gameover = new GameOver(this.context);
+    this.activePlayer.running = false;
+    this.state = Enums.serverState.GAMEOVER;
+  }
+
+  /**
+   * @description
+   * Standard update Methode für alle Zustände
+   */
+  public update() {
+    switch (this.state) {
+      case Enums.serverState.SELECTION:
+        this.startpage.update();
+        break;
+      case Enums.serverState.ROOM_WAIT:
+        this.roomwaitpage.updateRoomWait();
+        break;
+      case Enums.serverState.DESIGN:
+        break;
+      case Enums.serverState.FIELD_WAIT:
+        break;
+      case Enums.serverState.GAME:
+        this.game.updateGame();
+        // this.updateGame();
+        if (this.userhasleft !== null) {
+          this.userhasleft.updateUserHasLeft();
+        }
+        break;
+      case Enums.serverState.GAMEOVER:
+        this.game.updateGame();
+        // this.updateGame();
+        this.gameover.updateGameOver();
+        this.updateGameInfos();
+        break;
+      case Enums.serverState.WINNER:
+        this.game.updateGame();
+        // this.updateGame();
+        this.winner.drawWinner();
+        break;
+    }
+  }
+
+  /**
+   * @description
+   * Standard draw Methode für alle Zustände
+   */
+
+  public draw() {
+    switch (this.state) {
+      case Enums.serverState.SELECTION:
+        this.startpage.draw();
+        break;
+      case Enums.serverState.ROOM_WAIT:
+        this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
+        this.roomwaitpage.drawRoomWait();
+        break;
+      case Enums.serverState.DESIGN:
+        break;
+      case Enums.serverState.FIELD_WAIT:
+        break;
+      case Enums.serverState.GAME: {
+        this.game.drawGame();
+        //this.drawGame();
+        if (this.userhasleft !== null) {
+          this.userhasleft.drawUserHasLeft();
+        }
+        break;
+      }
+      case Enums.serverState.GAMEOVER:
+        this.game.drawGame();
+        // this.drawGame();
+        this.gameover.drawGameOver();
+        break;
+      case Enums.serverState.WINNER:
+        this.game.drawGame();
+        // this.drawGame();
+        this.winner.drawWinner();
+        break;
+    }
+  }
+
+  /**
+   * @description
    * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
    */
-  handleNetworkInput(): void {
+  public handleNetworkInput(): void {
     if (this.eventQueue.length > 0) {
       var evObject: any = this.eventQueue[0];
       var playerNrTmp = <number>evObject["playerId"];
@@ -286,20 +222,20 @@ export class GameState {
         if (e.playerNr === playerNrTmp) {
           if (e.transitionLock) {
             switch (event) {
-              case Event.DROP:
+              case Enums.Event.DROP:
                 e.placeBomb();
 
                 this.eventQueue.pop();
 
                 break;
-              case Event.MOVE:
+              case Enums.Event.MOVE:
                 e.setTarget(action);
 
                 this.eventQueue.pop();
 
                 break;
 
-              case Event.PICKUP:
+              case Enums.Event.PICKUP:
                 // Pickup Event
                 break;
             }
@@ -311,146 +247,41 @@ export class GameState {
     }
   }
 
-  /**
-   * Prozedur für die Aktualisierung des Spiels
-   * Nicht nur während des Spiels bedeuetsam, sondern auch während der Gameover oder Winning- Sequenz.
-   */
+  ////////////////////////////
+  /// Public functions
+  ////////////////////////////
 
-  updateGame() {
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i] instanceof Hallway) {
-        var tmpItem = <Hallway>this.items[i];
-        if (tmpItem.bombOnItem !== null) {
-          if (tmpItem.bombOnItem.explode) {
-            this.explosions.push(new Explosion(tmpItem, this, 3));
-          }
-        }
+  /**
+   * @description
+   * Setze Spieler zu neuer Position
+   * @param player Player für das neue Ziel
+   */
+  public setPlayerOnItem(player: Player, target: number): void {
+    this.items[target].playerOn.push(player);
+  }
+
+  /**
+   * @description
+   * Entferne den Spieler von der alten Position
+   * @param player
+   */
+  public rmPlayerFromItem(player: Player, x: number, y: number): void {
+    var newArr = new Array();
+    var oldPos = x + y * 8;
+    for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
+      if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
+        newArr.push(this.items[oldPos].playerOn[i]);
       }
     }
-
-    for (let elem of this.explosions) {
-      elem.update();
-    }
-
-    for (let elem of this.items) {
-      elem.update();
-    }
-
-    var winner = true;
-    for (let elem of this.passivePlayers) {
-      this.handleNetworkInput();
-      winner = !elem.alive && winner; // überprüfe, ob die anderen Spieler noch teilnehmen
-      elem.renderPlayer();
-    }
-
-    if (winner || this.passivePlayers.length === 0) {
-      this.winner = new Winner(this.context);
-      this.state = serverState.WINNER;
-    }
-
-    if (this.activePlayer !== null) {
-      this.activePlayer.renderPlayer();
-      if (!this.activePlayer.alive) {
-        this.gameover = new GameOver(this.context);
-        this.activePlayer.removeEventLister();
-        this.activePlayer.running = false;
-        this.state = serverState.GAMEOVER;
-      }
-    }
+    this.items[oldPos].playerOn = newArr;
   }
 
   /**
-   * Standard update Methode für alle Zustände
-   */
-  update() {
-    switch (this.state) {
-      case serverState.SELECTION:
-        this.startpage.update();
-        break;
-      case serverState.ROOM_WAIT:
-        this.roomwaitpage.updateRoomWait();
-        break;
-      case serverState.DESIGN:
-        break;
-      case serverState.FIELD_WAIT:
-        break;
-      case serverState.GAME:
-        this.updateGame();
-        if (this.userhasleft !== null) {
-          this.userhasleft.updateUserHasLeft();
-        }
-        break;
-      case serverState.GAMEOVER:
-        this.updateGame();
-        this.gameover.updateGameOver();
-        this.updateGameInfos();
-        break;
-      case serverState.WINNER:
-        this.updateGame();
-        this.winner.drawWinner();
-        break;
-    }
-  }
-
-  /**
-   * Prozedur für die Aktualisierung des Spiels
-   * Nicht nur während des Spiels bedeuetsam, sondern auch während der Gameover oder Winning- Sequenz.
-   */
-
-  drawGame() {
-    this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
-    for (let elem of this.items) {
-      elem.draw();
-    }
-    for (let elem of this.passivePlayers) {
-      elem.drawPlayer();
-    }
-
-    if (this.activePlayer !== null) {
-      this.activePlayer.drawPlayer();
-    }
-  }
-
-  /**
-   * Standard draw Methode für alle Zustände
-   */
-
-  draw() {
-    switch (this.state) {
-      case serverState.SELECTION:
-        this.startpage.draw();
-        break;
-      case serverState.ROOM_WAIT:
-        this.context.clearRect(0, 0, this.canvasWidth - 300, this.canvasHeight);
-        this.roomwaitpage.drawRoomWait();
-        break;
-      case serverState.DESIGN:
-        break;
-      case serverState.FIELD_WAIT:
-        break;
-      case serverState.GAME: {
-        this.drawGame();
-        if (this.userhasleft !== null) {
-          this.userhasleft.drawUserHasLeft();
-        }
-        break;
-      }
-      case serverState.GAMEOVER:
-        this.drawGame();
-        this.gameover.drawGameOver();
-        break;
-      case serverState.WINNER:
-        this.drawGame();
-        this.winner.drawWinner();
-        break;
-    }
-  }
-
-  /**
+   * @private
    *  Methode zur Anzeige der Informationen auf der rechten Seite
    */
-  updateGameInfos() {
-    if (this.state === serverState.GAME) {
+  private updateGameInfos(): void {
+    if (this.state === Enums.serverState.GAME) {
       this.context.clearRect(480, 0, 300, 480);
       this.context.fillStyle = "#fff2c6";
       this.context.fillRect(480, 0, 300, 480);
@@ -472,30 +303,5 @@ export class GameState {
         }.bind(this)
       );
     }
-  }
-
-  /**
-   * @description
-   * Setze Spieler zu neuer Position
-   * @param player Player für das neue Ziel
-   */
-  setPlayerOnItem(player: Player, target: number) {
-    this.items[target].playerOn.push(player);
-  }
-
-  /**
-   * @description
-   * Entferne den Spieler von der alten Position
-   * @param player
-   */
-  rmPlayerFromItem(player: Player, x: number, y: number) {
-    var newArr = new Array();
-    var oldPos = x + y * 8;
-    for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
-      if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
-        newArr.push(this.items[oldPos].playerOn[i]);
-      }
-    }
-    this.items[oldPos].playerOn = newArr;
   }
 }

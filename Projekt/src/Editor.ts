@@ -1,25 +1,7 @@
 import { CustomArea, EnemyArea, MenuElement } from "./EditorUtil";
+import {Enums } from './Enums'
 import { GameState } from "./GameState";
 import { Game } from "./Game";
-
-enum fieldType {
-  HALLWAY = 0,
-  WALL = 1,
-  HOLE = 2,
-  BRICK = 3,
-  STARTPOSITION = 4,
-  CONNECTION = 5
-}
-
-enum serverState {
-  SELECTION = 0,
-  ROOM_WAIT = 1,
-  DESIGN = 2,
-  FIELD_WAIT = 3,
-  GAME = 4,
-  GAMEOVER = 5,
-  WINNER = 6
-}
 
 export class Editor {
   canvas: HTMLCanvasElement;
@@ -120,14 +102,14 @@ export class Editor {
     for (let y = 0; y < this.customArea.boardHeight; y++) {
       let row_y = new Array<number>();
       for (let x = 0; x < this.customArea.boardWidth; x++) {
-        row_y[x] = fieldType.WALL;
+        row_y[x] = Enums.fieldType.WALL;
       }
       this.fields[y] = row_y;
     }
 
     this.tileset = new Array<HTMLImageElement>();
     this.changeTileset("tileset1");
-    this.item = fieldType.BRICK;
+    this.item = Enums.fieldType.BRICK;
 
     for (let y = 1; y < this.boardHeight; y++) {
       this.drawLine(
@@ -164,7 +146,7 @@ export class Editor {
         () => {
           this.item = 0;
         },
-        this.tileset[fieldType.HALLWAY]
+        this.tileset[Enums.fieldType.HALLWAY]
       ),
       new MenuElement(
         this.mapPixelWidth + 75,
@@ -174,7 +156,7 @@ export class Editor {
         () => {
           this.item = 1;
         },
-        this.tileset[fieldType.WALL]
+        this.tileset[Enums.fieldType.WALL]
       ),
       new MenuElement(
         this.mapPixelWidth + 150,
@@ -184,7 +166,7 @@ export class Editor {
         () => {
           this.item = 2;
         },
-        this.tileset[fieldType.HOLE]
+        this.tileset[Enums.fieldType.HOLE]
       ),
       new MenuElement(
         this.mapPixelWidth + 225,
@@ -194,7 +176,7 @@ export class Editor {
         () => {
           this.item = 3;
         },
-        this.tileset[fieldType.BRICK]
+        this.tileset[Enums.fieldType.BRICK]
       ),
       new MenuElement(
         this.mapPixelWidth,
@@ -204,7 +186,7 @@ export class Editor {
         () => {
           this.item = 4;
         },
-        this.tileset[fieldType.STARTPOSITION]
+        this.tileset[Enums.fieldType.STARTPOSITION]
       ),
       new MenuElement(
         this.mapPixelWidth,
@@ -277,7 +259,7 @@ export class Editor {
 
   drawFixedTiles() {
     this.context.drawImage(
-      this.tileset[fieldType.CONNECTION],
+      this.tileset[Enums.fieldType.CONNECTION],
       this.mapCenter.pixelX,
       this.mapCenter.pixelY,
       this.tileSquareLen,
@@ -384,7 +366,7 @@ waitForImages(paths:string[]) {
 
   canvasClick(event: MouseEvent) {
     console.log(this.gameState.state);
-    if (this.gameState.state === serverState.DESIGN) {
+    if (this.gameState.state === Enums.serverState.DESIGN) {
       this.drawCanvas();
       let xPixel: number = event.layerX - this.canvas.offsetLeft;
       let yPixel: number = event.layerY - this.canvas.offsetTop;
@@ -402,7 +384,7 @@ waitForImages(paths:string[]) {
       ) {
         let row: number = Math.floor(yPixel / this.tileSquareLen);
         let col: number = Math.floor(xPixel / this.tileSquareLen);
-        if (this.fields[row][col] == fieldType.STARTPOSITION) {
+        if (this.fields[row][col] == Enums.fieldType.STARTPOSITION) {
           this.startPosition.x = undefined;
           this.startPosition.y = undefined;
         }
@@ -414,12 +396,12 @@ waitForImages(paths:string[]) {
           this.tileSquareLen,
           this.tileSquareLen
         );
-        if (this.item == fieldType.STARTPOSITION) {
+        if (this.item == Enums.fieldType.STARTPOSITION) {
           if (this.startPosition.y != undefined)
             this.fields[this.startPosition.y][this.startPosition.x] =
-              fieldType.HALLWAY;
+              Enums.fieldType.HALLWAY;
           this.context.drawImage(
-            this.tileset[fieldType.HALLWAY],
+            this.tileset[Enums.fieldType.HALLWAY],
             this.customArea.topLeftPixelX +
               this.startPosition.x * this.tileSquareLen,
             this.customArea.topLeftPixelY +
@@ -475,28 +457,28 @@ waitForImages(paths:string[]) {
       console.log("av" + this.alreadyVisited);
       if (y - 1 > 0)
         if (
-          this.fields[y - 1][x] === fieldType.HALLWAY &&
+          this.fields[y - 1][x] === Enums.fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y - 1, x: x })
         ) {
           this.checkPath(y - 1, x);
         }
       if (x + 1 < this.customArea.boardWidth)
         if (
-          this.fields[y][x + 1] === fieldType.HALLWAY &&
+          this.fields[y][x + 1] === Enums.fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y, x: x + 1 })
         ) {
           this.checkPath(y, x + 1);
         }
       if (y + 1 > this.customArea.boardHeight)
         if (
-          this.fields[y + 1][x] === fieldType.HALLWAY &&
+          this.fields[y + 1][x] === Enums.fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y, x: x + 1 })
         ) {
           this.checkPath(y + 1, x);
         }
       if (x - 1 > 0)
         if (
-          this.fields[y][x - 1] === fieldType.HALLWAY &&
+          this.fields[y][x - 1] === Enums.fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y, x: x - 1 })
         ) {
           this.checkPath(y, x - 1);
