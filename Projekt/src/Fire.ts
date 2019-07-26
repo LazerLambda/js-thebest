@@ -1,14 +1,5 @@
 import { Item } from "./Item";
-
-let imgFire: any = new Image();
-imgFire.src = "animations/fire.png";
-imgFire.onload = function() {
-  init();
-};
-
-function init() {
-  this.startAnimating(200);
-}
+import { AnimatedObject } from "./AnimatedObject";
 
 export class Fire {
   timeLeft = 20;
@@ -18,12 +9,7 @@ export class Fire {
   xSize: number;
   ySize: number;
   placedOn: Item;
-
-  spriteWidthFire: number = 500;
-  spriteHeightFire: number = 500;
-  cycleLoopFire = [0, 1, 2, 3];
-  currentLoopIndex: number = 0;
-  frameCount: number = 0;
+  animatedObject: AnimatedObject;
 
   constructor(
     context: any,
@@ -39,36 +25,11 @@ export class Fire {
     this.xSize = xSize;
     this.ySize = ySize;
     this.placedOn = placedOn;
+    this.animatedObject = new AnimatedObject(this);
   }
 
   drawFire() {
-    const x = this.xPos * this.xSize;
-    const y = this.yPos * this.ySize;
-
-    let time = 4; // Zeit für Bildwechsel in der Animation
-    if (this.frameCount <= 4 * time) {
-      if (this.frameCount % time === 0) {
-        this.currentLoopIndex++;
-        if (this.currentLoopIndex >= this.cycleLoopFire.length) {
-          this.currentLoopIndex = 0;
-        }
-      }
-    } else {
-      this.frameCount = 0;
-    }
-    ++this.frameCount;
-
-    this.context.drawImage(
-      imgFire,
-      0,
-      this.cycleLoopFire[this.currentLoopIndex] * this.spriteHeightFire,
-      this.spriteWidthFire,
-      this.spriteHeightFire,
-      x,
-      y,
-      this.xSize,
-      this.ySize
-    );
+    this.animatedObject.animateFire();
   }
 
   update() {

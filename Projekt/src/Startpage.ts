@@ -1,5 +1,16 @@
 import { GameState } from "./GameState";
 
+enum serverState {
+  SELECTION = 0,
+  ROOM_WAIT = 1,
+  DESIGN = 2,
+  FIELD_WAIT = 3,
+  GAME = 4,
+  GAMEOVER = 5,
+  WINNER = 6
+}
+
+
 export class Startpage {
   gameState: GameState;
   context: any;
@@ -36,7 +47,6 @@ export class Startpage {
       this.name += e.key;
     }
     if(e.key === 'Backspace'){
-      console.log(e.key);
       this.name = this.name.substring(0, this.name.length - 1);
     }
   }
@@ -47,7 +57,7 @@ export class Startpage {
     // Game Start
     if (
       this.onButton1(e.clientX - rect.left, e.clientY - rect.top) &&
-      this.gameState.state === 0
+      this.gameState.state === serverState.SELECTION
     ) {
       this.gameState.socket.emit("mode", "game");
       if (!this.gameState.socket.connected) {
@@ -62,7 +72,7 @@ export class Startpage {
     // Editor Start
     if (
       this.onButton2(e.clientX - rect.left, e.clientY - rect.top) &&
-      this.gameState.state === 0
+      this.gameState.state === serverState.SELECTION
     ) {
       this.gameState.socket.emit("mode", "editor");
       if (!this.gameState.socket.connected) {
@@ -78,7 +88,6 @@ export class Startpage {
   buttonEvents(e: any) {
     var rect = this.canvas.getBoundingClientRect();
     if (this.onButton1(e.clientX - rect.left, e.clientY - rect.top)) {
-      console.log("sdf");
       this.mouseOverButton1 = true;
     } else {
       this.mouseOverButton1 = false;
@@ -116,7 +125,7 @@ export class Startpage {
 
   eventFunction(e: any) {
     {
-      if (e.key === "y" && this.gameState.state === 0) {
+      if (e.key === "y" && this.gameState.state === serverState.SELECTION) {
         this.gameState.socket.emit("mode", "game");
         if (!this.gameState.socket.connected) {
           alert("Connection Error\n\t'->Maybe Server isn't running");
@@ -125,7 +134,7 @@ export class Startpage {
         document.removeEventListener("keyup", this.eventFunction);
         this.gameState.startpage = null;
       }
-      if (e.key === "x" && this.gameState.state === 0) {
+      if (e.key === "x" && this.gameState.state === serverState.SELECTION) {
         this.gameState.socket.emit("mode", "editor");
         if (!this.gameState.socket.connected) {
           alert("Connection Error\n\t'->Maybe Server isn't running");

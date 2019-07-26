@@ -97,7 +97,6 @@ export class GameState {
    * Initialisierung des der WarteSeite mit EventListener für das Verhalten
    * bei positiver Rückmeldung vom Server. Ist vom Startseiten Objekt zu erreichen.
    */
-
   public initWaitPage(editorChoosen: boolean) {
     this.state = serverState.ROOM_WAIT;
     this.roomwaitpage = new RoomWait(this.context, this);
@@ -105,11 +104,12 @@ export class GameState {
       "S_ready",
       function(data: any) {
         this.clientId = <number>data["playerId"];
-        this.playerName = <string>data["playerName"];
-        this.socket.emit("G_ready", this.playerName);
+        // this.playerName = <string>data["playerName"];
+
         if (editorChoosen) {
           this.initEditor();
         } else {
+          this.socket.emit("G_ready", this.playerName);
           this.initGame();
         }
       }.bind(this)
@@ -127,18 +127,26 @@ export class GameState {
 
   /**
    * @description
-   * Initialisierung des Editors
+   * Initialisierung des Editors und des timeouts
    */
   private initEditor(): void {
     this.state = serverState.DESIGN;
-    this.editor = new Editor();
+    this.editor = new Editor(this);
+    this.socket.on(
+      "timeout",
+      function(data: any) {
+        this.editor.cleanUpPage();
+        this.editor = null;
+        this.socket.emit("G_ready", this.playerName);
+        this.initGame();
+      }.bind(this)
+    );
   }
 
   /**
    * @description
    * Eventhandler für das Game werden initialisiert
    */
-
   private initGame(): void {
     this.socket.on(
       "init_field",
@@ -190,6 +198,7 @@ export class GameState {
           var player = data["player_" + i];
           var x: number = <number>player["startpos"]["x"];
           var y: number = <number>player["startpos"]["y"];
+          var playerName: string = <string>player["name"];
 
           // this.state = serverState.GAME;
           // 8 dynamisch
@@ -197,12 +206,17 @@ export class GameState {
           var pos: number = x + y * 8;
           var field = this.items[pos];
           if (this.clientId === i) {
-            this.activePlayer = new ActivePlayer(this.context, this.socket, i);
+            this.activePlayer = new ActivePlayer(
+              this.context,
+              this.socket,
+              i,
+              playerName
+            );
             this.activePlayer.initField(this, field);
             this.update();
             this.draw();
           } else {
-            var passivePlayer = new PassivePlayer(this.context, i);
+            var passivePlayer = new PassivePlayer(this.context, i, playerName);
             passivePlayer.initField(this, field);
             this.passivePlayers.push(passivePlayer);
 
@@ -446,7 +460,7 @@ export class GameState {
         function(e: Player, i: number) {
           this.context.fillStyle = "#e44b43";
           this.context.font = "25px Krungthep";
-          this.context.fillText("Player: " + e.playerNr, 500, (i + 1) * 70); // Dynamisch machen
+          this.context.fillText("Player: " + e.name, 500, (i + 1) * 70); // Dynamisch machen
           this.context.fillStyle = "#ff9944";
           this.context.font = "13px Krungthep";
           this.context.fillText("Punkte: " + "0", 520, (i + 1) * 70 + 25);
