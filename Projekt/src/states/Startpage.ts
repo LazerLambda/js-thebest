@@ -1,11 +1,27 @@
-import { GameState } from "./GameState";
+import { GameState } from "../GameState";
+
+enum serverState {
+  SELECTION = 0,
+  ROOM_WAIT = 1,
+  DESIGN = 2,
+  FIELD_WAIT = 3,
+  GAME = 4,
+  GAMEOVER = 5,
+  WINNER = 6
+}
 
 export class Startpage {
+  // states
   gameState: GameState;
   context: any;
   canvas: HTMLCanvasElement;
 
   name: string = "";
+
+  mouseOverButton1: boolean = false;
+  mouseOverButton2: boolean = false;
+
+  // consts
 
   button1_X_start: number = 50;
   button1_X_length: number = 150;
@@ -17,9 +33,6 @@ export class Startpage {
   button2_Y_start: number = 375;
   button2_Y_length: number = 50;
 
-  mouseOverButton1: boolean = false;
-  mouseOverButton2: boolean = false;
-
   constructor(context: any, gameState: GameState) {
     this.context = context;
     this.gameState = gameState;
@@ -30,24 +43,35 @@ export class Startpage {
     document.addEventListener("keyup", this.nameFunction.bind(this));
   }
 
-  nameFunction(e: any) {
-    
-    if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".includes(e.key)) {
+  /**
+   * Methode um die Tastatureingabe aufzunehmen
+   * @param e any Event
+   */
+  private nameFunction(e: any): void {
+    if (
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".includes(
+        e.key
+      )
+    ) {
       this.name += e.key;
     }
-    if(e.key === 'Backspace'){
-      console.log(e.key);
+    if (e.key === "Backspace") {
       this.name = this.name.substring(0, this.name.length - 1);
     }
   }
 
-  buttonClick(e: any) {
+  /**
+   * @description
+   * Methode, um clicks auf den Buttons zu verarbeiten
+   * @param e any Event
+   */
+  private buttonClick(e: any): void {
     var rect = this.canvas.getBoundingClientRect();
 
     // Game Start
     if (
       this.onButton1(e.clientX - rect.left, e.clientY - rect.top) &&
-      this.gameState.state === 0
+      this.gameState.state === serverState.SELECTION
     ) {
       this.gameState.socket.emit("mode", "game");
       if (!this.gameState.socket.connected) {
@@ -62,20 +86,25 @@ export class Startpage {
     // Editor Start
     if (
       this.onButton2(e.clientX - rect.left, e.clientY - rect.top) &&
-      this.gameState.state === 0
+      this.gameState.state === serverState.SELECTION
     ) {
       this.gameState.socket.emit("mode", "editor");
       if (!this.gameState.socket.connected) {
         alert("Connection Error\n\t'->Maybe Server isn't running");
       }
-      this.gameState.initWaitPage(true)
+      this.gameState.initWaitPage(true);
       document.removeEventListener("keyup", this.nameFunction);
       this.gameState.playerName = this.name;
       this.gameState.startpage = null;
     }
   }
 
-  buttonEvents(e: any) {
+  /**
+   * @description
+   * Methode um die Zustände der Buttons zu verändern, wenn die Maus darübergeht.
+   * @param e any Event
+   */
+  private buttonEvents(e: any): void {
     var rect = this.canvas.getBoundingClientRect();
     if (this.onButton1(e.clientX - rect.left, e.clientY - rect.top)) {
       this.mouseOverButton1 = true;
@@ -89,7 +118,14 @@ export class Startpage {
     }
   }
 
-  onButton1(x: number, y: number): boolean {
+  /**
+   * @description
+   * Überprüfung, ob Maus über Button1 ist
+   * @param x number x Koordinate
+   * @param y number y Koordinate
+   * @return boolean
+   */
+  private onButton1(x: number, y: number): boolean {
     if (
       x >= this.button1_X_start &&
       this.button1_X_start + this.button1_X_length >= x &&
@@ -101,7 +137,14 @@ export class Startpage {
     return false;
   }
 
-  onButton2(x: number, y: number): boolean {
+  /**
+   * @description
+   * Überprüfung, ob Maus über Button2 ist
+   * @param x number x Koordinate
+   * @param y number y Koordinate
+   * @return boolean
+   */
+  private onButton2(x: number, y: number): boolean {
     if (
       x >= this.button2_X_start &&
       this.button2_X_start + this.button2_X_length >= x &&
@@ -113,9 +156,9 @@ export class Startpage {
     return false;
   }
 
-  eventFunction(e: any) {
+  private eventFunction(e: any): void {
     {
-      if (e.key === "y" && this.gameState.state === 0) {
+      if (e.key === "y" && this.gameState.state === serverState.SELECTION) {
         this.gameState.socket.emit("mode", "game");
         if (!this.gameState.socket.connected) {
           alert("Connection Error\n\t'->Maybe Server isn't running");
@@ -124,7 +167,7 @@ export class Startpage {
         document.removeEventListener("keyup", this.eventFunction);
         this.gameState.startpage = null;
       }
-      if (e.key === "x" && this.gameState.state === 0) {
+      if (e.key === "x" && this.gameState.state === serverState.SELECTION) {
         this.gameState.socket.emit("mode", "editor");
         if (!this.gameState.socket.connected) {
           alert("Connection Error\n\t'->Maybe Server isn't running");
@@ -136,9 +179,17 @@ export class Startpage {
     }
   }
 
-  update() {}
+  /**
+   * @description
+   * updates for this class
+   */
+  public update(): void {}
 
-  draw() {
+  /**
+   * @description
+   * draw this class
+   */
+  public draw(): void {
     this.context.fillStyle = "#fff2c6";
     this.context.fillRect(0, 0, 480, 480);
     this.context.fillStyle = "#e44b43";

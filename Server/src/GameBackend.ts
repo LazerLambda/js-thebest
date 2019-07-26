@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import { Server } from "./Server";
-import { start } from "repl";
 
 enum SocketStateEnum {
   SELECTION = 0,
@@ -9,20 +8,18 @@ enum SocketStateEnum {
   GAME = 3
 }
 
-enum fieldType {
-  HALLWAY = 0,
-  WALL = 1,
-  HOLE = 2,
-  BRICK = 3,
-  USABLEITEM = 4
-}
-
 export class GameBackend {
+  // consts
+  TIMEOUT_LENGTH: number = 20;
+
+  // states
   sockets: any[] = [];
   server: Server = null;
+  timeoutSet: boolean = false;
+
+  // properties
   gameNumber: any = 0;
   levelCounter: number = 1;
-  timeoutSet: boolean = false;
 
   constructor(sockets: any[], server: Server) {
     this.sockets = sockets;
@@ -50,77 +47,47 @@ export class GameBackend {
    * Methode, um die Antwort auf die Anfrage für den Editor oder das Spiel zu beantworten.
    * Es wird neben der Event-Id die cllientspezifische Nummer für einen Raum mitgesendet.
    */
-  public emitServerReady() {
+  public emitServerReady(): void {
     for (let e of this.sockets) {
-      console.log("Send to " + e.playerNr);
-      var toSend: object = { playerId: e.playerNr, playerName: e.name };
+      var toSend: object = { playerId: e.playerNr };
       e.emit("S_ready", toSend);
+      console.log("'S_ready' emitted to " + e.id + " Name " + e.name);
     }
   }
 
   /**
+   * @description
    * Methode zur Überprüfung des vorgeschlagenen Spielfeldes
+   * @param socket any Socket
+   * @param field number[][] field
+   * @return boolean
    */
-  public checkProposedField(socket: any, field: number[][]) {
-    var playerIdTmp: number = socket.playerNr;
+  public checkProposedField(socket: any, field: number[][]): boolean {
+    return false;
+  }
 
-    var door1: number = Math.floor(field.length / 2);
-    var door2: number = Math.floor(field.length / 2);
-
-    var startpos: object = { x: 0, y: 0 };
-
-    function addToVisitedFields() {}
-
-    function testWalls(
-      objStrt: { xStart: number; yStart: number },
-      objDoor1 : { x: number; y: number },
-      objDoor2 : { x: number; y: number },
-      xDir: number,
-      yDir: number
-    ) {
-      var loopVar: boolean = true;
-      var x = objStrt.xStart;
-      var y = objStrt.yStart;
-
-      if (field[x][y] !== fieldType.HALLWAY) {
-        return false;
-      }
-      var visitedFields: object[] = [];
-
-      while (loopVar) {
-        if(visitedFields.includes(objDoor1) && visitedFields.includes(objDoor2)){
-          return true;
-        }
-        if (field[x + xDir][y] === fieldType.HALLWAY) {
-          var objTmp: object = { x: x + xDir, y: y };
-          if (visitedFields.includes(objTmp)) {
-            visitedFields.push(objTmp);
-          }
-        } else if (field[x + xDir][y] === fieldType.HALLWAY) {
-          var objTmp: object = { x: x, y: y + yDir };
-          if (visitedFields.includes(objTmp)) {
-            visitedFields.push(objTmp);
-          }
-        } else {
-          return false;
-        }
-      }
+  /**
+   * @description
+   *  Setzen des Timeouts für den Editor.
+   */
+  public handleEditorTimeOut(): void {
+    var allStatesOnDesign: boolean = true;
+    for (let e of this.sockets) {
+      allStatesOnDesign =
+        e.state === SocketStateEnum.DESIGN && allStatesOnDesign;
     }
-
-    switch (playerIdTmp) {
-      case 1:
-        startpos = { x: 0, y: 0 }; // top left
-        break;
-      case 2:
-        startpos = { x: field.length, y: 0 }; // top right
-        break;
-      case 3:
-        startpos = { x: 0, y: field.length }; // bottom left
-        break;
-      case 4:
-        startpos = { x: field.length, y: field.length }; // bottom right
-      default:
-        throw "Error something went wrong with the playerId";
+    console.log("All Players ready? " + allStatesOnDesign);
+    if (allStatesOnDesign) {
+      setTimeout(
+        function() {
+          for (let e of this.sockets) {
+            e.emit("timeout");
+            console.log("'timeout' emitted to " + e.id + " Name " + e.name);
+          }
+        }.bind(this),
+        1000 * this.TIMEOUT_LENGTH
+      );
+      console.log("Timeout set");
     }
   }
 
@@ -130,18 +97,28 @@ export class GameBackend {
    * Übersendung dem neuen Zustand angepasst, sodass keine Duplikate gesendet werden.
    */
   public initField(): void {
-    // Hier optional noch levelcounter überprüfen.
-    // für weitere Levels
-
     var file: any = fs.readFileSync("./Fields/Field0.json");
-    var field: Object = JSON.parse(file);
+    var field: any = JSON.parse(file);
+
+    // TODO Namen senden
+    var allStatesOnGame: boolean = true;
     for (let e of this.sockets) {
-      if (e.state !== SocketStateEnum.GAME) {
+      allStatesOnGame = e.state === SocketStateEnum.GAME && allStatesOnGame;
+    }
+
+    if (allStatesOnGame) {
+      for (let i = 0; i < this.sockets.length; i++) {
+        var index: number = i + 1;
+        var playerObj: any = field["player_" + index];
+        if (this.sockets[i].name !== "") {
+          playerObj["name"] = this.sockets[i].name;
+        }
+      }
+      for (let e of this.sockets) {
+        console.log(field);
         e.emit("init_field", field);
-        console.log(e.id + "" + e.state);
         e.state = SocketStateEnum.GAME;
-        console.log(e.id + "" + e.state);
-        console.log("Field sent to " + e.id);
+        console.log("'init_field' emitted to " + e.id + " Name " + e.name);
       }
     }
   }
@@ -169,9 +146,9 @@ export class GameBackend {
   /**
    * @description
    * Methode, um die Bewegungen der weiteren Spieler an die
-   * @param eventObjectToSend Objekt, welches an die weiteren Spieler gesendet werden soll
+   * @param eventObjectToSend any Objekt, welches an die weiteren Spieler gesendet werden soll
    */
-  sendEventsToPeers(eventObjectToSend: any) {
+  public sendEventsToPeers(eventObjectToSend: any): void {
     var playerNrTMP: number = <number>eventObjectToSend["playerId"];
     console.log(playerNrTMP);
     for (let i = 0; i < this.sockets.length; i++) {
@@ -180,18 +157,26 @@ export class GameBackend {
       } else {
         console.log("Sent to " + this.sockets[i].id);
         this.sockets[i].emit("event", eventObjectToSend);
+        console.log(
+          "'event' emitted to " +
+            this.sockets[i].id +
+            " Name " +
+            this.sockets[i].name
+        );
       }
     }
   }
 
   /**
-   *
-   * @param socket
+   * @description
+   * Funktion um das Verlassen eines Spielers zu broadcasten
+   * @param socket any Socket
    */
-  sendPlayerHasLeft(socket: any) {
+  public sendPlayerHasLeft(socket: any): void {
     for (let e of this.sockets) {
       if (e.id !== socket.id) {
         e.emit("user_left", socket.playerNr);
+        console.log("'user_left' emitted to " + e.id + " Name " + e.name);
       }
     }
   }
@@ -203,12 +188,12 @@ export class GameBackend {
    * Latenzen nötig, damit nur eine Logik für die Teilnahme verantwortlich ist.
    * @param socket
    */
-  playerIsDead(socket: any) {
+  public playerIsDead(socket: any): void {
     for (let e of this.sockets) {
       if (e.id !== socket.id) {
         e.emit("passivePlayerGameOver", socket.playerNr);
         console.log(
-          "'passivePlayerGameOver' emitted\nt'-> To player " + socket.playerNr
+          "'passivePlayerGameOver' emitted to " + e.id + " Name " + e.name
         );
       }
     }

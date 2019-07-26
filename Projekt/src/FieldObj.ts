@@ -4,17 +4,7 @@ import { Fire } from "./Fire";
 import { AnimatedObject } from "./AnimatedObject";
 import { ActivePlayer } from "./Player";
 
-let imgBomb: any = new Image();
-imgBomb.src = "animations/bomb.png";
-imgBomb.onload = function() {
-  init();
-};
-
-function init() {
-  this.startAnimating(15);
-}
-
-export class Item {
+export class FieldObj {
   onFire: Fire = null;
   playerOn: Player[] = [];
   context: any;
@@ -23,12 +13,6 @@ export class Item {
 
   x: number;
   y: number;
-
-  spriteWidthBomb: number = 500;
-  spriteHeightBomb: number = 500;
-  cycleLoopBomb = [0, 1, 0, 1];
-  currentLoopIndex: number = 0;
-  frameCount : number = 0;
 
   constructor(
     context: any,
@@ -46,11 +30,30 @@ export class Item {
     this.SIZE_Y = ySize;
   }
 
+  /**
+   * @description
+   * draw this class
+   */
   draw() {}
-
+  /**
+   * @description
+   * update this class
+   */
   update() {}
+
+
+  /**
+   * @description
+   * react to explosions and fire events 
+   */
   setOnFire() {}
 
+
+  /**
+   * @description
+   * draw the FieldObj
+   * @param imageSource string Path to the image
+   */
   drawField(imageSource: string) {
     const x = this.x * this.SIZE_X;
     const y = this.y * this.SIZE_Y;
@@ -60,7 +63,14 @@ export class Item {
   }
 }
 
-export class Wall extends Item {
+
+
+
+
+
+
+
+export class Wall extends FieldObj {
   constructor(
     context: any,
     xPos: number,
@@ -76,12 +86,18 @@ export class Wall extends Item {
   }
 }
 
-export class Hallway extends Item {
+
+
+
+
+
+
+export class Hallway extends FieldObj {
   bombOnItem: Bomb = null;
   onFire: Fire = null;
   brickOnItem: Brick = null;
 
-  overlayingItem: Item[];
+  overlayingItem: FieldObj[];
 
   constructor(
     context: any,
@@ -141,6 +157,14 @@ export class Hallway extends Item {
   }
 }
 
+
+
+
+
+
+
+
+
 export class Hole extends Hallway {
   constructor(
     context: any,
@@ -154,10 +178,7 @@ export class Hole extends Hallway {
 
   draw() {
     this.drawField("tilesets/tileset1/hole.jpg");
-
-    // evtl. diese Methode in eine andere Methode schreiben mit der aus Hallway
     if (this.onFire !== null) {
-      this.onFire.update();
       this.onFire.drawFire();
     }
   }
@@ -169,21 +190,22 @@ export class Hole extends Hallway {
         e.setLose();
       }
     }
-  }
-
-  setOnFire() {
-    this.onFire = new Fire(
-      this.context,
-      this.x,
-      this.y,
-      this.SIZE_X,
-      this.SIZE_Y,
-      this
-    );
+    if (this.onFire !== null) {
+      this.onFire.update();
+    }
   }
 }
 
-export class Bomb extends Item {
+
+
+
+
+
+
+
+
+
+export class Bomb extends FieldObj {
   timeLeftToDrop: number;
   timeLeft: number;
   explode: boolean = false;
@@ -202,74 +224,14 @@ export class Bomb extends Item {
     this.timeLeft = 100;
     this.timeLeftToDrop = 10;
     this.placedOn = placed;
+    this.animatedObject = new AnimatedObject(this);
   }
 
   draw() {
-    //this.animatedObject.animateBomb();
-    
-    if (this.explode) {
-      const x = this.x * this.SIZE_X;
-      const y = this.y * this.SIZE_Y;
-
-      let time = 2; // Zeit für Bildwechsel in der Animation
-      if (this.frameCount <= 4 * time) {
-        if (this.frameCount % time === 0) {
-          this.currentLoopIndex++;
-          if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-            this.currentLoopIndex = 0;
-          }
-        }
-      } else {
-        this.frameCount = 0;
-      }
-      ++this.frameCount;
-
-      this.context.drawImage(
-        imgBomb,
-        0,
-        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
-        this.spriteWidthBomb,
-        this.spriteHeightBomb,
-        x - 10,
-        y - 10,
-        this.SIZE_X,
-        this.SIZE_Y
-      );
-    } else {
-      const x = this.x * this.SIZE_X;
-      const y = this.y * this.SIZE_Y;
-
-      let time = 2; // Zeit für Bildwechsel in der Animation
-      if (this.frameCount <= 4 * time) {
-        if (this.frameCount % time === 0) {
-          this.currentLoopIndex++;
-          if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-            this.currentLoopIndex = 0;
-          }
-        }
-      } else {
-        this.frameCount = 0;
-      }
-      ++this.frameCount;
-
-      this.context.drawImage(
-        imgBomb,
-        0,
-        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
-        this.spriteWidthBomb,
-        this.spriteHeightBomb,
-        x,
-        y,
-        this.SIZE_X,
-        this.SIZE_Y
-      );
-      this.currentLoopIndex++;
-      if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-        this.currentLoopIndex = 0;
-      }
-    }
+    this.animatedObject.animateBomb();
   }
 
+  
   update() {
     if (this.timeLeft < 0) {
       this.explode = true;

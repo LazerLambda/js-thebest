@@ -1,6 +1,7 @@
 import { Player } from "./Player";
 import { Explosion } from "./Explosion";
-import { Item, Bomb, Hallway, Hole } from "./Item";
+import { FieldObj, Bomb, Hallway, Hole } from "./FieldObj";
+import { Field } from "./Field";
 
 export class useableItem {
 defaultName : string = "Item 0"
@@ -148,7 +149,7 @@ class possibleLandingSpot {
     }
 }
 // Sprungfederfalle
-export class spring extends Item {
+export class spring extends FieldObj {
  PLS: possibleLandingSpot[] = [];
    
  getPossibleLandingSpots(){
@@ -172,7 +173,7 @@ export class spring extends Item {
                  var x = Math.floor(Math.random()*(this.PLS.length - 1));
                  var test : number = <number> this.PLS[x].x * <number> this.PLS[x].y * 8 ; // dynamisch machen
                  this.playerOn.forEach(e => {
-                    e.onItem = <Item> e.field.field[test];
+                    e.onItem = <FieldObj> e.field.field[test];
                  });
                  
             
