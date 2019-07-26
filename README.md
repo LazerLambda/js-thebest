@@ -2,7 +2,7 @@
 
 ## Installation 
  - Im Server Ordner : 
-   ```npm install && cd Projekt && npm install```
+   ```npm install && cd Projekt && npm install && cd ..```
    ausführen.
 
 ## Starten:
