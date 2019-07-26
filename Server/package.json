@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node ./dist/bundle.js"
+    "server": "./node_modules/.bin/ts-node src/index.ts ",
+    "buildClient": "cd Projekt/ && ./node_modules/.bin/webpack"
   },
   "author": "",
   "license": "ISC",
