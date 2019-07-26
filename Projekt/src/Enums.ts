@@ -30,4 +30,11 @@ export module Enums{
     export enum ActionBomb {
         DEFAULT_BOMB = 1
       }
+    
+    export enum PlayerSprite {
+      RUST = 1,
+      TUX = 2,
+      GOPHER = 3,
+      CLIPPY = 4
+    }
 }

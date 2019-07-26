@@ -39,6 +39,7 @@ export class Player {
   onItem: FieldObj = null;
   field: GameState = null;
 
+  currentDirection: number;
   //Animation
   loosingSequence: number = 0;
   animatedObject: AnimatedObject;

@@ -1,5 +1,7 @@
 import { Player } from "./Player";
 import { Bomb } from "./FieldObj";
+import { Fire } from "./Fire";
+import { Enums } from "./Enums";
 
 let imgGopher: any = new Image();
 imgGopher.src = "animations/gopher.png";
@@ -25,11 +27,15 @@ imgClippy.onload = function(){
   init();
 }
 
-
-
 let imgBomb: any = new Image();
 imgBomb.src = "animations/bomb.png";
 imgBomb.onload = function() {
+  init();
+};
+
+let imgFire: any = new Image();
+imgFire.src = "animations/fire.png";
+imgFire.onload = function() {
   init();
 };
 
@@ -42,56 +48,73 @@ export class AnimatedObject {
 
   context: CanvasRenderingContext2D;
 
+  state: Enums.PlayerSprite;
+
+
   spriteWidthPlayer: number = 100;
   spriteHeightPlayer: number = 100;
   cycleLoopPlayer = [0, 1, 0, 2];
-
+  playerSprite: any;
 
   spriteWidthBomb: number = 500;
   spriteHeightBomb: number = 500;
   cycleLoopBomb = [0, 1, 0, 1];
 
+  spriteWidthFire: number = 500;
+  spriteHeightFire: number = 500;
+  cycleLoopFire = [0, 1, 2, 3];
+
   currentLoopIndex: number = 0;
   frameCount: number = 0;
+
   player: Player;
   bomb: Bomb;
+  fire: Fire;
 
-  playerSprite: any;
+  constructor(object: any) {
+    if (object instanceof Player) {
+      this.player = object;
+    }
+    if (object instanceof Fire) {
+      this.fire = object;
+    }
+    if (object instanceof Bomb) {
+      this.bomb = object;
+    }
+  }
 
-
-  constructor(player: Player) {
-    this.player = player;
+  frameCounter(time: number) {
+    if (this.frameCount <= 4 * time) {
+      if (this.frameCount % time === 0) {
+        this.currentLoopIndex++;
+        if (this.currentLoopIndex >= this.cycleLoopFire.length) {
+          this.currentLoopIndex = 0;
+        }
+      }
+    } else {
+      this.frameCount = 0;
+    }
+    ++this.frameCount;
   }
 
   animatePlayer(spriteSheetNumber: number, canvasX: number, canvasY: number, playerNumber: number) {
     switch (playerNumber) {
-      case 1:
+      case Enums.PlayerSprite.RUST:
         this.playerSprite = imgRust;
         break;
-      case 2:
+      case Enums.PlayerSprite.TUX:
         this.playerSprite = imgTux;
         break;
-      case 3:
+      case Enums.PlayerSprite.GOPHER:
         this.playerSprite = imgGopher;
         break;
-      case 4:
+      case Enums.PlayerSprite.CLIPPY:
         this.playerSprite = imgClippy;
         break;
     }
 
     if (this.player.running) {
-      let time = 1; // Zeit für Bildwechsel in der Animation
-      if (this.frameCount <= 4 * time) {
-        if (this.frameCount % time === 0) {
-          this.currentLoopIndex++;
-          if (this.currentLoopIndex >= this.cycleLoopPlayer.length) {
-            this.currentLoopIndex = 0;
-          }
-        }
-      } else {
-        this.frameCount = 0;
-      }
-      ++this.frameCount;
+      this.frameCounter(1);
 
       this.player.context.drawImage(
         this.playerSprite,
@@ -117,49 +140,63 @@ export class AnimatedObject {
         this.player.field.ySize
       );
     }
-  };
+  }
+
+  animateBomb() {
+    const x = this.bomb.x * this.bomb.SIZE_X;
+    const y = this.bomb.y * this.bomb.SIZE_Y;
+
+    if (this.bomb.explode) {
+      this.frameCounter(2);
+   
+      this.bomb.context.drawImage(
+        imgBomb,
+        0,
+        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
+        this.spriteWidthBomb,
+        this.spriteHeightBomb,
+        x - 10,
+        y - 10,
+        this.bomb.SIZE_X,
+        this.bomb.SIZE_Y
+      );
+    } else {
+      this.frameCounter(2);
+   
+      this.bomb.context.drawImage(
+        imgBomb,
+        0,
+        this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
+        this.spriteWidthBomb,
+        this.spriteHeightBomb,
+        x,
+        y,
+        this.bomb.SIZE_X,
+        this.bomb.SIZE_Y
+        );
+      }
+   }
+
+   animateFire() {
+    const x = this.fire.xPos * this.fire.xSize;
+    const y = this.fire.yPos * this.fire.ySize;
+
+    this.frameCounter(4);
+
+    this.fire.context.drawImage(
+      imgFire,
+      0,
+      this.cycleLoopFire[this.currentLoopIndex] * this.spriteHeightFire,
+      this.spriteWidthFire,
+      this.spriteHeightFire,
+      x,
+      y,
+      this.fire.xSize,
+      this.fire.ySize
+    );
+   }
 }
 
-/*
-animateBomb() {
- if (this.bomb.explode) {
-   const x = this.bomb.x * this.bomb.SIZE_X;
-   const y = this.bomb.y * this.bomb.SIZE_Y;
 
-   this.context.drawImage(
-     imgBomb,
-     0,
-     this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
-     this.spriteWidthBomb,
-     this.spriteHeightBomb,
-     x - 10,
-     y - 10,
-     this.bomb.SIZE_X,
-     this.bomb.SIZE_Y
-   );
-   this.currentLoopIndex++;
-   if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-     this.currentLoopIndex = 0;
-   }
- } else {
-   const x = this.bomb.x * this.bomb.SIZE_X;
-   const y = this.bomb.y * this.bomb.SIZE_Y;
 
-   this.context.drawImage(
-     imgBomb,
-     0,
-     this.cycleLoopBomb[this.currentLoopIndex] * this.spriteHeightBomb,
-     this.spriteWidthBomb,
-     this.spriteHeightBomb,
-     x,
-     y,
-     this.bomb.SIZE_X,
-     this.bomb.SIZE_Y
-     );
-   this.currentLoopIndex++;
-   if (this.currentLoopIndex >= this.cycleLoopBomb.length) {
-     this.currentLoopIndex = 0;
-   }
- }
-}
-*/
+
