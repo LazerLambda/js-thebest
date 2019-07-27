@@ -4,73 +4,106 @@ import { GameState } from "./GameState";
 import { Game } from "./Game";
 import { Consts } from "./Consts";
 
+enum fieldType {
+  HALLWAY = 0,
+  WALL = 1,
+  HOLE = 2,
+  BRICK = 3,
+  STARTPOSITION = 4,
+  CONNECTION = 5
+}
+
+enum serverState {
+  SELECTION = 0,
+  ROOM_WAIT = 1,
+  DESIGN = 2,
+  FIELD_WAIT = 3,
+  GAME = 4,
+  GAMEOVER = 5,
+  WINNER = 6
+}
+
 export class Editor {
-  canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-  gameState: GameState;
-  menuWidth: number = 300;
-  fields: number[][];
-  tileset: HTMLImageElement[];
-  value: string;
-  item: number;
-  boardHeight: number = 9;
-  boardWidth: number = 9;
-  tileSquareLen: number = 60;
-  mapPixelHeight: number = this.boardHeight * this.tileSquareLen;
-  mapPixelWidth: number = this.boardWidth * this.tileSquareLen;
-  customArea: CustomArea;
+  gameState: GameState
+
+  canvas: HTMLCanvasElement
+  context: CanvasRenderingContext2D
+  menuWidth: number = 300
+  menuButtonWidth = this.menuWidth/2
+  mapPixelWidth: number
+  mapPixelHeight: number
+  tileWidth: number
+  tileHeight:number
+  fields: number[][]
+  boardHeight: number = 13
+  boardWidth: number = 19
+  tileset: HTMLImageElement[]
+  value: string
+  item: number
+
   mapCenter = {
-    pixelY: Math.floor(this.boardHeight / 2) * this.tileSquareLen,
-    pixelX: Math.floor(this.boardWidth / 2) * this.tileSquareLen,
+    pixelX: 0,
+    pixelY: 0,
     fieldY: 0,
     fieldX: 0
   };
   startPosition = { y: 0, x: 0 };
+
   enemyAreas: EnemyArea[];
+  customArea: CustomArea;
+  editMenu: MenuElement[];
+  fieldMenu:MenuElement[];
+
   playerNr: number;
-  menuElements: MenuElement[];
   alreadyVisited: { y: number; x: number }[];
+  tileImagesLoaded:boolean = false
+  mapInputTextfield:HTMLInputElement
 
   constructor(gameState: GameState) {
-    this.gameState = gameState;
-    this.startPosition.y = undefined;
-    this.startPosition.x = undefined;
 
-    const canvas = <HTMLCanvasElement>document.getElementById("background");
-    this.canvas = canvas;
-    const context = canvas.getContext("2d");
-    this.context = context;
+    this.gameState = gameState
+    this.startPosition.y = undefined
+    this.startPosition.x = undefined
 
-    this.canvas.height = this.mapPixelHeight;
-    this.canvas.width = this.mapPixelWidth + this.menuWidth;
+    const canvas = <HTMLCanvasElement>document.getElementById("background")
+    this.canvas = canvas
+    const context = canvas.getContext("2d")
+    this.context = context
+    this.context.strokeRect(0, 0, this.canvas.width, this.canvas.height)
+
+    this.mapPixelWidth  = this.canvas.width - this.menuWidth
+    this.mapPixelHeight = this.canvas.height
+
+    this.tileWidth  = this.mapPixelWidth / this.boardWidth
+    this.tileHeight = this.canvas.height / this.boardHeight
+
     this.playerNr = gameState.clientId;
-    const x: number = Math.ceil(this.boardWidth / 2) * this.tileSquareLen;
+    this.playerNr = 0
     const topLeftCorners: { x: number; y: number }[] = [
-      { y: 0, x: 0 },
-      { y: 0, x: Math.ceil(this.boardWidth / 2) * this.tileSquareLen },
+      { x: 0,  y: 0},
+      { x: Math.ceil(this.boardWidth / 2) * this.tileWidth, y: 0 },
       {
-        y: Math.ceil(this.boardHeight / 2) * this.tileSquareLen,
-        x: Math.floor(this.boardWidth / 2) * this.tileSquareLen
+        x: Math.floor(this.boardWidth / 2) * this.tileWidth,
+        y: Math.ceil(this.boardHeight / 2) * this.tileHeight
       },
-      { y: Math.floor(this.boardHeight / 2) * this.tileSquareLen, x: 0 }
+      { x: 0, y: Math.floor(this.boardHeight / 2) * this.tileHeight }
     ];
-
-    const dimensions: { y: number; x: number }[] = [
+    const dimensions: { x: number, y: number }[] = [
       {
-        y: Math.floor(this.boardHeight / 2) * this.tileSquareLen,
-        x: Math.ceil(this.boardWidth / 2) * this.tileSquareLen
+        x: Math.ceil(this.boardWidth / 2) * this.tileWidth,
+        y: Math.floor(this.boardHeight / 2) * this.tileHeight
       },
       {
-        y: Math.ceil(this.boardHeight / 2) * this.tileSquareLen,
-        x: Math.floor(this.boardWidth / 2) * this.tileSquareLen
+        x: Math.floor(this.boardWidth / 2) * this.tileWidth,
+        y: Math.ceil(this.boardHeight / 2) * this.tileHeight
       },
       {
-        y: Math.floor(this.boardHeight / 2) * this.tileSquareLen,
-        x: Math.ceil(this.boardWidth / 2) * this.tileSquareLen
+        x: Math.ceil(this.boardWidth / 2) * this.tileWidth,
+        y: Math.floor(this.boardHeight / 2) * this.tileHeight
       },
       {
-        y: Math.ceil(this.boardHeight / 2) * this.tileSquareLen,
-        x: Math.floor(this.boardWidth / 2) * this.tileSquareLen
+        x: Math.floor(this.boardWidth / 2) * this.tileWidth,
+        y: Math.ceil(this.boardHeight / 2) * this.tileHeight
       }
     ];
 
@@ -79,66 +112,59 @@ export class Editor {
     for (let p = 0; p < 4; p++) {
       if (p == this.playerNr)
         this.customArea = new CustomArea(
-          topLeftCorners[p].y,
           topLeftCorners[p].x,
+          topLeftCorners[p].y,
+          dimensions[p].x,
           dimensions[p].y,
-          dimensions[p].x
+          this.tileWidth,
+          this.tileHeight
         );
       else
         this.enemyAreas.push(
           new EnemyArea(
-            topLeftCorners[p].y,
             topLeftCorners[p].x,
-            dimensions[p].y,
-            dimensions[p].x
+            topLeftCorners[p].y,
+            dimensions[p].x,
+            dimensions[p].y
           )
         );
     }
-    this.mapCenter.fieldY =
-      Math.floor(this.boardHeight / 2) - this.customArea.topLeftFieldY;
-    this.mapCenter.fieldX =
-      Math.floor(this.boardWidth / 2) - this.customArea.topLeftFieldX;
+    this.mapCenter.pixelX = Math.floor(this.boardWidth  / 2) * this.tileWidth
+    this.mapCenter.pixelY = Math.floor(this.boardHeight / 2) * this.tileHeight
+    this.mapCenter.fieldY = Math.floor(this.boardHeight / 2) - this.customArea.topLeftFieldY;
+    this.mapCenter.fieldX = Math.floor(this.boardWidth / 2)  - this.customArea.topLeftFieldX;
 
     this.fields = new Array<Array<number>>();
     for (let y = 0; y < this.customArea.boardHeight; y++) {
       let row_y = new Array<number>();
       for (let x = 0; x < this.customArea.boardWidth; x++) {
-        row_y[x] = Enums.fieldType.WALL;
+        row_y[x] = fieldType.WALL;
       }
       this.fields[y] = row_y;
     }
 
     this.tileset = new Array<HTMLImageElement>();
     this.changeTileset("tileset1");
-    this.item = Enums.fieldType.BRICK;
+    this.item = fieldType.BRICK;
 
-    for (let y = 1; y < this.boardHeight; y++) {
-      this.drawLine(
-        y * this.tileSquareLen,
-        0,
-        y * this.tileSquareLen,
-        this.mapPixelWidth
-      );
-    }
     for (let x = 1; x < this.boardWidth; x++) {
       this.drawLine(
+        x * this.tileWidth,
         0,
-        x * this.tileSquareLen,
-        this.mapPixelHeight,
-        x * this.tileSquareLen
+        x * this.tileWidth,
+        this.mapPixelHeight
       );
     }
+    for (let y = 1; y < this.boardHeight; y++) {
+      this.drawLine(
+        0,
+        y * this.tileHeight,
+        this.mapPixelWidth,
+        y * this.tileHeight
+      );
+      }    
 
-    let inputMap = document.createElement("textarea");
-    inputMap.setAttribute("id", "inputMap");
-    document.body.append(inputMap);
-    const saveIcon = new Image(300, 300);
-    saveIcon.src = "images/savemapicon.jpg";
-    const loadIcon = new Image(300, 300);
-    loadIcon.src = "images/loadmapicon.jpg";
-    const checkPathIcon = new Image(300, 150);
-    checkPathIcon.src = "images/checkpathicon.jpg";
-    this.menuElements = [
+/*    this.menuElements = [
       new MenuElement(
         this.mapPixelWidth,
         0,
@@ -220,14 +246,16 @@ export class Editor {
         checkPathIcon
       )
     ];
+*/
 
     this.canvas.addEventListener("click", this.canvasClick.bind(this));
+    this.drawCanvas()
   }
 
-  drawLine(yStart: number, xStart: number, yEnd: number, xEnd: number) {
+  drawLine(xStart: number, yStart: number, xEnd: number, yEnd: number) {
     this.context.beginPath();
-    this.context.moveTo(yStart, xStart);
-    this.context.lineTo(yEnd, xEnd);
+    this.context.moveTo(xStart, yStart);
+    this.context.lineTo(xEnd, yEnd);
     this.context.stroke();
   }
 
@@ -242,29 +270,13 @@ export class Editor {
     return false;
   }
 
-  rectangleContains(
-    y: number,
-    x: number,
-    topLeftY: number,
-    topLeftX: number,
-    height: number,
-    width: number
-  ) {
-    return (
-      y > topLeftY &&
-      x > topLeftX &&
-      y < topLeftX + height &&
-      x < topLeftY + width
-    );
-  }
-
   drawFixedTiles() {
     this.context.drawImage(
-      this.tileset[Enums.fieldType.CONNECTION],
+      this.tileset[fieldType.CONNECTION],
       this.mapCenter.pixelX,
       this.mapCenter.pixelY,
-      this.tileSquareLen,
-      this.tileSquareLen
+      this.tileWidth,
+      this.tileHeight
     );
   }
 
@@ -295,51 +307,134 @@ export class Editor {
       for (let x = 0; x < this.customArea.boardWidth; x++) {
         this.context.drawImage(
           this.tileset[this.fields[y][x]],
-          this.customArea.topLeftPixelX + x * this.tileSquareLen,
-          this.customArea.topLeftPixelY + y * this.tileSquareLen,
-          this.tileSquareLen,
-          this.tileSquareLen
+          this.customArea.topLeftPixelX + x * this.tileWidth,
+          this.customArea.topLeftPixelY + y * this.tileHeight,
+          this.tileWidth,
+          this.tileHeight
+          );
+      }
+    }
+  }
+/*
+  createEditMenu(iconImages:HTMLImageElement[]) {
+    function buttonCheckPath() {
+      this.alreadyVisited = new Array()
+      if (this.startCheckingPath())
+        console.log("Path ok");
+      else 
+        console.log("Not ok");
+    }
+
+    function ready() {
+      this.gameState.socket.emit("proposedField", this.fields)
+    }
+
+    let editMenuFunctions = [
+      this.saveMap.bind(this),
+      this.loadMap(this.mapInputTextfield.value),
+      buttonCheckPath,
+      ready
+    ]
+    
+    {
+      let col = 0
+      let row = 0
+      for (let i = 0; i < this.tileset.length; i++) {
+        let itemNumber = i
+        this.editMenu[i] = new MenuElement(
+          row*this.menuButtonWidth + col *this.menuButtonWidth,
+          i*this.menuButtonWidth,
+          this.menuButtonWidth,
+          this.menuButtonWidth,
+          editMenuFunctions[i],
+          iconImages[i]
+        )
+        col = col - 2 * col + 1 // Flip {0,1}
+        row += col
+      }
+    }
+
+  }*/
+/*
+  loadIcons() {
+    const menuIconPaths = [
+      "images/savemapicon.png",
+      "images/loadmapicon.png",
+      "images/checkpathicon.png",
+    ]
+    let iconImages:HTMLImageElement[]
+    let count = 0
+    for (let i = 0; i < menuIconPaths.length; i++) {
+      let img = new Image(this.menuButtonWidth, this.menuButtonWidth);
+      img.onload = function() {
+        ++count;
+        if (count >= menuIconPaths.length) {
+          this.createEditMenuElements(iconImages);
+          console.log("here")
+        }
+      }.bind(this);
+      img.src = menuIconPaths[i];
+      iconImages[i] = img;
+    }
+  }
+*/
+  drawCanvas() {
+    this.drawEnemyAreas();
+    this.drawEditableMap();
+    this.drawFieldMenu(this.tileset);
+    this.drawFixedTiles();
+  }
+
+waitForImages(paths:string[], destination:HTMLImageElement[]) {
+	let count = 0
+	for (let i = 0; i < paths.length; i++) {
+		let img = new Image(this.tileWidth, this.tileHeight)
+		img.onload = function() {
+			++count;
+			if (count >= paths.length) {
+        this.drawEditableMap(this.tileset)
+        this.drawFieldMenu(this.tileset)
+			}
+		}.bind(this);
+		img.src = paths[i];
+		destination[i] = img;
+	}
+}
+
+  drawFieldMenu(tileset:HTMLImageElement[]) {
+    {
+      let col = 0
+      let row = 0
+      for (let i = 0; i < tileset.length; i++) {
+        let itemNumber = i
+        this.fieldMenu[i] = new MenuElement(
+          this.mapPixelWidth + col *this.menuButtonWidth,
+          row*this.menuButtonWidth,
+          this.menuButtonWidth,
+          this.menuButtonWidth,
+          () => { this.item = itemNumber },
+          this.tileset[i]
+        )
+        col = col - 2 * col + 1 // Flip {0,1}
+        row += col
+        console.log("fm "+this.fieldMenu[i])
+      }
+    }
+    for (let i = 0; i < this.fieldMenu.length; i++) {
+      let canvas = <HTMLCanvasElement>document.getElementById("background");
+      let context = canvas.getContext("2d");
+      for (let i = 0; i < this.fieldMenu.length; i++) {
+        context.drawImage(
+          this.fieldMenu[i].pic,
+          this.fieldMenu[i].x,
+          this.fieldMenu[i].y,
+          this.fieldMenu[i].height,
+          this.fieldMenu[i].width
         );
       }
     }
   }
-
-  drawMenu() {
-    let canvas = <HTMLCanvasElement>document.getElementById("background");
-    let context = canvas.getContext("2d");
-    for (let i = 0; i < this.menuElements.length; i++) {
-      context.drawImage(
-        this.menuElements[i].pic,
-        this.menuElements[i].x,
-        this.menuElements[i].y,
-        this.menuElements[i].height,
-        this.menuElements[i].width
-      );
-    }
-  }
-
-  drawCanvas() {
-    this.drawEnemyAreas();
-    this.drawEditableMap();
-    this.drawMenu();
-    this.drawFixedTiles();
-  }
-  /*
-waitForImages(paths:string[]) {
-	let count = 0
-	for (let i = 0; i < paths.length; i++) {
-		let img = new Image(this.tileSquareLen, this.tileSquareLen);
-		img.onload = function() {
-			++count;
-			if (count >= paths.length) {
-				this.drawCanvas();
-			}
-		}.bind(this);
-		img.src = paths[i];
-		this.tileset[i] = img;
-	}
-}
-*/
+//this.gameState.socket.emit("proposedField", field)
   changeTileset(path: string) {
     let count = 0;
     const paths = [
@@ -350,25 +445,11 @@ waitForImages(paths:string[]) {
       "tilesets/" + path + "/startposition.jpg",
       "tilesets/" + path + "/connection.jpg"
     ];
-
-    //	this.waitForImages(paths)
-    for (let i = 0; i < paths.length; i++) {
-      let img = new Image(this.tileSquareLen, this.tileSquareLen);
-      img.onload = function() {
-        ++count;
-        if (count >= paths.length) {
-          this.drawCanvas();
-        }
-      }.bind(this);
-      img.src = paths[i];
-      this.tileset[i] = img;
-    }
+    this.waitForImages(paths, this.tileset)
   }
 
   canvasClick(event: MouseEvent) {
-    console.log(this.gameState.state);
-    if (this.gameState.state === Enums.serverState.DESIGN) {
-      this.drawCanvas();
+    if (this.gameState.state === serverState.DESIGN) {
       let xPixel: number = event.layerX - this.canvas.offsetLeft;
       let yPixel: number = event.layerY - this.canvas.offsetTop;
       if (xPixel < this.mapPixelWidth) {
@@ -376,46 +457,42 @@ waitForImages(paths:string[]) {
         xPixel -= this.customArea.topLeftPixelX;
         yPixel -= this.customArea.topLeftPixelY;
       }
-
       if (
         xPixel > 0 &&
         yPixel > 0 &&
         xPixel < this.customArea.pixelWidth &&
         yPixel < this.customArea.pixelHeight
       ) {
-        let row: number = Math.floor(yPixel / this.tileSquareLen);
-        let col: number = Math.floor(xPixel / this.tileSquareLen);
-        if (this.fields[row][col] == Enums.fieldType.STARTPOSITION) {
+        let row: number = Math.floor(yPixel / this.tileHeight);
+        let col: number = Math.floor(xPixel / this.tileWidth);
+        if (this.fields[row][col] == fieldType.STARTPOSITION) {
           this.startPosition.x = undefined;
           this.startPosition.y = undefined;
         }
         this.fields[row][col] = this.item;
         this.context.drawImage(
           this.tileset[this.item],
-          this.customArea.topLeftPixelX + col * this.tileSquareLen,
-          this.customArea.topLeftPixelY + row * this.tileSquareLen,
-          this.tileSquareLen,
-          this.tileSquareLen
+          this.customArea.topLeftPixelX + col * this.tileWidth,
+          this.customArea.topLeftPixelY + row * this.tileHeight,
+          this.tileWidth,
+          this.tileHeight
         );
-        if (this.item == Enums.fieldType.STARTPOSITION) {
+        if (this.item == fieldType.STARTPOSITION) {
           if (this.startPosition.y != undefined)
-            this.fields[this.startPosition.y][this.startPosition.x] =
-              Enums.fieldType.HALLWAY;
+            this.fields[this.startPosition.y][this.startPosition.x] = fieldType.HALLWAY;
           this.context.drawImage(
-            this.tileset[Enums.fieldType.HALLWAY],
-            this.customArea.topLeftPixelX +
-              this.startPosition.x * this.tileSquareLen,
-            this.customArea.topLeftPixelY +
-              this.startPosition.y * this.tileSquareLen,
-            this.tileSquareLen,
-            this.tileSquareLen
+            this.tileset[fieldType.HALLWAY],
+            this.customArea.topLeftPixelX + this.startPosition.x * this.tileWidth,
+            this.customArea.topLeftPixelY + this.startPosition.y * this.tileHeight,
+            this.tileWidth,
+            this.tileHeight
           );
           this.startPosition.y = row;
           this.startPosition.x = col;
         }
       }
       if (xPixel > this.mapPixelWidth)
-        this.getClickedMenuElement(this.menuElements, yPixel, xPixel).f();
+        this.getClickedMenuElement(this.fieldMenu, yPixel, xPixel).f();
     }
   }
 
@@ -458,28 +535,28 @@ waitForImages(paths:string[]) {
       console.log("av" + this.alreadyVisited);
       if (y - 1 > 0)
         if (
-          this.fields[y - 1][x] === Enums.fieldType.HALLWAY &&
+          this.fields[y - 1][x] === fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y - 1, x: x })
         ) {
           this.checkPath(y - 1, x);
         }
       if (x + 1 < this.customArea.boardWidth)
         if (
-          this.fields[y][x + 1] === Enums.fieldType.HALLWAY &&
+          this.fields[y][x + 1] === fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y, x: x + 1 })
         ) {
           this.checkPath(y, x + 1);
         }
       if (y + 1 > this.customArea.boardHeight)
         if (
-          this.fields[y + 1][x] === Enums.fieldType.HALLWAY &&
+          this.fields[y + 1][x] === fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y, x: x + 1 })
         ) {
           this.checkPath(y + 1, x);
         }
       if (x - 1 > 0)
         if (
-          this.fields[y][x - 1] === Enums.fieldType.HALLWAY &&
+          this.fields[y][x - 1] === fieldType.HALLWAY &&
           !this.arrayContains(this.alreadyVisited, { y: y, x: x - 1 })
         ) {
           this.checkPath(y, x - 1);
@@ -553,7 +630,7 @@ waitForImages(paths:string[]) {
       function() {
         this.drawEditor();
       }.bind(this),
-      1000 * (Consts.TIMEOUT_LENGTH - 3)
+      100000 * 1
     ); // Konstante abhängig vom Timeout am Server
   }
 

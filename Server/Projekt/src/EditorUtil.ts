@@ -17,16 +17,16 @@ export class MenuElement {
 
 export class EnemyArea {
 
-	topLeftPixelY:number
 	topLeftPixelX:number
-	pixelHeight:number
+	topLeftPixelY:number
 	pixelWidth:number
+	pixelHeight:number
 
-	constructor(topLeftPixelY:number, topLeftPixelX:number, pixelHeight:number, pixelWidth:number) {
-		this.topLeftPixelY = topLeftPixelY
+	constructor(topLeftPixelX:number, topLeftPixelY:number, pixelWidth:number, pixelHeight:number) {
 		this.topLeftPixelX = topLeftPixelX
-		this.pixelHeight = pixelHeight
+		this.topLeftPixelY = topLeftPixelY
 		this.pixelWidth = pixelWidth
+		this.pixelHeight = pixelHeight
 	}
 }
 
@@ -37,11 +37,11 @@ export class CustomArea extends EnemyArea {
 	boardHeight:number
 	boardWidth:number
 
-	constructor(topLeftPixelY:number, topLeftPixelX:number, pixelHeight:number, pixelWidth:number) {
-		super(topLeftPixelY, topLeftPixelX, pixelHeight, pixelWidth)
-		this.topLeftFieldY = topLeftPixelY/60
-		this.topLeftFieldX = topLeftPixelX/60
-		this.boardHeight   = pixelHeight/60
-		this.boardWidth    = pixelWidth/60
+	constructor(topLeftPixelX:number, topLeftPixelY:number, pixelWidth:number, pixelHeight:number, tileWidth:number, tileHeight:number) {
+		super(topLeftPixelX, topLeftPixelY, pixelWidth, pixelHeight)
+		this.topLeftFieldY = topLeftPixelY/tileHeight
+		this.topLeftFieldX = topLeftPixelX/tileWidth
+		this.boardHeight   = pixelHeight/tileHeight
+		this.boardWidth    = pixelWidth/tileWidth
 	}
 }
