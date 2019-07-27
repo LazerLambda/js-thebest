@@ -1,22 +1,24 @@
 import { Brick } from "../Brick";
-import {Consts } from "../Consts";
+import { Consts } from "../Consts";
 import { Player, ActivePlayer, PassivePlayer } from "../Player";
+//import { Nuke} from "../UsableItems";
 import { Enums } from "../Enums";
 import { Explosion } from "../Explosion";
 import { GameState } from "../GameState";
-import { Hallway, Hole, Wall } from "../FieldObj";
+import { Hallway, Hole, Wall, Bomb, Nuke_Bomb } from "../FieldObj";
 import { UserHasLeft } from "./UserHasLeft";
 import { Winner } from "./Winner";
+import { UseableItem, Nuke } from "../UseableItems";
 
 export class Game {
   //consts
   ARRAY_CONST: number = 8;
   // states
   gameState: GameState = null;
+  eventQueue: object[] = [];
 
   constructor(gameState: GameState) {
     this.gameState = gameState;
-
 
     // initialize protocol events
 
@@ -83,7 +85,7 @@ export class Game {
             }
           }
         }
-        
+
         for (let i = 1; i <= Consts.MAX_PLAYERS; i++) {
           var player = data["player_" + i];
           var x: number = <number>player["startpos"]["x"];
@@ -118,7 +120,7 @@ export class Game {
             this.gameState.update();
             this.gameState.draw();
           }
-          
+
           this.gameState.state = Enums.serverState.GAME;
         }
         this.gameState.updateGameInfos();
@@ -128,7 +130,7 @@ export class Game {
     this.gameState.socket.on(
       "event",
       function(data: any) {
-        this.gameState.eventQueue.push(data);
+        this.eventQueue.push(data);
       }.bind(this)
     );
 
@@ -165,18 +167,47 @@ export class Game {
 
   /**
    * @description
-   * Procedure for updating the game Not only significant during the game, 
+   * Procedure for updating the game Not only significant during the game,
    * but also during the gameover or winning sequence.
    */
   public updateGame(): void {
+
+
+
+    if (this.gameState.activePlayer.inventory !== undefined) {
+      var random: number = Math.floor(
+        Math.random() * 100 * Consts.RANDOM_FACTOR
+      );
+
+      // new Items for the Player's Inventory, invisible for other Players
+      var inv = this.gameState.activePlayer.inventory;
+      if (random % Consts.RANDOM_MODULO === 0 && inv === null) {
+        this.gameState.activePlayer.inventory = new Nuke(this.gameState);
+      }
+    }
+
+    // Handle Objects on this specific Item
     for (let i = 0; i < this.gameState.items.length; i++) {
       if (this.gameState.items[i] instanceof Hallway) {
         var tmpItem = <Hallway>this.gameState.items[i];
         if (tmpItem.bombOnItem !== null) {
-          if (tmpItem.bombOnItem.explode) {
-            this.gameState.explosions.push(
-              new Explosion(tmpItem, this.gameState, 3)
-            );
+          
+          // this has to be checked before Bomb
+          if (tmpItem.bombOnItem instanceof Nuke_Bomb) {
+            if (tmpItem.bombOnItem.explode) {
+              this.gameState.explosions.push(
+                new Explosion(tmpItem, this.gameState, Consts.NUKE_RAD)
+              );
+            }
+            
+          }
+
+          if (tmpItem.bombOnItem instanceof Bomb) {
+            if (tmpItem.bombOnItem.explode) {
+              this.gameState.explosions.push(
+                new Explosion(tmpItem, this.gameState, Consts.BOMB_RAD)
+              );
+            }
           }
         }
       }
@@ -193,7 +224,7 @@ export class Game {
     // check if  still players alive
     var winner = true;
     for (let elem of this.gameState.passivePlayers) {
-      this.gameState.handleNetworkInput();
+      this.handleNetworkInput();
       winner = !elem.alive && winner;
       elem.updatePlayer();
     }
@@ -232,6 +263,45 @@ export class Game {
 
     if (this.gameState.activePlayer !== null) {
       this.gameState.activePlayer.drawPlayer();
+    }
+  }
+
+  /**
+   * @description
+   * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
+   */
+  public handleNetworkInput(): void {
+    if (this.eventQueue.length > 0) {
+      var evObject: any = this.eventQueue[0];
+      var playerNrTmp = <number>evObject["playerId"];
+      var event = <string>evObject["event"];
+      var action = <number>evObject["action"];
+
+      for (let e of this.gameState.passivePlayers) {
+        if (e.playerNr === playerNrTmp) {
+          if (e.transitionLock) {
+            switch (event) {
+              case Enums.Event.DROP:
+                if (action === Enums.ActionBomb.DEFAULT_BOMB) {
+                  e.placeBomb();
+                }
+                if (action === Enums.ActionBomb.NUKE) {
+                  e.placeNuke_Bomb();
+                }
+                this.eventQueue.pop();
+                break;
+              case Enums.Event.MOVE:
+                e.setTarget(action);
+
+                this.eventQueue.pop();
+
+                break;
+            }
+          }
+        }
+      }
+    } else {
+      return;
     }
   }
 }

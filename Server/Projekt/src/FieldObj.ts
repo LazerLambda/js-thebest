@@ -2,6 +2,7 @@ import { Player } from "./Player";
 import { Brick } from "./Brick";
 import { Fire } from "./Fire";
 import { AnimatedObject } from "./AnimatedObject";
+// import { Bomb } from "./UsableItems";
 import { ActivePlayer } from "./Player";
 
 export class FieldObj {
@@ -64,8 +65,103 @@ export class FieldObj {
 }
 
 
+export class Bomb extends FieldObj {
+  timeLeftToDrop: number;
+  timeLeft: number;
+  explode: boolean = false;
+  placedOn: Hallway;
+  animatedObject: AnimatedObject;
 
+  constructor(
+    context: CanvasRenderingContext2D,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number,
+    placed: Hallway
+  ) {
+    super(context, xPos, yPos, xSize, ySize);
+    this.timeLeft = 100;
+    this.timeLeftToDrop = 10;
+    this.placedOn = placed;
+    this.animatedObject = new AnimatedObject(this);
+  }
 
+  draw() {
+    this.animatedObject.animateBomb();
+  }
+
+  
+  update() {
+    if (this.timeLeft < 0) {
+      this.explode = true;
+      if (this.timeLeftToDrop < 0) {
+        this.placedOn.bombOnItem = null;
+        this.placedOn.onFire = new Fire(
+          this.context,
+          this.x,
+          this.y,
+          this.SIZE_X,
+          this.SIZE_Y,
+          this.placedOn
+        );
+      } else {
+        --this.timeLeftToDrop;
+      }
+    } else {
+      --this.timeLeft;
+    }
+  }
+}
+
+export class Nuke_Bomb extends Bomb {
+  timeLeftToDrop: number;
+  timeLeft: number;
+  explode: boolean = false;
+  placedOn: Hallway;
+  animatedObject: AnimatedObject;
+
+  constructor(
+    context: CanvasRenderingContext2D,
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number,
+    placed: Hallway
+  ) {
+    super(context, xPos, yPos, xSize, ySize, placed);
+    this.timeLeft = 100;
+    this.timeLeftToDrop = 10;
+    this.placedOn = placed;
+    this.animatedObject = new AnimatedObject(this);
+  }
+
+  draw() {
+    this.animatedObject.animateBomb();
+  }
+
+  
+  update() {
+    if (this.timeLeft < 0) {
+      this.explode = true;
+      if (this.timeLeftToDrop < 0) {
+        this.placedOn.bombOnItem = null;
+        this.placedOn.onFire = new Fire(
+          this.context,
+          this.x,
+          this.y,
+          this.SIZE_X,
+          this.SIZE_Y,
+          this.placedOn
+        );
+      } else {
+        --this.timeLeftToDrop;
+      }
+    } else {
+      --this.timeLeft;
+    }
+  }
+}
 
 
 
@@ -203,53 +299,3 @@ export class Hole extends Hallway {
 
 
 
-
-
-export class Bomb extends FieldObj {
-  timeLeftToDrop: number;
-  timeLeft: number;
-  explode: boolean = false;
-  placedOn: Hallway;
-  animatedObject: AnimatedObject;
-
-  constructor(
-    context: CanvasRenderingContext2D,
-    xPos: number,
-    yPos: number,
-    xSize: number,
-    ySize: number,
-    placed: Hallway
-  ) {
-    super(context, xPos, yPos, xSize, ySize);
-    this.timeLeft = 100;
-    this.timeLeftToDrop = 10;
-    this.placedOn = placed;
-    this.animatedObject = new AnimatedObject(this);
-  }
-
-  draw() {
-    this.animatedObject.animateBomb();
-  }
-
-  
-  update() {
-    if (this.timeLeft < 0) {
-      this.explode = true;
-      if (this.timeLeftToDrop < 0) {
-        this.placedOn.bombOnItem = null;
-        this.placedOn.onFire = new Fire(
-          this.context,
-          this.x,
-          this.y,
-          this.SIZE_X,
-          this.SIZE_Y,
-          this.placedOn
-        );
-      } else {
-        --this.timeLeftToDrop;
-      }
-    } else {
-      --this.timeLeft;
-    }
-  }
-}

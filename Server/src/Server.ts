@@ -31,6 +31,13 @@ export class Server {
     let http = require("http").Server(app);
     let io = require("socket.io")(http);
 
+
+    // Remote Shutdown 
+    app.get("/shutdownServer", (req: any, res: any) => {
+      process.exit(0);
+    });
+    
+    // Default Routing
     app.get("/", (req: any, res: any) => {
       res.sendFile(path.resolve("./Projekt/dist/index.html"));
     });
