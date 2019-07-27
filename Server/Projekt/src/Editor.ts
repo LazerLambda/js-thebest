@@ -29,7 +29,7 @@ export class Editor {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
   menuWidth: number = 300
-  menuButtonWidth = this.menuWidth/2
+  menuButtonWidth = this.menuWidth/4
   mapPixelWidth: number
   mapPixelHeight: number
   tileWidth: number
@@ -61,6 +61,14 @@ export class Editor {
 
   constructor(gameState: GameState) {
 
+    let x = new Image(50,50)
+
+    let y = new MenuElement(
+      0,0,50,50,()=>{console.log("xxx")}, x 
+    )
+    
+
+    console.log(y)
     this.gameState = gameState
     this.startPosition.y = undefined
     this.startPosition.x = undefined
@@ -402,7 +410,6 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
 }
 
   drawFieldMenu() {
-    let fieldMenu = new Array<MenuElement>()
 
       let col = 0
       let row = 0
@@ -416,27 +423,19 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
           () => { this.item = itemNumber },
           this.tileset[i]
         )
-        fieldMenu.push(fM)
-        col = col - 2 * col + 1 // Flip {0,1}
-        row += col
-
-      }
-
-        console.log(fieldMenu)
-
-    for (let i = 0; i < this.fieldMenu.length; i++) {
-      let canvas = <HTMLCanvasElement>document.getElementById("background");
-      let context = canvas.getContext("2d");
-      for (let i = 0; i < this.fieldMenu.length; i++) {
-        context.drawImage(
-          this.fieldMenu[i].pic,
-          this.fieldMenu[i].x,
-          this.fieldMenu[i].y,
-          this.fieldMenu[i].width,
-          this.fieldMenu[i].height
+        this.context.drawImage(
+          fM.pic,
+          fM.x,
+          fM.y,
+          fM.width,
+          fM.height
         );
-      }
-    }
+        if (col == 4) {
+          col = 0
+          row++
+        }
+
+        }
     
   }
 //this.gameState.socket.emit("proposedField", field)
