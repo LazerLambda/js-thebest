@@ -42,14 +42,7 @@ function combineMaps(map0, map1, map2, map3) {
     }
 
 	fullMap[mapCenterY][mapCenterX] = 5
-/*
-    for (let y = 0; y < 3; y++) {
-        let row_y = new Array
-        for (let x = 0; x < 2; x++) {
-			row_y[x] = 1
-		}
-	}
-*/
+
     for (let y = 0; y < map0Height; y++) {
         let row_y = map0[y]
 		for (let x = 0; x < map0Width; x++) {
