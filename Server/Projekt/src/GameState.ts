@@ -12,6 +12,7 @@ import { Winner } from "./states/Winner";
 
 import * as io from "socket.io-client";
 import { FieldObj } from "./FieldObj";
+import { UseableItem } from "./UseableItems";
 
 export class GameState {
   // dynamic assigned variables
@@ -40,7 +41,7 @@ export class GameState {
   playerName: string = "";
   passivePlayers: PassivePlayer[] = [];
   explosions: Explosion[] = [];
-  eventQueue: object[] = [];
+  
 
   constructor() {
     this.socket = io(Consts.URL);
@@ -150,6 +151,7 @@ export class GameState {
         if (this.userhasleft !== null) {
           this.userhasleft.updateUserHasLeft();
         }
+        this.updateGameInfos();
         break;
       case Enums.serverState.GAMEOVER:
         this.game.updateGame();
@@ -204,45 +206,6 @@ export class GameState {
     }
   }
 
-  /**
-   * @description
-   * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
-   */
-  public handleNetworkInput(): void {
-    if (this.eventQueue.length > 0) {
-      var evObject: any = this.eventQueue[0];
-      var playerNrTmp = <number>evObject["playerId"];
-      var event = <string>evObject["event"];
-      var action = <number>evObject["action"];
-
-      for (let e of this.passivePlayers) {
-        if (e.playerNr === playerNrTmp) {
-          if (e.transitionLock) {
-            switch (event) {
-              case Enums.Event.DROP:
-                e.placeBomb();
-
-                this.eventQueue.pop();
-
-                break;
-              case Enums.Event.MOVE:
-                e.setTarget(action);
-
-                this.eventQueue.pop();
-
-                break;
-
-              case Enums.Event.PICKUP:
-                // Pickup Event
-                break;
-            }
-          }
-        }
-      }
-    } else {
-      return;
-    }
-  }
 
   ////////////////////////////
   /// Public functions
@@ -292,6 +255,16 @@ export class GameState {
           this.context.fillStyle = "#ff9944";
           this.context.font = "13px Krungthep";
           this.context.fillText("Punkte: " + "0", 520, (i + 1) * 70 + 25);
+          var item: UseableItem = this.activePlayer.inventory;
+
+          // Display Item of the player
+          if (item !== null && e instanceof ActivePlayer) {
+            this.context.fillText(
+              "Item: " + item.itemName,
+              520,
+              (i + 1) * 70 + 39
+            );
+          }
           if (!e.alive) {
             this.context.fillStyle = "#f1651c";
             this.context.font = "10px Krungthep";

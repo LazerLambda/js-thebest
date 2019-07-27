@@ -23,12 +23,14 @@ export module Enums{
       
     export enum Event {
         MOVE = "move",
-        DROP = "drop",
-        PICKUP = "pickup"
+        DROP = "drop"
       }
       
+
+
     export enum ActionBomb {
-        DEFAULT_BOMB = 1
+        DEFAULT_BOMB = 1,
+        NUKE = 2
       }
     
     export enum PlayerSprite {
@@ -36,5 +38,16 @@ export module Enums{
       TUX = 2,
       GOPHER = 3,
       CLIPPY = 4
+    }
+
+    export enum Direction {
+      NORTH = 2,
+      SOUTH = 0,
+      WEST = 1,
+      EAST = 3
+    }
+
+    export enum UsableItem{
+      NUKE = 0,
     }
 }
