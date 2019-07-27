@@ -45,6 +45,7 @@ export class Server {
         socket.state = Enums.serverState.SELECTION;
         socket.waitingForEditor = false;
         socket.waitingForGame = false;
+        socket.proposedField = [[]];
         socket.room = null;
         socket.playerNr = 0;
         socket.name = "";
@@ -89,6 +90,7 @@ export class Server {
             var room = <GameBackend>socket.room;
             room.sendEventsToPeers(data);
             if (room.checkProposedField(socket, field)) {
+              socket.proposedField = field;
               socket.emit("check", 1);
             } else {
               socket.emit("check", 0);
