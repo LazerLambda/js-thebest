@@ -41,7 +41,6 @@ export class GameState {
   playerName: string = "";
   passivePlayers: PassivePlayer[] = [];
   explosions: Explosion[] = [];
-  
 
   constructor() {
     this.socket = io(Consts.URL);
@@ -206,7 +205,6 @@ export class GameState {
     }
   }
 
-
   ////////////////////////////
   /// Public functions
   ////////////////////////////
@@ -247,31 +245,39 @@ export class GameState {
       this.context.fillRect(480, 0, 300, 480);
 
       let players: Player[] = <Player[]>this.passivePlayers.slice();
-      players.concat(this.activePlayer).forEach(
-        function(e: Player, i: number) {
+      players = players.concat(this.activePlayer);
+      console.log(players);
+      for (let i = 0; i < players.length; i++) {
+        if (players[i] !== null) {
           this.context.fillStyle = "#e44b43";
           this.context.font = "25px Krungthep";
-          this.context.fillText("Player: " + e.name, 500, (i + 1) * 70); // Dynamisch machen
+          this.context.fillText(
+            "Player: " + players[i].name,
+            500,
+            (i + 1) * 70
+          );
           this.context.fillStyle = "#ff9944";
           this.context.font = "13px Krungthep";
           this.context.fillText("Punkte: " + "0", 520, (i + 1) * 70 + 25);
-          var item: UseableItem = this.activePlayer.inventory;
-
-          // Display Item of the player
-          if (item !== null && e instanceof ActivePlayer) {
-            this.context.fillText(
-              "Item: " + item.itemName,
-              520,
-              (i + 1) * 70 + 39
-            );
+          if (players[i] instanceof ActivePlayer) {
+            if (this.activePlayer.inventory !== null) {
+              var item: UseableItem = this.activePlayer.inventory;
+              this.context.fillText(
+                "Item: " + item.itemName,
+                520,
+                (i + 1) * 70 + 39
+              );
+            }
           }
-          if (!e.alive) {
+          if (!players[i].alive) {
             this.context.fillStyle = "#f1651c";
             this.context.font = "10px Krungthep";
-            this.context.fillText("You loooose xD", 600, (i + 1) * 70 + 25);
+            this.context.fillText("So sad...", 600, (i + 1) * 70 + 25);
           }
-        }.bind(this)
-      );
+        } else {
+          continue;
+        }
+      }
     }
   }
 }
