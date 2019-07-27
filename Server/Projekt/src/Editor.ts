@@ -381,7 +381,7 @@ export class Editor {
   drawCanvas() {
     this.drawEnemyAreas();
     this.drawEditableMap();
-    this.drawFieldMenu(this.tileset);
+    this.drawFieldMenu();
     this.drawFixedTiles();
   }
 
@@ -392,8 +392,8 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
 		img.onload = function() {
 			++count;
 			if (count >= paths.length) {
-        this.drawEditableMap(this.tileset)
-        this.drawFieldMenu(this.tileset)
+        this.drawEditableMap()
+        this.drawFieldMenu()
 			}
 		}.bind(this);
 		img.src = paths[i];
@@ -401,13 +401,14 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
 	}
 }
 
-  drawFieldMenu(tileset:HTMLImageElement[]) {
-    {
+  drawFieldMenu() {
+    let fieldMenu = new Array<MenuElement>()
+
       let col = 0
       let row = 0
-      for (let i = 0; i < tileset.length; i++) {
+      for (let i = 0; i < this.tileset.length; i++) {
         let itemNumber = i
-        this.fieldMenu[i] = new MenuElement(
+        let fM = new MenuElement(
           this.mapPixelWidth + col *this.menuButtonWidth,
           row*this.menuButtonWidth,
           this.menuButtonWidth,
@@ -415,11 +416,14 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
           () => { this.item = itemNumber },
           this.tileset[i]
         )
+        fieldMenu.push(fM)
         col = col - 2 * col + 1 // Flip {0,1}
         row += col
-        console.log("fm "+this.fieldMenu[i])
+
       }
-    }
+
+        console.log(fieldMenu)
+
     for (let i = 0; i < this.fieldMenu.length; i++) {
       let canvas = <HTMLCanvasElement>document.getElementById("background");
       let context = canvas.getContext("2d");
@@ -428,11 +432,12 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
           this.fieldMenu[i].pic,
           this.fieldMenu[i].x,
           this.fieldMenu[i].y,
-          this.fieldMenu[i].height,
-          this.fieldMenu[i].width
+          this.fieldMenu[i].width,
+          this.fieldMenu[i].height
         );
       }
     }
+    
   }
 //this.gameState.socket.emit("proposedField", field)
   changeTileset(path: string) {

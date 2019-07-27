@@ -5,13 +5,13 @@ export class MenuElement {
 	height:number
 	f:Function
 	pic:HTMLImageElement
-	constructor(x:number, y:number, height:number, width:number, f:Function, pic:HTMLImageElement) {
+	constructor(x:number, y:number, width:number, height:number, f:Function, pic:HTMLImageElement) {
 		this.x = x
 		this.y = y
-		this.height = height
 		this.width = width
+		this.height = height
 		this.f = f
-		pic.onload = function() {this.pic = pic}.bind(this)
+		this.pic = pic
 	}
 }
 
