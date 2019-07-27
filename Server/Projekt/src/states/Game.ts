@@ -95,12 +95,15 @@ export class Game {
           var pos: number = x + y * this.ARRAY_CONST;
           var field = this.gameState.items[pos];
           if (this.gameState.clientId === i) {
+            console.log(i);
+            console.log(this.gameState.clientId);
             this.gameState.activePlayer = new ActivePlayer(
               this.gameState.context,
               this.gameState.socket,
               i,
               playerName
             );
+            console.log(this.gameState.activePlayer);
             this.gameState.activePlayer.initField(this.gameState, field);
             this.gameState.update();
             this.gameState.draw();
@@ -174,14 +177,15 @@ export class Game {
 
 
 
-    if (this.gameState.activePlayer.inventory !== undefined) {
+    if (this.gameState.activePlayer !== null) {
       var random: number = Math.floor(
         Math.random() * 100 * Consts.RANDOM_FACTOR
       );
 
       // new Items for the Player's Inventory, invisible for other Players
       var inv = this.gameState.activePlayer.inventory;
-      if (random % Consts.RANDOM_MODULO === 0 && inv === null) {
+
+      if (random % Consts.RANDOM_MODULO === 0) {
         this.gameState.activePlayer.inventory = new Nuke(this.gameState);
       }
     }
@@ -271,7 +275,7 @@ export class Game {
    * Verarbeitung der Warteliste für eingehende events von anderen Clients über den Server
    */
   public handleNetworkInput(): void {
-    if (this.eventQueue.length > 0) {
+    if (this.eventQueue.length > 0 && this.gameState.state === Enums.serverState.GAME) {
       var evObject: any = this.eventQueue[0];
       var playerNrTmp = <number>evObject["playerId"];
       var event = <string>evObject["event"];

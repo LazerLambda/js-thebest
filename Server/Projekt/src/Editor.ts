@@ -36,7 +36,7 @@ export class Editor {
   tileWidth: number
   tileHeight:number
   fields: number[][]
-  boardHeight: number = 13
+  boardHeight: number = 17
   boardWidth: number = 19
   tileset: HTMLImageElement[]
   menuButtonImage: HTMLImageElement[]
@@ -85,8 +85,7 @@ export class Editor {
     this.tileWidth  = this.mapPixelWidth / this.boardWidth
     this.tileHeight = this.canvas.height / this.boardHeight
 
-    this.playerNr = gameState.clientId;
-    this.playerNr = 0
+    this.playerNr = gameState.clientId - 1;
     const topLeftCorners: { x: number; y: number }[] = [
       { x: 0,  y: 0},
       { x: Math.ceil(this.boardWidth / 2) * this.tileWidth, y: 0 },
@@ -622,9 +621,6 @@ drawMenu() {
 
   public cleanUpPage() {
     this.context.clearRect(0, 0, 10000, 10000);
-    var element = document.getElementById("inputMap");
-    element.parentNode.removeChild(element);
-    this.canvas.removeEventListener("click", this.canvasClick.bind(this));
   }
   
 }
