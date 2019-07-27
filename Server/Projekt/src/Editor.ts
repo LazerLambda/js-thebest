@@ -29,7 +29,8 @@ export class Editor {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
   menuWidth: number = 300
-  menuButtonWidth = this.menuWidth/4
+  tileButtonWidth = this.menuWidth/4
+  menuButtonWidth = this.menuWidth/2
   mapPixelWidth: number
   mapPixelHeight: number
   tileWidth: number
@@ -38,6 +39,7 @@ export class Editor {
   boardHeight: number = 13
   boardWidth: number = 19
   tileset: HTMLImageElement[]
+  menuButtonImage: HTMLImageElement[]
   value: string
   item: number
 
@@ -53,6 +55,7 @@ export class Editor {
   customArea: CustomArea;
   editMenu: MenuElement[];
   fieldMenu:MenuElement[];
+  menu:MenuElement[];
 
   playerNr: number;
   alreadyVisited: { y: number; x: number }[];
@@ -61,14 +64,11 @@ export class Editor {
 
   constructor(gameState: GameState) {
 
-    let x = new Image(50,50)
+    this.mapInputTextfield = <HTMLInputElement>document.createElement("mapInputTextfield");
+    this.mapInputTextfield.setAttribute('type', 'text');
+    var parent = document.getElementById("stage");
+    parent.appendChild(this.mapInputTextfield);
 
-    let y = new MenuElement(
-      0,0,50,50,()=>{console.log("xxx")}, x 
-    )
-    
-
-    console.log(y)
     this.gameState = gameState
     this.startPosition.y = undefined
     this.startPosition.x = undefined
@@ -152,8 +152,11 @@ export class Editor {
     }
 
     this.tileset = new Array<HTMLImageElement>();
-    this.changeTileset("tileset1");
+    this.drawTileset("tileset1");
     this.item = fieldType.BRICK;
+
+    this.menuButtonImage = new Array<HTMLImageElement>();
+    this.drawMenuImages();
 
     for (let x = 1; x < this.boardWidth; x++) {
       this.drawLine(
@@ -170,92 +173,91 @@ export class Editor {
         this.mapPixelWidth,
         y * this.tileHeight
       );
-      }    
+      }
 
-/*    this.menuElements = [
-      new MenuElement(
-        this.mapPixelWidth,
-        0,
-        75,
-        75,
-        () => {
-          this.item = 0;
-        },
-        this.tileset[Enums.fieldType.HALLWAY]
-      ),
-      new MenuElement(
-        this.mapPixelWidth + 75,
-        0,
-        75,
-        75,
-        () => {
-          this.item = 1;
-        },
-        this.tileset[Enums.fieldType.WALL]
-      ),
-      new MenuElement(
-        this.mapPixelWidth + 150,
-        0,
-        75,
-        75,
-        () => {
-          this.item = 2;
-        },
-        this.tileset[Enums.fieldType.HOLE]
-      ),
-      new MenuElement(
-        this.mapPixelWidth + 225,
-        0,
-        75,
-        75,
-        () => {
-          this.item = 3;
-        },
-        this.tileset[Enums.fieldType.BRICK]
-      ),
-      new MenuElement(
-        this.mapPixelWidth,
-        75,
-        75,
-        75,
-        () => {
-          this.item = 4;
-        },
-        this.tileset[Enums.fieldType.STARTPOSITION]
-      ),
+      this.fieldMenu = [
+        new MenuElement(
+          this.mapPixelWidth + 0*this.tileButtonWidth,
+          0*this.tileButtonWidth,
+          this.tileButtonWidth,
+          this.tileButtonWidth,
+          () => { this.item = fieldType.HALLWAY },
+          this.tileset[fieldType.HALLWAY]
+        ),
+        new MenuElement(
+          this.mapPixelWidth + 1*this.tileButtonWidth,
+          0*this.tileButtonWidth,
+          this.tileButtonWidth,
+          this.tileButtonWidth,
+          () => { this.item = fieldType.WALL },
+          this.tileset[fieldType.WALL]
+        ),
+        new MenuElement(
+          this.mapPixelWidth + 2*this.tileButtonWidth,
+          0*this.tileButtonWidth,
+          this.tileButtonWidth,
+          this.tileButtonWidth,
+          () => { this.item = fieldType.HOLE },
+          this.tileset[fieldType.HOLE]
+        ),
+        new MenuElement(
+          this.mapPixelWidth + 3*this.tileButtonWidth,
+          0*this.tileButtonWidth,
+          this.tileButtonWidth,
+          this.tileButtonWidth,
+          () => { this.item = fieldType.BRICK },
+          this.tileset[fieldType.BRICK]
+        ),
+        new MenuElement(
+          this.mapPixelWidth + 0*this.tileButtonWidth,
+          1*this.tileButtonWidth,
+          this.tileButtonWidth,
+          this.tileButtonWidth,
+          () => { this.item = fieldType.STARTPOSITION },
+          this.tileset[fieldType.STARTPOSITION]
+        ),
+      ]
+
+    this.editMenu = [
       new MenuElement(
         this.mapPixelWidth,
         150,
         150,
-        150,
-        this.saveMap.bind(this),
-        saveIcon
-      ),
-      new MenuElement(
-        this.mapPixelWidth + 150,
-        150,
-        150,
-        150,
-        () => {
-          this.loadMap(inputMap.value);
-        },
-        loadIcon
-      ),
-      new MenuElement(
-        this.mapPixelWidth,
-        300,
-        150,
-        150,
+        100,
         () => {
           this.alreadyVisited = new Array();
           if (this.startCheckingPath()) console.log("Path ok");
           else console.log("Not ok");
         },
-        checkPathIcon
+        this.menuButtonImage[0]
+      ),
+      new MenuElement(
+        this.mapPixelWidth,
+        300,
+        100,
+        100,
+        this.saveMap.bind(this),
+        this.menuButtonImage[1]
+      ),
+      new MenuElement(
+        this.mapPixelWidth+100,
+        300,
+        100,
+        100,
+        () => {
+          //this.loadMap(inputMap.value);
+        },
+        this.menuButtonImage[2]
       )
     ];
-*/
-
+    this.menu = new Array<MenuElement>()
+    for (let i = 0; i < this.fieldMenu.length; i++) {
+      this.menu[i] = this.fieldMenu[i]
+    }
+    for (let i = 0; i < this.editMenu.length; i++) {
+      this.menu.push(this.editMenu[i])
+    }
+    console.log(this.menu)
     this.canvas.addEventListener("click", this.canvasClick.bind(this));
     this.drawCanvas()
   }
@@ -323,124 +325,16 @@ export class Editor {
       }
     }
   }
-/*
-  createEditMenu(iconImages:HTMLImageElement[]) {
-    function buttonCheckPath() {
-      this.alreadyVisited = new Array()
-      if (this.startCheckingPath())
-        console.log("Path ok");
-      else 
-        console.log("Not ok");
-    }
 
-    function ready() {
-      this.gameState.socket.emit("proposedField", this.fields)
-    }
-
-    let editMenuFunctions = [
-      this.saveMap.bind(this),
-      this.loadMap(this.mapInputTextfield.value),
-      buttonCheckPath,
-      ready
-    ]
-    
-    {
-      let col = 0
-      let row = 0
-      for (let i = 0; i < this.tileset.length; i++) {
-        let itemNumber = i
-        this.editMenu[i] = new MenuElement(
-          row*this.menuButtonWidth + col *this.menuButtonWidth,
-          i*this.menuButtonWidth,
-          this.menuButtonWidth,
-          this.menuButtonWidth,
-          editMenuFunctions[i],
-          iconImages[i]
-        )
-        col = col - 2 * col + 1 // Flip {0,1}
-        row += col
-      }
-    }
-
-  }*/
-/*
-  loadIcons() {
-    const menuIconPaths = [
-      "images/savemapicon.png",
-      "images/loadmapicon.png",
-      "images/checkpathicon.png",
-    ]
-    let iconImages:HTMLImageElement[]
-    let count = 0
-    for (let i = 0; i < menuIconPaths.length; i++) {
-      let img = new Image(this.menuButtonWidth, this.menuButtonWidth);
-      img.onload = function() {
-        ++count;
-        if (count >= menuIconPaths.length) {
-          this.createEditMenuElements(iconImages);
-          console.log("here")
-        }
-      }.bind(this);
-      img.src = menuIconPaths[i];
-      iconImages[i] = img;
-    }
-  }
-*/
   drawCanvas() {
-    this.drawEnemyAreas();
-    this.drawEditableMap();
-    this.drawFieldMenu();
-    this.drawFixedTiles();
+    this.drawEnemyAreas()
+    this.drawEditableMap()
+    this.drawFieldMenu()
+    this.drawMenuImages()
+    this.drawFixedTiles()
   }
 
-waitForImages(paths:string[], destination:HTMLImageElement[]) {
-	let count = 0
-	for (let i = 0; i < paths.length; i++) {
-		let img = new Image(this.tileWidth, this.tileHeight)
-		img.onload = function() {
-			++count;
-			if (count >= paths.length) {
-        this.drawEditableMap()
-        this.drawFieldMenu()
-			}
-		}.bind(this);
-		img.src = paths[i];
-		destination[i] = img;
-	}
-}
-
-  drawFieldMenu() {
-
-      let col = 0
-      let row = 0
-      for (let i = 0; i < this.tileset.length; i++) {
-        let itemNumber = i
-        let fM = new MenuElement(
-          this.mapPixelWidth + col *this.menuButtonWidth,
-          row*this.menuButtonWidth,
-          this.menuButtonWidth,
-          this.menuButtonWidth,
-          () => { this.item = itemNumber },
-          this.tileset[i]
-        )
-        this.context.drawImage(
-          fM.pic,
-          fM.x,
-          fM.y,
-          fM.width,
-          fM.height
-        );
-        if (col == 4) {
-          col = 0
-          row++
-        }
-
-        }
-    
-  }
-//this.gameState.socket.emit("proposedField", field)
-  changeTileset(path: string) {
-    let count = 0;
+  drawTileset(path: string) {
     const paths = [
       "tilesets/" + path + "/hallway.jpg",
       "tilesets/" + path + "/wall.jpg",
@@ -449,8 +343,75 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
       "tilesets/" + path + "/startposition.jpg",
       "tilesets/" + path + "/connection.jpg"
     ];
-    this.waitForImages(paths, this.tileset)
+    this.waitForTileImages(paths, this.tileset)
   }
+
+  waitForTileImages(paths:string[], destination:HTMLImageElement[]) {
+    let count = 0
+    for (let i = 0; i < paths.length; i++) {
+      let img = new Image(this.tileWidth, this.tileHeight)
+      img.onload = function() {
+        ++count;
+        if (count >= paths.length) {
+          this.drawEditableMap()
+          this.drawFieldMenu()
+          this.drawFixedTiles()
+        }
+      }.bind(this);
+      img.src = paths[i];
+      destination[i] = img;
+    }
+  }
+
+  drawFieldMenu() {
+      for (let i = 0; i < this.fieldMenu.length; i++) {
+        this.context.drawImage(
+          this.fieldMenu[i].pic,
+          this.fieldMenu[i].x,
+          this.fieldMenu[i].y,
+          this.fieldMenu[i].width,
+          this.fieldMenu[i].height
+        );
+
+      }
+  }
+  drawMenuImages() {
+    const paths = [
+      "images/checkpathicon.png",
+      "images/savemapicon.png",
+      "images/loadmapicon.png"
+    ]
+    this.waitForButtonImages(paths, this.menuButtonImage)
+  }
+
+  waitForButtonImages(paths:string[], destination:HTMLImageElement[]) {
+    let count = 0
+    for (let i = 0; i < paths.length; i++) {
+      let img = new Image(this.menuButtonWidth, this.menuButtonWidth)
+      img.onload = function() {
+        ++count;
+        if (count >= paths.length) {
+          this.drawMenu()
+        }
+      }.bind(this);
+      img.src = paths[i];
+      destination[i] = img;
+    }
+  }
+
+drawMenu() {
+  for (let i = 0; i< this.editMenu.length; i++) {
+    this.context.drawImage(
+      this.editMenu[i].pic,
+      this.editMenu[i].x,
+      this.editMenu[i].y,
+      this.editMenu[i].width,
+      this.editMenu[i].height
+    )
+  }
+}
+
+//this.gameState.socket.emit("proposedField", field)
 
   canvasClick(event: MouseEvent) {
     if (this.gameState.state === serverState.DESIGN) {
@@ -496,7 +457,8 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
         }
       }
       if (xPixel > this.mapPixelWidth)
-        this.getClickedMenuElement(this.fieldMenu, yPixel, xPixel).f();
+        this.getClickedMenuElement(this.menu, yPixel, xPixel).f();
+
     }
   }
 
@@ -654,4 +616,5 @@ waitForImages(paths:string[], destination:HTMLImageElement[]) {
     element.parentNode.removeChild(element);
     this.canvas.removeEventListener("click", this.canvasClick.bind(this));
   }
+  
 }
