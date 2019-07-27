@@ -8,7 +8,7 @@
 ## Starten:
  - In den Server Ordner navigieren:
  - Für das Build 
-   ```npm run buildClient```
+   ```npm run build```
    ausführen
  - Server mit 
    ```npm run server```
