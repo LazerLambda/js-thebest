@@ -248,6 +248,16 @@ export class Editor {
           //this.loadMap(inputMap.value);
         },
         this.menuButtonImage[2]
+      ),
+      new MenuElement(
+        this.mapPixelWidth,
+        400,
+        100,
+        100,
+        () => {
+          this.gameState.socket.emit("proposedField", this.fields)
+        },
+        this.menuButtonImage[3]
       )
     ];
     this.menu = new Array<MenuElement>()
@@ -379,7 +389,8 @@ export class Editor {
     const paths = [
       "images/checkpathicon.png",
       "images/savemapicon.png",
-      "images/loadmapicon.png"
+      "images/loadmapicon.png",
+      "images/readyicon.png"
     ]
     this.waitForButtonImages(paths, this.menuButtonImage)
   }
@@ -411,7 +422,6 @@ drawMenu() {
   }
 }
 
-//this.gameState.socket.emit("proposedField", field)
 
   canvasClick(event: MouseEvent) {
     if (this.gameState.state === serverState.DESIGN) {
