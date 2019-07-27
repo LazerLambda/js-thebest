@@ -13,6 +13,8 @@
  - Server mit 
    ```npm run server```
    starten
+ - Erst build dann server:
+   ```npm run buildAndRun```
 
 
 
