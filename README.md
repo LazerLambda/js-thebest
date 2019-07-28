@@ -1,9 +1,13 @@
 # README - JS-THE-BEST
 
-## Installation 
+## Installation (UNIX)
  - Im Server Ordner : 
    ```npm install && cd Projekt && npm install && cd ..```
    ausführen.
+
+## Installatin Win:
+ - In der PowerShell zum JS-TheBest Ordner navigieren:
+   ``` cd .\Server\; npm install; cd .\Projekt\; npm install; cd ..; cd..```
 
 ## Starten:
  - In den Server Ordner navigieren:
@@ -13,6 +17,8 @@
  - Server mit 
    ```npm run server```
    starten
+ - Erst build dann server:
+   ```npm run buildAndRun```
 
 
 

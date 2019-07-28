@@ -1,16 +1,9 @@
-import { Bomb, Hallway, Hole, FieldObj } from "./FieldObj";
+import { Bomb, Hallway, Nuke_Bomb, FieldObj } from "./FieldObj";
 import { Enums } from "./Enums";
 import { GameState } from "./GameState";
-import { useableItem, portableHole } from "./UsableItems";
+import { UseableItem, Nuke } from "./UseableItems";
 import { AnimatedObject } from "./AnimatedObject";
-import {Consts} from "./Consts";
-
-enum Direction {
-  NORTH = 2,
-  SOUTH = 0,
-  WEST = 1,
-  EAST = 3
-}
+import { Consts } from "./Consts";
 
 export class Player {
   // properties
@@ -21,18 +14,18 @@ export class Player {
   // counter
   transitionCounter: number = 0;
 
-  // consts
-  TRANSITION_UPPER_BOUND: number = 5;
 
   // state variables
   xPos: number = 0;
   yPos: number = 0;
+  xTar: number = 0;
+  yTar: number = 0;
   transitionLock: boolean = true;
   target: number = 0;
   alive: boolean = true;
   running: boolean = false;
   movementSpeed: number = 10;
-  inventory: useableItem = null;
+  inventory: UseableItem = null;
   visible: boolean = true;
   direction: number = 0;
   context: CanvasRenderingContext2D = null;
@@ -56,12 +49,13 @@ export class Player {
     this.animatedObject = new AnimatedObject(this);
     this.context = context;
 
-    this.direction = Direction.EAST;
+    this.direction = Enums.Direction.EAST;
   }
 
   initField(field: GameState, item: Hallway) {
     this.field = field;
-    this.target = item.x + item.y * Consts.ARRAY_CONST;
+    this.xTar = item.x;
+    this.yTar = item.y;
     this.onItem = item;
     this.onItem.playerOn.push(this);
     this.xPos = item.x * this.field.xSize;
@@ -74,22 +68,22 @@ export class Player {
    */
   public updatePlayer(): void {
     if (this.running) {
-      if (this.transitionCounter < this.TRANSITION_UPPER_BOUND) {
+      if (this.transitionCounter < Consts.TRANSITION_UPPER_BOUND) {
         switch (this.direction) {
-          case Direction.NORTH: {
-            this.yPos -= this.field.ySize / this.TRANSITION_UPPER_BOUND;
+          case Enums.Direction.NORTH: {
+            this.yPos -= this.field.ySize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
-          case Direction.SOUTH: {
-            this.yPos += this.field.ySize / this.TRANSITION_UPPER_BOUND;
+          case Enums.Direction.SOUTH: {
+            this.yPos += this.field.ySize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
-          case Direction.WEST: {
-            this.xPos -= this.field.xSize / this.TRANSITION_UPPER_BOUND;
+          case Enums.Direction.WEST: {
+            this.xPos -= this.field.xSize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
-          case Direction.EAST: {
-            this.xPos += this.field.xSize / this.TRANSITION_UPPER_BOUND;
+          case Enums.Direction.EAST: {
+            this.xPos += this.field.xSize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
         }
@@ -101,15 +95,15 @@ export class Player {
 
         // Player auf neues Feld setzen
         var tmpItem = <Hallway>this.onItem;
-        this.onItem = this.field.items[this.target];
+        this.onItem = this.field.fieldObjs[this.yTar][this.xTar];
 
-        this.field.setPlayerOnItem(this, this.target);
-        this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
+        this.field.setPlayerOnFieldObjs(this, this.xTar, this.yTar);
+        this.field.setPlayerOnFieldObjs(this, tmpItem.x, tmpItem.y);
 
         // Freigabe des transitionsLocks
 
-        this.field.setPlayerOnItem(this, this.target);
-        this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
+        this.field.setPlayerOnFieldObjs(this, this.xTar, this.yTar);
+        this.field.rmPlayerFromFieldObjs(this, tmpItem.x, tmpItem.y);
         this.transitionLock = true;
 
         this.xPos = this.onItem.x * this.field.xSize;
@@ -136,14 +130,7 @@ export class Player {
       // GameOverAnimation
 
       if (this.loosingSequence < 0) {
-        var pos = this.onItem.x + this.onItem.y * Consts.ARRAY_CONST;
-        var newArr = new Array();
-        for (let i = 0; i < this.field.items[pos].playerOn.length; i++) {
-          if (this.field.items[pos].playerOn[i].playerNr !== this.playerNr) {
-            newArr.push(this.field.items[pos].playerOn[i]);
-          }
-        }
-        this.field.items[pos].playerOn = newArr;
+          this.field.rmPlayerFromFieldObjs(this, this.onItem.x, this.onItem.y);
       } else {
         ////
         this.context.fillStyle = "red";
@@ -167,36 +154,27 @@ export class Player {
    * @param y y Target
    */
 
-  protected checkCollide(x: number, y: number): boolean {
+  protected checkPathAndSet(x: number, y: number): boolean {
     if (this.onItem === null) {
       throw new Error(
         'Field is not connected to Player:\n\t"this.onItem === null"'
       );
       return false;
     } else {
-      var pos = y * Consts.ARRAY_CONST + x;
-      var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
-      var checkType = this.field.items[pos] instanceof Hallway;
+      console.log(x + " " + y);
+      var checkType = this.field.fieldObjs[y][x] instanceof Hallway;
 
-      if (inBounds && checkType) {
-        let tempField = <Hallway>this.field.items[pos];
+      if (checkType) {
+        let tempField = <Hallway>this.field.fieldObjs[y][x];
         if (tempField.brickOnItem === null) {
-          this.target = pos;
+          this.xTar = x;
+          this.yTar = y;
           return true;
         }
       }
     }
   }
 }
-
-
-
-
-
-
-
-
-
 
 /**
  * @description
@@ -205,7 +183,12 @@ export class Player {
  */
 export class ActivePlayer extends Player {
   socket: any = null;
-  constructor(context: CanvasRenderingContext2D, socket: any, playerNr: number, name: string) {
+  constructor(
+    context: CanvasRenderingContext2D,
+    socket: any,
+    playerNr: number,
+    name: string
+  ) {
     super(context, playerNr, name);
     this.socket = socket;
 
@@ -218,40 +201,54 @@ export class ActivePlayer extends Player {
    * @param e Event
    */
   private gameEventListener(e: any) {
+    console.log("hier");
     if (this.field.state === Enums.serverState.GAME) {
       if (!this.running && this.alive) {
         switch (e.key) {
           case "ArrowUp":
-            if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
-              this.direction = Direction.NORTH;
+            if (this.checkPathAndSet(this.onItem.x, this.onItem.y - 1)) {
+              this.direction = Enums.Direction.NORTH;
               this.running = true;
-              this.emitEvent(Enums.Event.MOVE, Direction.NORTH);
+              this.emitEvent(Enums.Event.MOVE, Enums.Direction.NORTH);
             }
             break;
           case "ArrowDown":
-            if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
-              this.direction = Direction.SOUTH;
+            if (this.checkPathAndSet(this.onItem.x, this.onItem.y + 1)) {
+              this.direction = Enums.Direction.SOUTH;
               this.running = true;
-              this.emitEvent(Enums.Event.MOVE, Direction.SOUTH);
+              this.emitEvent(Enums.Event.MOVE, Enums.Direction.SOUTH);
             }
             break;
           case "ArrowRight":
-            if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
-              this.direction = Direction.EAST;
+            if (this.checkPathAndSet(this.onItem.x + 1, this.onItem.y)) {
+              this.direction = Enums.Direction.EAST;
               this.running = true;
-              this.emitEvent(Enums.Event.MOVE, Direction.EAST);
+              this.emitEvent(Enums.Event.MOVE, Enums.Direction.EAST);
             }
             break;
           case "ArrowLeft":
-            if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
-              this.direction = Direction.WEST;
+            if (this.checkPathAndSet(this.onItem.x - 1, this.onItem.y)) {
+              this.direction = Enums.Direction.WEST;
               this.running = true;
-              this.emitEvent(Enums.Event.MOVE, Direction.WEST);
+              this.emitEvent(Enums.Event.MOVE, Enums.Direction.WEST);
             }
             break;
           case "y":
-            if (e.key === "y") {
-              var item = <Hallway>this.onItem;
+            var item = <Hallway>this.onItem;
+            if (this.inventory !== null) {
+              if (this.inventory.getEventType() === Enums.ActionBomb.NUKE) {
+                item.bombOnItem = new Nuke_Bomb(
+                  this.onItem.context,
+                  this.onItem.x,
+                  this.onItem.y,
+                  this.onItem.SIZE_X,
+                  this.onItem.SIZE_Y,
+                  item
+                );
+              }
+              this.emitEvent(Enums.Event.DROP, this.inventory.getEventType());
+              this.inventory = null;
+            } else {
               item.bombOnItem = new Bomb(
                 this.onItem.context,
                 this.onItem.x,
@@ -262,6 +259,7 @@ export class ActivePlayer extends Player {
               );
               this.emitEvent(Enums.Event.DROP, Enums.ActionBomb.DEFAULT_BOMB);
             }
+            break;
         }
       }
     }
@@ -279,7 +277,7 @@ export class ActivePlayer extends Player {
   }
 
   private emitEvent(event: string, action: number) {
-    var evObject: object = {
+    var evObject: { playerId: number; event: string; action: number } = {
       playerId: this.playerNr,
       event: event,
       action: action
@@ -287,15 +285,6 @@ export class ActivePlayer extends Player {
     this.socket.emit("event", evObject);
   }
 }
-
-
-
-
-
-
-
-
-
 
 /**
  * @description
@@ -305,7 +294,11 @@ export class ActivePlayer extends Player {
  */
 
 export class PassivePlayer extends Player {
-  constructor(context: CanvasRenderingContext2D, playerNr: number, name: string) {
+  constructor(
+    context: CanvasRenderingContext2D,
+    playerNr: number,
+    name: string
+  ) {
     super(context, playerNr, name);
   }
 
@@ -318,42 +311,34 @@ export class PassivePlayer extends Player {
    */
   public setTarget(action: number): void {
     switch (action) {
-      case Direction.NORTH:
-        if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
+      case Enums.Direction.NORTH:
+        if (this.checkPathAndSet(this.onItem.x, this.onItem.y - 1)) {
           this.transitionLock = false;
-
-          this.target = this.onItem.x + (this.onItem.y - 1) * Consts.ARRAY_CONST;
           this.running = true;
-          this.direction = Direction.NORTH;
+          this.direction = Enums.Direction.NORTH;
         }
         break;
 
-      case Direction.SOUTH:
-        if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
+      case Enums.Direction.SOUTH:
+        if (this.checkPathAndSet(this.onItem.x, this.onItem.y + 1)) {
           this.transitionLock = false;
-
-          this.target = this.onItem.x + (this.onItem.y + 1) * Consts.ARRAY_CONST;
           this.running = true;
-          this.direction = Direction.SOUTH;
+          this.direction = Enums.Direction.SOUTH;
         }
         break;
 
-      case Direction.EAST:
-        if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
+      case Enums.Direction.EAST:
+        if (this.checkPathAndSet(this.onItem.x + 1, this.onItem.y)) {
           this.transitionLock = false;
-
-          this.target = this.onItem.x + 1 + this.onItem.y * Consts.ARRAY_CONST;
           this.running = true;
-          this.direction = Direction.EAST;
+          this.direction = Enums.Direction.EAST;
         }
         break;
-      case Direction.WEST:
-        if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
+      case Enums.Direction.WEST:
+        if (this.checkPathAndSet(this.onItem.x - 1, this.onItem.y)) {
           this.transitionLock = false;
-
-          this.target = this.onItem.x - 1 + this.onItem.y * Consts.ARRAY_CONST;
           this.running = true;
-          this.direction = Direction.WEST;
+          this.direction = Enums.Direction.WEST;
           break;
         }
     }
@@ -367,6 +352,22 @@ export class PassivePlayer extends Player {
   public placeBomb(): void {
     var item = <Hallway>this.onItem;
     item.bombOnItem = new Bomb(
+      this.onItem.context,
+      this.onItem.x,
+      this.onItem.y,
+      this.onItem.SIZE_X,
+      this.onItem.SIZE_Y,
+      item
+    );
+  }
+
+  /**
+   * @description
+   * Ablegen einer größeren Bombe des passiven Spielers
+   */
+  public placeNuke_Bomb(): void {
+    var item = <Hallway>this.onItem;
+    item.bombOnItem = new Nuke_Bomb(
       this.onItem.context,
       this.onItem.x,
       this.onItem.y,

@@ -6,7 +6,7 @@ export class Explosion {
   //bombFields: Item[] = [];
   explosionRad: number;
   counter: number = 1;
-  field: GameState;
+  gameState: GameState;
   startPosX: number;
   startPosY: number;
 
@@ -15,61 +15,77 @@ export class Explosion {
   west: boolean = true;
   east: boolean = true;
 
-  constructor(item: Hallway, field: GameState, explosionRad:number) {
+  constructor(item: Hallway, gameState: GameState, explosionRad:number) {
     this.explosionRad = explosionRad;
 
-    this.field = field;
+    this.gameState = gameState;
 
     this.startPosX = item.x;
     this.startPosY = item.y;
   }
 
-  checkBounds(pos: number) {
-    return pos >= 0 && pos < this.field.items.length;
-  }
 
-  performFire(pos: number) {
-    if (this.field.items[pos] instanceof Hallway) {
-      this.field.items[pos].setOnFire();
+  /**
+   * @description
+   * check wether position is inside bounds or not
+   * @param x number  
+   * @param y number
+   * @return boolean
+   */
+  checkBounds(x : number, y : number): boolean{
+    return x >= 0 && x < this.gameState.fieldObjs[0].length  && y >= 0 && y < this.gameState.fieldObjs.length)
+  }
+  
+
+  /**
+   * @default
+   * set field on fire
+   * @param x number
+   * @param y number 
+   */
+  performFire(x :number, y : number): void{
+    if(this.gameState.fieldObjs[y][x] instanceof Hallway){
+      this.gameState.fieldObjs[y][x].setOnFire();
     }
   }
 
-    update() {
+
+  /**
+   * @description
+   * update class as long the explosion radius isn't reached
+   */
+    update() : void{
     if (this.counter < this.explosionRad) {
-      var posNorth = (this.startPosY - this.counter) * Consts.ARRAY_CONST + this.startPosX;
-      var posSouth = (this.startPosY + this.counter) * Consts.ARRAY_CONST + this.startPosX;
-      var posWest = this.startPosY * Consts.ARRAY_CONST + (this.startPosX - this.counter);
-      var posEast = this.startPosY * Consts.ARRAY_CONST + (this.startPosX + this.counter);
 
       if (this.south) {
-        if (this.checkBounds(posSouth)) {
-          this.performFire(posSouth);
-          if (this.field.items[posSouth] instanceof Wall) {
+        if (this.checkBounds(this.startPosX, (this.startPosY + this.counter))){
+          this.performFire(this.startPosX, (this.startPosY + this.counter));
+          if (this.gameState.fieldObjs[(this.startPosY + this.counter)][this.startPosX] instanceof Wall) {
             this.south = false;
           }
         }
       }
       if (this.north) {
-        if (this.checkBounds(posNorth)) {
-          this.performFire(posNorth);
-          if (this.field.items[posNorth] instanceof Wall) {
+        if (this.checkBounds(this.startPosX, (this.startPosY - this.counter))){
+          this.performFire(this.startPosX, (this.startPosY - this.counter));
+          if (this.gameState.fieldObjs[(this.startPosY - this.counter)][this.startPosX] instanceof Wall) {
             this.north = false;
           }
         }
       }
       if (this.west) {
-        if (this.checkBounds(posWest)) {
-          this.performFire(posWest);
-          if (this.field.items[posWest] instanceof Wall) {
+        if (this.checkBounds((this.startPosX - this.counter), this.startPosY)){
+          this.performFire((this.startPosX - this.counter), this.startPosY);
+          if (this.gameState.fieldObjs[this.startPosY][(this.startPosX - this.counter)] instanceof Wall) {
             this.west = false;
           }
         }
       }
       if (this.east) {
-        if (this.checkBounds(posEast)) {
-          this.performFire(posEast);
-          if (this.field.items[posEast] instanceof Wall) {
-            this.east = false;
+        if (this.checkBounds((this.startPosX + this.counter), this.startPosY)){
+          this.performFire((this.startPosX + this.counter), this.startPosY);
+          if (this.gameState.fieldObjs[this.startPosY][(this.startPosX + this.counter)] instanceof Wall) {
+            this.north = false;
           }
         }
       }
