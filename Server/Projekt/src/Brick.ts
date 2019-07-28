@@ -1,12 +1,15 @@
 import { Hallway, FieldObj } from "./FieldObj";
 
 export class Brick {
+  //state
   breakBricks: boolean = false;
-  placedOn: Hallway;
-
-  context: CanvasRenderingContext2D;
   SIZE_X: number;
   SIZE_Y: number;
+  context: CanvasRenderingContext2D;
+  breakAnimiation: number = 10;
+
+  // properties
+  placedOn: Hallway;
 
   x: number;
   y: number;
@@ -31,12 +34,17 @@ export class Brick {
 
   drawBrick() {
     if (this.breakBricks) {
-      const x = this.x * this.SIZE_X;
-      const y = this.y * this.SIZE_Y;
-      im.src = "images/breakBrick.jpg";
-      this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
-      this.placedOn.setOnFire();
-      this.placedOn.brickOnItem = null;
+      if (this.breakAnimiation > 0) {
+        const x = this.x * this.SIZE_X;
+        const y = this.y * this.SIZE_Y;
+        var im = new Image(this.SIZE_X, this.SIZE_Y);
+        im.src = "images/breakBrick.jpg";
+        this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
+        this.placedOn.setOnFire();
+        --this.breakAnimiation;
+      } else {
+        this.placedOn.brickOnItem = null;
+      }
     } else {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
