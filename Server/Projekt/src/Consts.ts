@@ -6,7 +6,7 @@ export module Consts {
   export const FIELD_WIDTH: number = 8;
 
   // maximum amount of players in game
-  export const MAX_PLAYERS: number = 2;
+  export const MAX_PLAYERS: number = 4;
 
   // Explosion radius
   export const NUKE_RAD: number = 5;
@@ -38,4 +38,32 @@ export module Consts {
 
   // GameInfo text difference y
   export const GAME_INFO_TEXT_DIFF_Y = 70;
+
+  ////////////////
+  // Button Consts
+  ////////////////
+
+  // Startpage ButtonGame Pos X
+  export const BUTTON1_X_START: number = 50;
+
+  // Startpage Button length X
+  export const BUTTON1_X_LENGTH: number = 150;
+
+  // Startpage ButtonGame Pos y
+  export const BUTTON1_Y_START: number = 375;
+
+  // Startpage ButtonGame length X
+  export const BUTTON1_Y_LENGTH: number = 50;
+
+  // Startpage ButtonEditor Pos X
+  export const BUTTON2_X_START: number = 300;
+
+  // Startpage ButtonEditor length X
+  export const BUTTON2_X_LENGTH: number = 150;
+
+  // Startpage ButtonEditor Pos y
+  export const BUTTON2_Y_START: number = 375;
+
+  // Startpage ButtonEditor length X
+  export const BUTTON2_Y_LENGTH: number = 50;
 }
