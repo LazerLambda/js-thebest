@@ -33,7 +33,7 @@ export class Explosion {
    * @return boolean
    */
   checkBounds(x : number, y : number): boolean{
-    return x >= 0 && x < this.gameState.fieldObjs[0].length  && y >= 0 && y < this.gameState.fieldObjs.length)
+    return x >= 0 && x < this.gameState.fieldObjs[0].length  && y >= 0 && y < this.gameState.fieldObjs.length
   }
   
 
