@@ -81,7 +81,7 @@ export class Server {
                 room.emitServerReady();
               }
             }
-            if (this.connectionCounter === this.MAX_PLAYER) {
+            if (this.connectionCounter === Consts.MAX_PLAYERS) {
               this.connectionCounter = 1;
             } else {
               ++this.connectionCounter;
