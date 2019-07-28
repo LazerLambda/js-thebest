@@ -1,4 +1,5 @@
 import { GameState } from "../GameState";
+import { Consts } from "../Consts";
 
 enum serverState {
   SELECTION = 0,
@@ -202,10 +203,10 @@ export class Startpage {
       this.context.fillStyle = "#ff9944";
     }
     this.context.fillRect(
-      this.button1_X_start,
-      this.button1_Y_start,
-      this.button1_X_length,
-      this.button1_Y_length
+      Consts.BUTTON1_X_START,
+      Consts.BUTTON1_Y_START,
+      Consts.BUTTON1_X_LENGTH,
+      Consts.BUTTON1_Y_LENGTH
     );
     this.context.fillStyle = "#e44b43";
     this.context.fillText(
@@ -220,10 +221,10 @@ export class Startpage {
       this.context.fillStyle = "#ff9944";
     }
     this.context.fillRect(
-      this.button2_X_start,
-      this.button2_Y_start,
-      this.button2_X_length,
-      this.button2_Y_length
+      Consts.BUTTON2_X_START,
+      Consts.BUTTON2_Y_START,
+      Consts.BUTTON2_X_LENGTH,
+      Consts.BUTTON2_Y_LENGTH
     );
     this.context.fillStyle = "#e44b43";
     this.context.fillText(

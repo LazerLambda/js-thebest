@@ -1,12 +1,15 @@
 export module Consts {
+  // Animation const
+  export const ANIMATION : number = 60;
+
   // field height
-  export const FIELD_HEIGHT: number = 8;
+  export const FIELD_HEIGHT: number = 17;
 
   // field width
-  export const FIELD_WIDTH: number = 8;
+  export const FIELD_WIDTH: number = 17;
 
   // maximum amount of players in game
-  export const MAX_PLAYERS: number = 4;
+  export const MAX_PLAYERS: number = 2;
 
   // Explosion radius
   export const NUKE_RAD: number = 5;

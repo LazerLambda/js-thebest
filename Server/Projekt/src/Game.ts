@@ -1,5 +1,6 @@
 import { GameState } from "./GameState";
 import { Player } from "./Player";
+import {Consts} from "./Consts";
 
 export class Game {
   frameTime: number;
@@ -13,7 +14,7 @@ export class Game {
 
   constructor() {
     this.game = new GameState();
-    this.startAnimating(200);
+    this.startAnimating(Consts.ANIMATION);
   }
 
   startAnimating(targetFPS: number) {

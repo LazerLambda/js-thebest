@@ -126,7 +126,7 @@ export class Game {
           var playerName: string = <string>player["name"];
 
           var pos: number = x + y * this.ARRAY_CONST;
-          var field = this.gameState.items[pos];
+          var field = this.gameState.fieldObjs[y][x];
           if (this.gameState.clientId === i) {
             this.gameState.activePlayer = new ActivePlayer(
               this.gameState.context,
