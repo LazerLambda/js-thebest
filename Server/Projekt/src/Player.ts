@@ -14,12 +14,12 @@ export class Player {
   // counter
   transitionCounter: number = 0;
 
-  // consts
-  TRANSITION_UPPER_BOUND: number = 5;
 
   // state variables
   xPos: number = 0;
   yPos: number = 0;
+  xTar: number = 0;
+  yTar: number = 0;
   transitionLock: boolean = true;
   target: number = 0;
   alive: boolean = true;
@@ -54,7 +54,8 @@ export class Player {
 
   initField(field: GameState, item: Hallway) {
     this.field = field;
-    this.target = item.x + item.y * Consts.ARRAY_CONST;
+    this.xTar = item.x;
+    this.yTar = item.y;
     this.onItem = item;
     this.onItem.playerOn.push(this);
     this.xPos = item.x * this.field.xSize;
@@ -67,22 +68,22 @@ export class Player {
    */
   public updatePlayer(): void {
     if (this.running) {
-      if (this.transitionCounter < this.TRANSITION_UPPER_BOUND) {
+      if (this.transitionCounter < Consts.TRANSITION_UPPER_BOUND) {
         switch (this.direction) {
           case Enums.Direction.NORTH: {
-            this.yPos -= this.field.ySize / this.TRANSITION_UPPER_BOUND;
+            this.yPos -= this.field.ySize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
           case Enums.Direction.SOUTH: {
-            this.yPos += this.field.ySize / this.TRANSITION_UPPER_BOUND;
+            this.yPos += this.field.ySize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
           case Enums.Direction.WEST: {
-            this.xPos -= this.field.xSize / this.TRANSITION_UPPER_BOUND;
+            this.xPos -= this.field.xSize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
           case Enums.Direction.EAST: {
-            this.xPos += this.field.xSize / this.TRANSITION_UPPER_BOUND;
+            this.xPos += this.field.xSize / Consts.TRANSITION_UPPER_BOUND;
             break;
           }
         }
@@ -94,15 +95,15 @@ export class Player {
 
         // Player auf neues Feld setzen
         var tmpItem = <Hallway>this.onItem;
-        this.onItem = this.field.items[this.target];
+        this.onItem = this.field.fieldObjs[this.yTar][this.xTar];
 
-        this.field.setPlayerOnItem(this, this.target);
-        this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
+        this.field.setPlayerOnFieldObjs(this, this.xTar, this.yTar);
+        this.field.setPlayerOnFieldObjs(this, tmpItem.x, tmpItem.y);
 
         // Freigabe des transitionsLocks
 
-        this.field.setPlayerOnItem(this, this.target);
-        this.field.rmPlayerFromItem(this, tmpItem.x, tmpItem.y);
+        this.field.setPlayerOnFieldObjs(this, this.xTar, this.yTar);
+        this.field.rmPlayerFromFieldObjs(this, tmpItem.x, tmpItem.y);
         this.transitionLock = true;
 
         this.xPos = this.onItem.x * this.field.xSize;
@@ -129,14 +130,7 @@ export class Player {
       // GameOverAnimation
 
       if (this.loosingSequence < 0) {
-        var pos = this.onItem.x + this.onItem.y * Consts.ARRAY_CONST;
-        var newArr = new Array();
-        for (let i = 0; i < this.field.items[pos].playerOn.length; i++) {
-          if (this.field.items[pos].playerOn[i].playerNr !== this.playerNr) {
-            newArr.push(this.field.items[pos].playerOn[i]);
-          }
-        }
-        this.field.items[pos].playerOn = newArr;
+          this.field.rmPlayerFromFieldObjs(this, this.onItem.x, this.onItem.y);
       } else {
         ////
         this.context.fillStyle = "red";
@@ -160,21 +154,21 @@ export class Player {
    * @param y y Target
    */
 
-  protected checkCollide(x: number, y: number): boolean {
+  protected checkPathAndSet(x: number, y: number): boolean {
     if (this.onItem === null) {
       throw new Error(
         'Field is not connected to Player:\n\t"this.onItem === null"'
       );
       return false;
     } else {
-      var pos = y * Consts.ARRAY_CONST + x;
-      var inBounds: boolean = pos >= 0 && pos < this.field.items.length;
-      var checkType = this.field.items[pos] instanceof Hallway;
+      console.log(x + " " + y);
+      var checkType = this.field.fieldObjs[y][x] instanceof Hallway;
 
-      if (inBounds && checkType) {
-        let tempField = <Hallway>this.field.items[pos];
+      if (checkType) {
+        let tempField = <Hallway>this.field.fieldObjs[y][x];
         if (tempField.brickOnItem === null) {
-          this.target = pos;
+          this.xTar = x;
+          this.yTar = y;
           return true;
         }
       }
@@ -207,32 +201,33 @@ export class ActivePlayer extends Player {
    * @param e Event
    */
   private gameEventListener(e: any) {
+    console.log("hier");
     if (this.field.state === Enums.serverState.GAME) {
       if (!this.running && this.alive) {
         switch (e.key) {
           case "ArrowUp":
-            if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
+            if (this.checkPathAndSet(this.onItem.x, this.onItem.y - 1)) {
               this.direction = Enums.Direction.NORTH;
               this.running = true;
               this.emitEvent(Enums.Event.MOVE, Enums.Direction.NORTH);
             }
             break;
           case "ArrowDown":
-            if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
+            if (this.checkPathAndSet(this.onItem.x, this.onItem.y + 1)) {
               this.direction = Enums.Direction.SOUTH;
               this.running = true;
               this.emitEvent(Enums.Event.MOVE, Enums.Direction.SOUTH);
             }
             break;
           case "ArrowRight":
-            if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
+            if (this.checkPathAndSet(this.onItem.x + 1, this.onItem.y)) {
               this.direction = Enums.Direction.EAST;
               this.running = true;
               this.emitEvent(Enums.Event.MOVE, Enums.Direction.EAST);
             }
             break;
           case "ArrowLeft":
-            if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
+            if (this.checkPathAndSet(this.onItem.x - 1, this.onItem.y)) {
               this.direction = Enums.Direction.WEST;
               this.running = true;
               this.emitEvent(Enums.Event.MOVE, Enums.Direction.WEST);
@@ -317,41 +312,31 @@ export class PassivePlayer extends Player {
   public setTarget(action: number): void {
     switch (action) {
       case Enums.Direction.NORTH:
-        if (this.checkCollide(this.onItem.x, this.onItem.y - 1)) {
+        if (this.checkPathAndSet(this.onItem.x, this.onItem.y - 1)) {
           this.transitionLock = false;
-
-          this.target =
-            this.onItem.x + (this.onItem.y - 1) * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Enums.Direction.NORTH;
         }
         break;
 
       case Enums.Direction.SOUTH:
-        if (this.checkCollide(this.onItem.x, this.onItem.y + 1)) {
+        if (this.checkPathAndSet(this.onItem.x, this.onItem.y + 1)) {
           this.transitionLock = false;
-
-          this.target =
-            this.onItem.x + (this.onItem.y + 1) * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Enums.Direction.SOUTH;
         }
         break;
 
       case Enums.Direction.EAST:
-        if (this.checkCollide(this.onItem.x + 1, this.onItem.y)) {
+        if (this.checkPathAndSet(this.onItem.x + 1, this.onItem.y)) {
           this.transitionLock = false;
-
-          this.target = this.onItem.x + 1 + this.onItem.y * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Enums.Direction.EAST;
         }
         break;
       case Enums.Direction.WEST:
-        if (this.checkCollide(this.onItem.x - 1, this.onItem.y)) {
+        if (this.checkPathAndSet(this.onItem.x - 1, this.onItem.y)) {
           this.transitionLock = false;
-
-          this.target = this.onItem.x - 1 + this.onItem.y * Consts.ARRAY_CONST;
           this.running = true;
           this.direction = Enums.Direction.WEST;
           break;

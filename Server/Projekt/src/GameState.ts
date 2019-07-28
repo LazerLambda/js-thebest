@@ -34,7 +34,7 @@ export class GameState {
   userhasleft: UserHasLeft = null;
 
   // state ariables
-  items: FieldObj[] = null;
+  fieldObjs: FieldObj[][] = [];
   context: any = null;
   socket: any = null;
   activePlayer: ActivePlayer = null;
@@ -50,8 +50,8 @@ export class GameState {
     // dynamisch machen
     this.canvasHeight = canvas.height;
     this.canvasWidth = canvas.width;
-    this.xSize = (canvas.width - 300) / Consts.ARRAY_CONST;
-    this.ySize = canvas.height / Consts.ARRAY_CONST;
+    this.xSize = (canvas.width - 300) / Consts.FIELD_WIDTH;
+    this.ySize = canvas.height / Consts.FIELD_HEIGHT;
 
     this.initStartPage();
   }
@@ -211,27 +211,30 @@ export class GameState {
 
   /**
    * @description
-   * Setze Spieler zu neuer Position
+   * Set Player to new Position
    * @param player Player für das neue Ziel
+   * @param x number
+   * @param y number
    */
-  public setPlayerOnItem(player: Player, target: number): void {
-    this.items[target].playerOn.push(player);
+  public setPlayerOnFieldObjs(player: Player, x: number, y: number): void {
+    this.fieldObjs[y][x].playerOn.push(player);
   }
 
   /**
    * @description
-   * Entferne den Spieler von der alten Position
-   * @param player
+   * Remove Player from position
+   * @param player Player
+   * @param x number
+   * @param y number
    */
-  public rmPlayerFromItem(player: Player, x: number, y: number): void {
+  public rmPlayerFromFieldObjs(player: Player, x: number, y: number): void {
     var newArr = new Array();
-    var oldPos = x + y * Consts.ARRAY_CONST;
-    for (let i = 0; i < this.items[oldPos].playerOn.length; i++) {
-      if (this.items[oldPos].playerOn[i].playerNr !== this.clientId) {
-        newArr.push(this.items[oldPos].playerOn[i]);
+    for (let i = 0; i < this.fieldObjs[y][x].playerOn.length; i++) {
+      if (this.fieldObjs[y][x].playerOn[i].playerNr !== this.clientId) {
+        newArr.push(this.fieldObjs[y][x].playerOn[i]);
       }
     }
-    this.items[oldPos].playerOn = newArr;
+    this.fieldObjs[y][x].playerOn = newArr;
   }
 
   /**
@@ -246,7 +249,6 @@ export class GameState {
 
       let players: Player[] = <Player[]>this.passivePlayers.slice();
       players = players.concat(this.activePlayer);
-      console.log(players);
       for (let i = 0; i < players.length; i++) {
         if (players[i] !== null) {
           this.context.fillStyle = "#e44b43";
@@ -258,21 +260,29 @@ export class GameState {
           );
           this.context.fillStyle = "#ff9944";
           this.context.font = "13px Krungthep";
-          this.context.fillText("Punkte: " + "0", 520, (i + 1) * 70 + 25);
+          this.context.fillText(
+            "Punkte: " + "0",
+            Consts.GAME_INFO_TEXT_POS_X,
+            (i + 1) * Consts.GAME_INFO_TEXT_DIFF_Y + 25
+          );
           if (players[i] instanceof ActivePlayer) {
             if (this.activePlayer.inventory !== null) {
               var item: UseableItem = this.activePlayer.inventory;
               this.context.fillText(
                 "Item: " + item.itemName,
                 520,
-                (i + 1) * 70 + 39
+                (i + 1) * Consts.GAME_INFO_TEXT_DIFF_Y + 39
               );
             }
           }
           if (!players[i].alive) {
             this.context.fillStyle = "#f1651c";
             this.context.font = "10px Krungthep";
-            this.context.fillText("So sad...", 600, (i + 1) * 70 + 25);
+            this.context.fillText(
+              "So sad...",
+              Consts.GAME_INFO_SUBTEXT_POS_X,
+              (i + 1) * Consts.GAME_INFO_TEXT_DIFF_Y + 25
+            );
           }
         } else {
           continue;
