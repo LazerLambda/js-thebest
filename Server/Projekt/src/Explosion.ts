@@ -85,7 +85,7 @@ export class Explosion {
         if (this.checkBounds((this.startPosX + this.counter), this.startPosY)){
           this.performFire((this.startPosX + this.counter), this.startPosY);
           if (this.gameState.fieldObjs[this.startPosY][(this.startPosX + this.counter)] instanceof Wall) {
-            this.north = false;
+            this.east = false;
           }
         }
       }
