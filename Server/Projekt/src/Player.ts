@@ -133,8 +133,11 @@ export class Player {
           this.field.rmPlayerFromFieldObjs(this, this.onItem.x, this.onItem.y);
       } else {
         ////
-        this.context.fillStyle = "red";
-        this.context.fillRect(this.xPos - 10, this.yPos - 10, 20, 20);
+        const x = this.xPos * this.field.xSize;
+        const y = this.yPos * this.field.ySize;
+        var im = new Image(this.field.xSize, this.field.ySize);
+        im.src = "images/disappear.png";
+        this.context.drawImage(im, x, y, this.field.xSize, this.field.ySize);
       }
       --this.loosingSequence;
     } else {

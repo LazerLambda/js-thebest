@@ -33,8 +33,8 @@ export class Brick {
     if (this.breakBricks) {
       const x = this.x * this.SIZE_X;
       const y = this.y * this.SIZE_Y;
-      this.context.fillStyle = "yellow";
-      this.context.fillRect(x - 10, y - 10, this.SIZE_X + 10, this.SIZE_Y + 10);
+      im.src = "images/breakBrick.jpg";
+      this.context.drawImage(im, x, y, this.SIZE_X, this.SIZE_Y);
       this.placedOn.setOnFire();
       this.placedOn.brickOnItem = null;
     } else {
