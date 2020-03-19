@@ -424,8 +424,8 @@ drawMenu() {
 
   canvasClick(event: MouseEvent) {
     if (this.gameState.state === serverState.DESIGN) {
-      let xPixel: number = event.layerX - this.canvas.offsetLeft;
-      let yPixel: number = event.layerY - this.canvas.offsetTop;
+      let xPixel: number = event.clientX - this.canvas.offsetLeft;
+      let yPixel: number = event.clientY - this.canvas.offsetTop;
       if (xPixel < this.mapPixelWidth) {
         //Make coordinates relative to top-left of customArea
         xPixel -= this.customArea.topLeftPixelX;
